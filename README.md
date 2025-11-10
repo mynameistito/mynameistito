@@ -1,41 +1,35 @@
-## Hi there 👋
+<div align="center">
 
-<!--
-**mynameistito/mynameistito** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+  # My Name is Tito
 
-Here are some ideas to get you started:
+  <a href="https://x.com/mynameistito" style="margin: 0 6px;"><img src="assets/svg/faXTwitter.svg" width="20" height="20" alt="X" /></a>
+  <a href="https://www.figma.com/@mynameistito" style="margin: 0 6px;"><img src="assets/svg/faFigma.svg" width="20" height="20" alt="Figma" /></a>
+  <a href="https://bsky.app/mynameistito.com" style="margin: 0 6px;"><img src="assets/svg/faBluesky.svg" width="20" height="20" alt="Bluesky" /></a>
+  <a href="https://discord.com/users/611746802122620937" style="margin: 0 6px;"><img src="assets/svg/faDiscord.svg" width="20" height="20" alt="Discord" /></a>
+  <a href="https://twitch.tv/mynameistito" style="margin: 0 6px;"><img src="assets/svg/faTwitch.svg" width="20" height="20" alt="Twitch" /></a>
+  <a href="https://youtube.com/@mynameistito" style="margin: 0 6px;"><img src="assets/svg/faYoutube.svg" width="20" height="20" alt="YouTube" /></a>
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+  <br>
 
-<center>
-  <table>
-    <tbody>
-      <tr>
-        <td>
-          <a href="https://octo-ring.com/">
-            <img src="https://octo-ring.com/static/img/widget/top.png" width="99%" alt="Octo Ring logo" align="top">
-          </a>
-          <br>
-          <a href="https://octo-ring.com/p/mynameistito/prev">
-            <img src="https://octo-ring.com/static/img/widget/prev.png" width="33%" alt="previous" align="top" title="previous profile">
-          </a>
-          <a href="https://octo-ring.com/p/mynameistito/random"><img src="https://octo-ring.com/static/img/widget/random.png" width="33%" alt="random" align="top" title="random profile">
-          </a>
-          <a href="https://octo-ring.com/p/mynameistito/next"><img src="https://octo-ring.com/static/img/widget/next.png" width="33%" alt="next" align="top" title="next profile">
-          </a>
-          <br>
-          <a href="https://octo-ring.com/"><img src="https://octo-ring.com/static/img/widget/bottom.png" width="99%" alt="check out other GitHub profiles in the Octo Ring" align="top">
-          </a>
-        </td>
-      </tr>
-    </tbody>
+  <img height="135" src="https://github-readme-stats.vercel.app/api?username=mynameistito&show_icons=true&hide_border=true&bg_color=0D1117&title_color=ffffff&text_color=ffffff&icon_color=ffffff&hide_title=true&count_private=true" />
+
+  <br>
+  <br>
+
+  <table cellpadding="10" cellspacing="0">
+    <tr>
+      <td align="center">
+        <a href="https://octo-ring.com/p/mynameistito/prev" style="text-decoration: none; color: #8b949e;">←</a>
+      </td>
+      <td align="center">
+        <a href="https://octo-ring.com/p/mynameistito/random" style="text-decoration: none; color: #8b949e;">○</a>
+      </td>
+      <td align="center">
+        <a href="https://octo-ring.com/p/mynameistito/next" style="text-decoration: none; color: #8b949e;">→</a>
+      </td>
+    </tr>
   </table>
-</center>
+
+  <a href="https://octo-ring.com/" style="text-decoration: none; color: #6e7681; font-size: 10px; letter-spacing: 1px;">octo ring</a>
+
+</div>
