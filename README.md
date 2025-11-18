@@ -12,7 +12,7 @@
   <br>
 
   <img height="135" src="https://github-readme-stats.vercel.app/api?username=mynameistito&show_icons=true&hide_border=true&bg_color=0D1117&title_color=ffffff&text_color=ffffff&icon_color=ffffff&hide_title=true&count_private=true" />
-
+  [![GitHub Streak](https://streak-stats.demolab.com?user=mynameistito&theme=transparent)](https://git.io/streak-stats)
   <br>
   <br>
 
