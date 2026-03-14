@@ -29,17 +29,11 @@ const SKIP = new Set([
 // Hardcoded featured entries (used when a repo is private or the URL differs).
 // These always appear first. Set url to homepage if it has one.
 const FEATURED = [
-  { name: 'justfuckingusecloudflare', url: 'https://justfuckingusecloudflare.com',  emoji: '⚡', desc: 'Stop paying seventeen different bills. Just use Cloudflare.' },
-  { name: 'justfuckinguse.com',       url: 'https://justfuckinguse.com',             emoji: '🌐', desc: 'The no-bullshit hub for all "Just Fucking Use X" sites.' },
-  { name: 'mcp-interceptor',          url: 'https://github.com/mynameistito/mcp-interceptor', emoji: '🔍', desc: 'Debug MCP requests in real-time with a live traffic proxy.' },
-  { name: 'cloudflare-mcp',           url: 'https://github.com/mynameistito/cloudflare-mcp',  emoji: '☁️',  desc: 'Unofficial MCP server for the Cloudflare API.' },
-  { name: 'CodexBar',                 url: 'https://codexbar.app',                   emoji: '📊', desc: 'Usage stats for OpenAI Codex and Claude Code, no login required.' },
-  { name: 'portless',                 url: 'https://port1355.dev',                   emoji: '🔗', desc: 'Replace port numbers with stable named local URLs. For humans and agents.' },
-  { name: 'better-context',           url: 'https://btca.dev',                       emoji: '🧠', desc: 'A better way to get up-to-date context on libraries in your projects.' },
-  { name: 'repo-updater',             url: 'https://github.com/mynameistito/repo-updater',     emoji: '🔄', desc: 'Mass-update dependencies across multiple repos, auto-commit and open PRs.' },
-  { name: 'claude-notifier',          url: 'https://github.com/mynameistito/claude-notifier',  emoji: '🔔', desc: 'Audible notifications for Claude Code on Windows. No dependencies, just beeps.' },
-  { name: 'github-archiver',          url: 'https://github.com/mynameistito/github-archiver',  emoji: '🗃️', desc: 'Mass-archive GitHub repos with parallel processing.' },
-  { name: 'cursor-rules',             url: 'https://github.com/mynameistito/cursor-rules',     emoji: '⚙️', desc: 'My Cursor rules and commands, open sourced.' },
+  { name: 'justfuckingusecloudflare', url: 'https://justfuckingusecloudflare.com', emoji: '⚡', desc: 'Stop paying seventeen different bills. Just use Cloudflare.' },
+  { name: 'repo-updater',             url: 'https://github.com/mynameistito/repo-updater',    emoji: '🔄', desc: 'Mass-update dependencies across multiple repos, auto-commit and open PRs.' },
+  { name: 'claude-notifier',          url: 'https://github.com/mynameistito/claude-notifier', emoji: '🔔', desc: 'Audible notifications for Claude Code on Windows. No dependencies, just beeps.' },
+  { name: 'github-archiver',          url: 'https://github.com/mynameistito/github-archiver', emoji: '🗃️', desc: 'Mass-archive GitHub repos with parallel processing.' },
+  { name: 'cursor-rules',             url: 'https://github.com/mynameistito/cursor-rules',    emoji: '⚙️', desc: 'My Cursor rules and commands, open sourced.' },
 ];
 
 // Emoji fallback by language

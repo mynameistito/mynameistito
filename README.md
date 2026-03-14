@@ -20,18 +20,6 @@
 <!-- AUTO-PROJECTS:START -->
 ⚡ **[justfuckingusecloudflare](https://justfuckingusecloudflare.com)** ⭐18 — Stop paying seventeen different bills. Just use Cloudflare.
 
-🌐 **[justfuckinguse.com](https://justfuckinguse.com)** — The no-bullshit hub for all "Just Fucking Use X" sites.
-
-🔍 **[mcp-interceptor](https://github.com/mynameistito/mcp-interceptor)** — Debug MCP requests in real-time with a live traffic proxy.
-
-☁️ **[cloudflare-mcp](https://github.com/mynameistito/cloudflare-mcp)** — Unofficial MCP server for the Cloudflare API.
-
-📊 **[CodexBar](https://codexbar.app)** — Usage stats for OpenAI Codex and Claude Code, no login required.
-
-🔗 **[portless](https://port1355.dev)** — Replace port numbers with stable named local URLs. For humans and agents.
-
-🧠 **[better-context](https://btca.dev)** — A better way to get up-to-date context on libraries in your projects.
-
 🔄 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐1 — Mass-update dependencies across multiple repos, auto-commit and open PRs.
 
 🔔 **[claude-notifier](https://github.com/mynameistito/claude-notifier)** — Audible notifications for Claude Code on Windows. No dependencies, just beeps.
