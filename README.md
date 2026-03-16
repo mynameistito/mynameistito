@@ -28,6 +28,8 @@
 
 ⚙️ **[cursor-rules](https://github.com/mynameistito/cursor-rules)** ⭐1 — My Cursor rules and commands, open sourced.
 
+🔷 **[chrome-mute-tab](https://github.com/mynameistito/chrome-mute-tab)** — A Chrome extension that properly mutes tabs — including YouTube, which ignores Chrome's native tab mute.
+
 🔷 **[WOL-Android](https://github.com/mynameistito/WOL-Android)** — Wake-on-LAN app for Android with home screen widget
 <!-- AUTO-PROJECTS:END -->
 
