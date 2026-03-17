@@ -86,7 +86,7 @@ const autoRepos = repos
 const sorted = [
   ...FEATURED.map(f => ({ ...f, stars: starMap[f.name] ?? 0 })),
   ...autoRepos,
-];
+].sort((a, b) => b.stars - a.stars);
 
 const lines = sorted
   .slice(0, 12)
