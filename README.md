@@ -22,11 +22,11 @@
 
 🔄 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐3 — Mass-update dependencies across multiple repos, auto-commit and open PRs.
 
+⚙️ **[cursor-rules](https://github.com/mynameistito/cursor-rules)** ⭐1 — My Cursor rules and commands, open sourced.
+
 🔔 **[claude-notifier](https://github.com/mynameistito/claude-notifier)** — Audible notifications for Claude Code on Windows. No dependencies, just beeps.
 
 🗃️ **[github-archiver](https://github.com/mynameistito/github-archiver)** — Mass-archive GitHub repos with parallel processing.
-
-⚙️ **[cursor-rules](https://github.com/mynameistito/cursor-rules)** ⭐1 — My Cursor rules and commands, open sourced.
 
 🔷 **[chrome-mute-tab](https://github.com/mynameistito/chrome-mute-tab)** — A Chrome extension that properly mutes tabs — including YouTube, which ignores Chrome's native tab mute.
 
