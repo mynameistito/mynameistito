@@ -2,7 +2,7 @@ name: Update README Projects
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # Every Sunday at midnight UTC
+    - cron: '0 0 * * *' # Every day at midnight UTC
   push:
     branches: [main]
   workflow_dispatch:
