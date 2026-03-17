@@ -20,7 +20,7 @@
 <!-- AUTO-PROJECTS:START -->
 ⚡ **[justfuckingusecloudflare](https://justfuckingusecloudflare.com)** ⭐18 — Stop paying seventeen different bills. Just use Cloudflare.
 
-🔄 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐1 — Mass-update dependencies across multiple repos, auto-commit and open PRs.
+🔄 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐3 — Mass-update dependencies across multiple repos, auto-commit and open PRs.
 
 🔔 **[claude-notifier](https://github.com/mynameistito/claude-notifier)** — Audible notifications for Claude Code on Windows. No dependencies, just beeps.
 
