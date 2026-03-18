@@ -20,7 +20,7 @@
 <!-- AUTO-PROJECTS:START -->
 ⚡ **[justfuckingusecloudflare](https://justfuckingusecloudflare.com)** ⭐18 — Stop paying seventeen different bills. Just use Cloudflare.
 
-🔄 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐3 — Mass-update dependencies across multiple repos, auto-commit and open PRs.
+🔄 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐5 — Mass-update dependencies across multiple repos, auto-commit and open PRs.
 
 ⚙️ **[cursor-rules](https://github.com/mynameistito/cursor-rules)** ⭐1 — My Cursor rules and commands, open sourced.
 
@@ -29,6 +29,8 @@
 🗃️ **[github-archiver](https://github.com/mynameistito/github-archiver)** — Mass-archive GitHub repos with parallel processing.
 
 🔷 **[chrome-mute-tab](https://github.com/mynameistito/chrome-mute-tab)** — A Chrome extension that properly mutes tabs — including YouTube, which ignores Chrome's native tab mute.
+
+📦 **[windhawk-perform-speedtest](https://github.com/mynameistito/windhawk-perform-speedtest)** — windhawk-perform-speedtest
 
 🔷 **[WOL-Android](https://github.com/mynameistito/WOL-Android)** — Wake-on-LAN app for Android with home screen widget
 <!-- AUTO-PROJECTS:END -->
