@@ -28,11 +28,11 @@
 
 🗃️ **[github-archiver](https://github.com/mynameistito/github-archiver)** — Mass-archive GitHub repos with parallel processing.
 
+🔷 **[.dotfiles](https://github.com/mynameistito/.dotfiles)** — .dotfiles
+
 💙 **[counter-strike-configs](https://mynameistito.com)** — Personal Counter-Strike Configuration Files
 
 🔷 **[mute-tab-manager](https://github.com/mynameistito/mute-tab-manager)** — A Chrome extension that properly mutes tabs — including YouTube, which ignores Chrome's native tab mute.
-
-📦 **[windhawk-perform-speedtest](https://github.com/mynameistito/windhawk-perform-speedtest)** — windhawk-perform-speedtest
 <!-- AUTO-PROJECTS:END -->
 
 ---
