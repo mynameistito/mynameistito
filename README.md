@@ -18,21 +18,23 @@
 ## Projects
 
 <!-- AUTO-PROJECTS:START -->
-⚡ **[justfuckingusecloudflare](https://justfuckingusecloudflare.com)** ⭐18 — Stop paying seventeen different bills. Just use Cloudflare.
+🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐18 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
 
-🔄 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐5 — Mass-update dependencies across multiple repos, auto-commit and open PRs.
+🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐5 — CLI tool that mass-updates dependencies across multiple git repositories using your preferred package manager (npm, pnpm, yarn, or Bun). Automatically detects the package manager, commits changes, creates pull requests via gh, and opens all resulting PR URLs in the browser.
 
-⚙️ **[cursor-rules](https://github.com/mynameistito/cursor-rules)** ⭐1 — My Cursor rules and commands, open sourced.
+🐚 **[cursor-rules](https://github.com/mynameistito/cursor-rules)** ⭐1 — My Cursor Rules and Commands.
 
-🔔 **[claude-notifier](https://github.com/mynameistito/claude-notifier)** — Audible notifications for Claude Code on Windows. No dependencies, just beeps.
+🔷 **[github-archiver](https://github.com/mynameistito/github-archiver)** — A powerful CLI for mass archiving GitHub repositories with parallel processing and comprehensive error handling.
 
-🗃️ **[github-archiver](https://github.com/mynameistito/github-archiver)** — Mass-archive GitHub repos with parallel processing.
+💙 **[claude-notifier](https://github.com/mynameistito/claude-notifier)** — A lightweight Windows utility that plays audible notifications when Claude Code needs your attention. Uses a 3-note console beep chime — no external dependencies or sound files required.
 
-🔷 **[.dotfiles](https://mynameistito.com)** — My personal Windows dotfiles managed with chezmoi
+🔷 **[.dotfiles](https://github.com/mynameistito/.dotfiles)** — My personal Windows dotfiles managed with chezmoi
 
-💙 **[counter-strike-configs](https://mynameistito.com)** — Personal Counter-Strike Configuration Files
+💙 **[counter-strike-configs](https://github.com/mynameistito/counter-strike-configs)** — Personal Counter-Strike Configuration Files
 
 🔷 **[mute-tab-manager](https://github.com/mynameistito/mute-tab-manager)** — A Chrome extension that properly mutes tabs — including YouTube, which ignores Chrome's native tab mute.
+
+📦 **[windhawk-perform-speedtest](https://github.com/mynameistito/windhawk-perform-speedtest)** — windhawk-perform-speedtest
 <!-- AUTO-PROJECTS:END -->
 
 ---
