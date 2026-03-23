@@ -28,7 +28,7 @@
 
 🗃️ **[github-archiver](https://github.com/mynameistito/github-archiver)** — Mass-archive GitHub repos with parallel processing.
 
-🔷 **[.dotfiles](https://github.com/mynameistito/.dotfiles)** — .dotfiles
+🔷 **[.dotfiles](https://mynameistito.com)** — My personal Windows dotfiles managed with chezmoi
 
 💙 **[counter-strike-configs](https://mynameistito.com)** — Personal Counter-Strike Configuration Files
 
