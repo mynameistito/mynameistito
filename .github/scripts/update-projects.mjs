@@ -26,16 +26,6 @@ const SKIP = new Set([
   'Automated-Medication-Script-Emailer',
 ]);
 
-// Hardcoded featured entries (used when a repo is private or the URL differs).
-// These always appear first. Set url to homepage if it has one.
-const FEATURED = [
-  { name: 'justfuckingusecloudflare', url: 'https://justfuckingusecloudflare.com', emoji: '⚡', desc: 'Stop paying seventeen different bills. Just use Cloudflare.' },
-  { name: 'repo-updater',             url: 'https://github.com/mynameistito/repo-updater',    emoji: '🔄', desc: 'Mass-update dependencies across multiple repos, auto-commit and open PRs.' },
-  { name: 'claude-notifier',          url: 'https://github.com/mynameistito/claude-notifier', emoji: '🔔', desc: 'Audible notifications for Claude Code on Windows. No dependencies, just beeps.' },
-  { name: 'github-archiver',          url: 'https://github.com/mynameistito/github-archiver', emoji: '🗃️', desc: 'Mass-archive GitHub repos with parallel processing.' },
-  { name: 'cursor-rules',             url: 'https://github.com/mynameistito/cursor-rules',    emoji: '⚙️', desc: 'My Cursor rules and commands, open sourced.' },
-];
-
 // Emoji fallback by language
 const LANG_EMOJI = {
   TypeScript: '🔷',
@@ -47,7 +37,23 @@ const LANG_EMOJI = {
 };
 
 const username = 'mynameistito';
-// Fetch all pages manually (--paginate returns concatenated JSON arrays)
+
+// Fetch pinned repos via GraphQL (these become the featured list)
+const pinnedResult = execSync(
+  `gh api graphql -f query='{ user(login: "${username}") { pinnedItems(first: 6, types: REPOSITORY) { nodes { ... on Repository { name description url stargazerCount primaryLanguage { name } } } } } }'`,
+  { env: { ...process.env } }
+);
+const pinnedData = JSON.parse(pinnedResult.toString());
+const pinnedRepos = pinnedData.data.user.pinnedItems.nodes.map(r => ({
+  name: r.name,
+  url: r.url,
+  emoji: LANG_EMOJI[r.primaryLanguage?.name] ?? '📦',
+  desc: r.description ?? r.name,
+  stars: r.stargazerCount,
+}));
+const pinnedNames = new Set(pinnedRepos.map(r => r.name));
+
+// Fetch all public non-fork repos for auto-discovery padding
 let repos = [];
 let page = 1;
 while (true) {
@@ -63,13 +69,9 @@ while (true) {
 }
 repos = repos.filter(r => !r.fork && !r.private);
 
-// Build star map from public repos
-const starMap = Object.fromEntries(repos.map(r => [r.name, r.stargazers_count]));
-const featuredNames = new Set(FEATURED.map(f => f.name));
-
-// Auto-discovered public repos not already in FEATURED
+// Auto-discovered public repos not already pinned
 const autoRepos = repos
-  .filter(r => !SKIP.has(r.name) && !featuredNames.has(r.name))
+  .filter(r => !SKIP.has(r.name) && !pinnedNames.has(r.name))
   .sort((a, b) => {
     if (b.stargazers_count !== a.stargazers_count) return b.stargazers_count - a.stargazers_count;
     return new Date(b.updated_at) - new Date(a.updated_at);
@@ -77,16 +79,13 @@ const autoRepos = repos
   .slice(0, 3) // pad with up to 3 auto-discovered repos
   .map(r => ({
     name: r.name,
-    url: r.homepage?.trim() || r.html_url,
+    url: r.html_url,
     emoji: LANG_EMOJI[r.language] ?? '📦',
     desc: r.description ?? r.name,
     stars: r.stargazers_count,
   }));
 
-const sorted = [
-  ...FEATURED.map(f => ({ ...f, stars: starMap[f.name] ?? 0 })),
-  ...autoRepos,
-].sort((a, b) => b.stars - a.stars);
+const sorted = [...pinnedRepos, ...autoRepos].sort((a, b) => b.stars - a.stars);
 
 const lines = sorted
   .slice(0, 12)
@@ -103,4 +102,4 @@ const updated = readme.replace(
 );
 
 writeFileSync('README.md', updated);
-console.log(`README updated: ${FEATURED.length} featured + ${autoRepos.length} auto-discovered = ${sorted.slice(0, 12).length} total.`);
+console.log(`README updated: ${pinnedRepos.length} pinned + ${autoRepos.length} auto-discovered = ${sorted.slice(0, 12).length} total.`);
