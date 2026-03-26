@@ -30,11 +30,11 @@
 
 🔷 **[.dotfiles](https://github.com/mynameistito/.dotfiles)** — My personal Windows dotfiles managed with chezmoi
 
+🔷 **[discord-search](https://github.com/mynameistito/discord-search)** — Search Discord server messages from your terminal. Filter by author, content type, mentions, and more.
+
+📦 **[d](https://github.com/mynameistito/d)** — d
+
 🔷 **[mute-tab-manager](https://github.com/mynameistito/mute-tab-manager)** — A Chrome extension that properly mutes tabs — including YouTube, which ignores Chrome's native tab mute.
-
-💙 **[counter-strike-configs](https://github.com/mynameistito/counter-strike-configs)** — Personal Counter-Strike Configuration Files
-
-📦 **[windhawk-perform-speedtest](https://github.com/mynameistito/windhawk-perform-speedtest)** — windhawk-perform-speedtest
 <!-- AUTO-PROJECTS:END -->
 
 ---
