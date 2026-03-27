@@ -22,19 +22,15 @@
 
 🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐5 — CLI tool that mass-updates dependencies across multiple git repositories using your preferred package manager (npm, pnpm, yarn, or Bun). Automatically detects the package manager, commits changes, creates pull requests via gh, and opens all resulting PR URLs in the browser.
 
+🔷 **[.dotfiles](https://github.com/mynameistito/.dotfiles)** ⭐1 — My personal Windows dotfiles managed with chezmoi
+
+🔷 **[discord-search](https://github.com/mynameistito/discord-search)** ⭐1 — Search Discord server messages from your terminal. Filter by author, content type, mentions, and more.
+
 🐚 **[cursor-rules](https://github.com/mynameistito/cursor-rules)** ⭐1 — My Cursor Rules and Commands.
 
 🔷 **[github-archiver](https://github.com/mynameistito/github-archiver)** — A powerful CLI for mass archiving GitHub repositories with parallel processing and comprehensive error handling.
 
-💙 **[claude-notifier](https://github.com/mynameistito/claude-notifier)** — A lightweight Windows utility that plays audible notifications when Claude Code needs your attention. Uses a 3-note console beep chime — no external dependencies or sound files required.
-
-🔷 **[.dotfiles](https://github.com/mynameistito/.dotfiles)** — My personal Windows dotfiles managed with chezmoi
-
-🔷 **[discord-search](https://github.com/mynameistito/discord-search)** — Search Discord server messages from your terminal. Filter by author, content type, mentions, and more.
-
-📦 **[d](https://github.com/mynameistito/d)** — d
-
-🔷 **[mute-tab-manager](https://github.com/mynameistito/mute-tab-manager)** — A Chrome extension that properly mutes tabs — including YouTube, which ignores Chrome's native tab mute.
+🟨 **[tampermonkey-addons](https://github.com/mynameistito/tampermonkey-addons)** — tampermonkey-addons
 <!-- AUTO-PROJECTS:END -->
 
 ---
