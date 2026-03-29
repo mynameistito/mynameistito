@@ -28,9 +28,9 @@
 
 🔷 **[github-archiver](https://github.com/mynameistito/github-archiver)** — A powerful CLI for mass archiving GitHub repositories with parallel processing and comprehensive error handling.
 
-🔷 **[mute-tab-manager](https://github.com/mynameistito/mute-tab-manager)** — A Chrome extension that properly mutes tabs — including YouTube, which ignores Chrome's native tab mute.
-
 🔷 **[discord-search](https://github.com/mynameistito/discord-search)** — Search Discord server messages from your terminal. Filter by author, content type, mentions, and more.
+
+🔷 **[mute-tab-manager](https://github.com/mynameistito/mute-tab-manager)** — A Chrome extension that properly mutes tabs — including YouTube, which ignores Chrome's native tab mute.
 <!-- AUTO-PROJECTS:END -->
 
 ---
