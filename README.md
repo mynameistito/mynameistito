@@ -28,7 +28,7 @@
 
 🔷 **[github-archiver](https://github.com/mynameistito/github-archiver)** — A powerful CLI for mass archiving GitHub repositories with parallel processing and comprehensive error handling.
 
-🔷 **[discord-search](https://github.com/mynameistito/discord-search)** — Search Discord server messages from your terminal. Filter by author, content type, mentions, and more.
+🌐 **[biome-check-write-repro](https://github.com/mynameistito/biome-check-write-repro)** — biome-check-write-repro
 
 🔷 **[mute-tab-manager](https://github.com/mynameistito/mute-tab-manager)** — A Chrome extension that properly mutes tabs — including YouTube, which ignores Chrome's native tab mute.
 <!-- AUTO-PROJECTS:END -->
