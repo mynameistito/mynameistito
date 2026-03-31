@@ -20,6 +20,8 @@
 <!-- AUTO-PROJECTS:START -->
 🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐18 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
 
+🌐 **[create-cf-token](https://github.com/mynameistito/create-cf-token)** ⭐9 — A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.
+
 🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐5 — CLI tool that mass-updates dependencies across multiple git repositories using your preferred package manager (npm, pnpm, yarn, or Bun). Automatically detects the package manager, commits changes, creates pull requests via gh, and opens all resulting PR URLs in the browser.
 
 🔷 **[.dotfiles](https://github.com/mynameistito/.dotfiles)** ⭐1 — My personal Windows dotfiles managed with chezmoi
@@ -29,8 +31,6 @@
 🔷 **[github-archiver](https://github.com/mynameistito/github-archiver)** — A powerful CLI for mass archiving GitHub repositories with parallel processing and comprehensive error handling.
 
 🌐 **[biome-check-write-repro](https://github.com/mynameistito/biome-check-write-repro)** — biome-check-write-repro
-
-🔷 **[mute-tab-manager](https://github.com/mynameistito/mute-tab-manager)** — A Chrome extension that properly mutes tabs — including YouTube, which ignores Chrome's native tab mute.
 <!-- AUTO-PROJECTS:END -->
 
 ---
