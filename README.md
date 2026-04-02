@@ -18,9 +18,9 @@
 ## Projects
 
 <!-- AUTO-PROJECTS:START -->
-🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐18 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
+🔷 **[create-cf-token](https://github.com/mynameistito/create-cf-token)** ⭐19 — A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.
 
-🔷 **[create-cf-token](https://github.com/mynameistito/create-cf-token)** ⭐18 — A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.
+🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐18 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
 
 🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐5 — CLI tool that mass-updates dependencies across multiple git repositories using your preferred package manager (npm, pnpm, yarn, or Bun). Automatically detects the package manager, commits changes, creates pull requests via gh, and opens all resulting PR URLs in the browser.
 
