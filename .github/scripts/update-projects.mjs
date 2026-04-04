@@ -24,6 +24,7 @@ const SKIP = new Set([
   'quickscreen',
   'screenshotgun-app-v2',
   'Automated-Medication-Script-Emailer',
+  'biome-check-write-repro',
 ]);
 
 // Emoji fallback by language
