@@ -18,7 +18,7 @@
 ## Projects
 
 <!-- AUTO-PROJECTS:START -->
-🔷 **[create-cf-token](https://github.com/mynameistito/create-cf-token)** ⭐20 — A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.
+🔷 **[create-cf-token](https://github.com/mynameistito/create-cf-token)** ⭐21 — A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.
 
 🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐18 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
 
@@ -30,7 +30,7 @@
 
 🔷 **[github-archiver](https://github.com/mynameistito/github-archiver)** — A powerful CLI for mass archiving GitHub repositories with parallel processing and comprehensive error handling.
 
-💙 **[counter-strike-configs](https://github.com/mynameistito/counter-strike-configs)** — Personal Counter-Strike Configuration Files
+🔷 **[mute-tab-manager](https://github.com/mynameistito/mute-tab-manager)** — A Chrome extension that properly mutes tabs — including YouTube, which ignores Chrome's native tab mute.
 <!-- AUTO-PROJECTS:END -->
 
 ---
