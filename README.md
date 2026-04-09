@@ -30,7 +30,7 @@
 
 🔷 **[github-archiver](https://github.com/mynameistito/github-archiver)** — A powerful CLI for mass archiving GitHub repositories with parallel processing and comprehensive error handling.
 
-🔷 **[mute-tab-manager](https://github.com/mynameistito/mute-tab-manager)** — A Chrome extension that properly mutes tabs — including YouTube, which ignores Chrome's native tab mute.
+📦 **[index-knowledge](https://github.com/mynameistito/index-knowledge)** — index-knowledge
 <!-- AUTO-PROJECTS:END -->
 
 ---
