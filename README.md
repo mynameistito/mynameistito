@@ -30,7 +30,7 @@
 
 🔷 **[github-archiver](https://github.com/mynameistito/github-archiver)** — A powerful CLI for mass archiving GitHub repositories with parallel processing and comprehensive error handling.
 
-🔷 **[mute-tab-manager](https://github.com/mynameistito/mute-tab-manager)** — A Chrome extension that properly mutes tabs — including YouTube, which ignores Chrome's native tab mute.
+📦 **[opencode-dangerously-skip-permissions](https://github.com/mynameistito/opencode-dangerously-skip-permissions)** — The --dangerously-skip-permissions equivalent for OpenCode, with a red theme so you don't forget.
 <!-- AUTO-PROJECTS:END -->
 
 ---
