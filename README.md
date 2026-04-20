@@ -30,7 +30,7 @@
 
 🔷 **[github-archiver](https://github.com/mynameistito/github-archiver)** — A powerful CLI for mass archiving GitHub repositories with parallel processing and comprehensive error handling.
 
-📦 **[opencode-dangerously-skip-permissions](https://github.com/mynameistito/opencode-dangerously-skip-permissions)** — The --dangerously-skip-permissions equivalent for OpenCode, with a red theme so you don't forget.
+🔷 **[mechvibes](https://github.com/mynameistito/mechvibes)** — mechvibes
 <!-- AUTO-PROJECTS:END -->
 
 ---
