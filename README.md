@@ -30,7 +30,7 @@
 
 🔷 **[github-archiver](https://github.com/mynameistito/github-archiver)** — A powerful CLI for mass archiving GitHub repositories with parallel processing and comprehensive error handling.
 
-🔷 **[mechvibes](https://github.com/mynameistito/mechvibes)** — mechvibes
+📦 **[im28-today](https://github.com/mynameistito/im28-today)** — im28-today
 <!-- AUTO-PROJECTS:END -->
 
 ---
