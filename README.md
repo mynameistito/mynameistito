@@ -53,9 +53,9 @@
 
 <div align="center">
 
-[![X / Twitter](https://img.shields.io/badge/-@mynameistito-000000?style=flat-square&logo=x&logoColor=white)](https://x.com/mynameistito)
-[![Bluesky](https://img.shields.io/badge/-mynameistito-00A8E8?style=flat-square&logo=bluesky&logoColor=white)](https://bsky.app/mynameistito.com)
-[![Twitch](https://img.shields.io/badge/-mynameistito-9146FF?style=flat-square&logo=twitch&logoColor=white)](https://twitch.tv/mynameistito)
+[![X](https://img.shields.io/badge/-@mynameistito-000000?style=flat-square&logo=x&logoColor=white)](https://x.com/mynameistito)
+[![Bluesky](https://img.shields.io/badge/-mynameistito.com-00A8E8?style=flat-square&logo=bluesky&logoColor=white)](https://bsky.app/mynameistito.com)
+[![Twitch](https://img.shields.io/badge/-mynameistito__-9146FF?style=flat-square&logo=twitch&logoColor=white)](https://twitch.tv/mynameistito_)
 [![YouTube](https://img.shields.io/badge/-mynameistito-FF0000?style=flat-square&logo=youtube&logoColor=white)](https://youtube.com/@mynameistito)
 [![Figma](https://img.shields.io/badge/-mynameistito-F24E1E?style=flat-square&logo=figma&logoColor=white)](https://www.figma.com/@mynameistito)
 [![Discord](https://img.shields.io/badge/-mynameistito-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.com/users/611746802122620937)
