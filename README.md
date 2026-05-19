@@ -15,7 +15,7 @@
 
 ---
 
-## Projects
+## Projects 
 
 <!-- AUTO-PROJECTS:START -->
 🔷 **[create-cf-token](https://github.com/mynameistito/create-cf-token)** ⭐39 — A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.
