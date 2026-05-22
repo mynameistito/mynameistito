@@ -20,7 +20,7 @@
 <!-- AUTO-PROJECTS:START -->
 🔷 **[create-cf-token](https://github.com/mynameistito/create-cf-token)** ⭐40 — A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.
 
-🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐19 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
+🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐20 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
 
 🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐5 — CLI tool that mass-updates dependencies across multiple git repositories using your preferred package manager (npm, pnpm, yarn, or Bun). Automatically detects the package manager, commits changes, creates pull requests via gh, and opens all resulting PR URLs in the browser.
 
