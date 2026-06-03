@@ -24,9 +24,9 @@
 
 🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐5 — CLI tool that mass-updates dependencies across multiple git repositories using your preferred package manager (npm, pnpm, yarn, or Bun). Automatically detects the package manager, commits changes, creates pull requests via gh, and opens all resulting PR URLs in the browser.
 
-🔷 **[.dotfiles](https://github.com/mynameistito/.dotfiles)** ⭐1 — My personal Windows dotfiles managed with chezmoi
+🔷 **[volume-master](https://github.com/mynameistito/volume-master)** ⭐2 — Per-tab volume control with up to 600% boost. Cross-browser (Chrome + Firefox).
 
-🔷 **[volume-master](https://github.com/mynameistito/volume-master)** ⭐1 — Per-tab volume control with up to 600% boost. Cross-browser (Chrome + Firefox).
+🔷 **[.dotfiles](https://github.com/mynameistito/.dotfiles)** ⭐1 — My personal Windows dotfiles managed with chezmoi
 
 📦 **[im28.today](https://github.com/mynameistito/im28.today)** ⭐1 — A birthday microsite for me turning 28, 3 prompts (incl. deployment) made w/ ampcode.
 
