@@ -26,8 +26,6 @@
 
 🔷 **[volume-master](https://github.com/mynameistito/volume-master)** ⭐2 — Per-tab volume control with up to 600% boost. Cross-browser (Chrome + Firefox).
 
-🔷 **[.dotfiles](https://github.com/mynameistito/.dotfiles)** ⭐1 — My personal Windows dotfiles managed with chezmoi
-
 📦 **[im28.today](https://github.com/mynameistito/im28.today)** ⭐1 — A birthday microsite for me turning 28, 3 prompts (incl. deployment) made w/ ampcode.
 
 🔷 **[github-archiver](https://github.com/mynameistito/github-archiver)** — A powerful CLI for mass archiving GitHub repositories with parallel processing and comprehensive error handling.
