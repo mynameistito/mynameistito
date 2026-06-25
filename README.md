@@ -18,21 +18,21 @@
 ## Projects 
 
 <!-- AUTO-PROJECTS:START -->
-🔷 **[create-cf-token](https://github.com/mynameistito/create-cf-token)** ⭐42 — A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.
+🔷 **[create-cf-token](https://github.com/mynameistito/create-cf-token)** ⭐44 — A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.
 
-🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐21 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
+🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐22 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
 
 🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐6 — CLI tool that mass-updates dependencies across multiple git repositories using your preferred package manager (npm, pnpm, yarn, or Bun). Automatically detects the package manager, commits changes, creates pull requests via gh, and opens all resulting PR URLs in the browser.
 
-🔷 **[oc-usage-limits-plugin](https://github.com/mynameistito/oc-usage-limits-plugin)** ⭐3 — OpenCode TUI plugin for Codex and ZAI usage limits
+🔷 **[oc-usage-limits-plugin](https://github.com/mynameistito/oc-usage-limits-plugin)** ⭐6 — OpenCode TUI plugin for Codex and ZAI usage limits
 
 🔷 **[volume-master](https://github.com/mynameistito/volume-master)** ⭐2 — Per-tab volume control with up to 600% boost. Cross-browser (Chrome + Firefox).
+
+🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
 
 📦 **[im28.today](https://github.com/mynameistito/im28.today)** ⭐1 — A birthday microsite for me turning 28, 3 prompts (incl. deployment) made w/ ampcode.
 
 🐚 **[cursor-rules](https://github.com/mynameistito/cursor-rules)** ⭐1 — My Cursor Rules and Commands.
-
-🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** — CLI for inspecting Codex usage windows and reset credits
 <!-- AUTO-PROJECTS:END -->
 
 ---
