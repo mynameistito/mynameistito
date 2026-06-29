@@ -1,0 +1,26 @@
+{
+  "name": "mynameistito-workspace",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "bun run --cwd packages/mynameistito build",
+    "changeset": "changeset",
+    "format": "oxfmt --write .",
+    "lint": "ultracite check && oxlint .",
+    "lint:fix": "ultracite fix && oxlint --fix .",
+    "check": "ultracite check",
+    "fix": "ultracite fix"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.31.0",
+    "@typescript/native-preview": "7.0.0-dev.20260628.1",
+    "oxfmt": "^0.56.0",
+    "oxlint": "^1.71.0",
+    "tsdown": "^0.22.3",
+    "ultracite": "7.8.3"
+  },
+  "packageManager": "bun@1.2.23"
+}
