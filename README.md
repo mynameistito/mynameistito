@@ -18,7 +18,7 @@
 ## Projects 
 
 <!-- AUTO-PROJECTS:START -->
-🔷 **[create-cf-token](https://github.com/mynameistito/create-cf-token)** ⭐44 — A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.
+🔷 **[create-cf-token](https://github.com/mynameistito/create-cf-token)** ⭐45 — A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.
 
 🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐22 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
 
