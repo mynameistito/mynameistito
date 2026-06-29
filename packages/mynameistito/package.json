@@ -1,0 +1,47 @@
+{
+  "name": "mynameistito",
+  "version": "0.1.0",
+  "description": "An OpenTUI portfolio for mynameistito's GitHub projects, npm packages, and links.",
+  "keywords": [
+    "github",
+    "npm",
+    "opentui",
+    "portfolio",
+    "tui"
+  ],
+  "license": "MIT",
+  "author": "Tito <https://github.com/mynameistito>",
+  "bin": {
+    "mynameistito": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown && tsgo --project tsconfig.json",
+    "dev": "bun src/cli.ts",
+    "prepublishOnly": "bun run build"
+  },
+  "dependencies": {
+    "@opentui/core": "^0.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "@typescript/native-preview": "7.0.0-dev.20260628.1",
+    "tsdown": "^0.22.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
