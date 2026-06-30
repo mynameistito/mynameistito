@@ -1,6 +1,6 @@
 # mynameistito
 
-An OpenTUI portfolio for Tito's GitHub projects, npm packages, and links.
+A tiny terminal profile card for Tito.
 
 ```bash
 npx mynameistito
@@ -13,7 +13,7 @@ bunx mynameistito
 ## Exports
 
 ```ts
-import { links, packages, profile, projects } from "mynameistito";
+import { links, profile } from "mynameistito";
 ```
 
 ## Development

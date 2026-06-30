@@ -1,13 +1,12 @@
 {
   "name": "mynameistito",
   "version": "0.1.0",
-  "description": "An OpenTUI portfolio for mynameistito's GitHub projects, npm packages, and links.",
+  "description": "A tiny terminal profile card for Tito.",
   "keywords": [
     "github",
     "npm",
-    "opentui",
     "portfolio",
-    "tui"
+    "profile"
   ],
   "license": "MIT",
   "author": "Tito <https://github.com/mynameistito>",
@@ -32,9 +31,6 @@
     "build": "tsdown && tsgo --project tsconfig.json",
     "dev": "bun src/cli.ts",
     "prepublishOnly": "bun run build"
-  },
-  "dependencies": {
-    "@opentui/core": "^0.4.2"
   },
   "devDependencies": {
     "@types/node": "^26.0.1",
