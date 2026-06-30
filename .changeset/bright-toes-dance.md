@@ -2,4 +2,4 @@
 "mynameistito": minor
 ---
 
-Add the initial plain-text terminal profile package with Tito's bio and links.
+Add the initial OpenTUI portfolio package with GitHub project, npm package, and social link data.
