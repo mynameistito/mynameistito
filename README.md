@@ -20,7 +20,7 @@
 <!-- AUTO-PROJECTS:START -->
 🔷 **[create-cf-token](https://github.com/mynameistito/create-cf-token)** ⭐45 — A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.
 
-🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐22 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
+🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐21 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
 
 🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐6 — CLI tool that mass-updates dependencies across multiple git repositories using your preferred package manager (npm, pnpm, yarn, or Bun). Automatically detects the package manager, commits changes, creates pull requests via gh, and opens all resulting PR URLs in the browser.
 
@@ -30,9 +30,9 @@
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
 
-📦 **[im28.today](https://github.com/mynameistito/im28.today)** ⭐1 — A birthday microsite for me turning 28, 3 prompts (incl. deployment) made w/ ampcode.
+🔷 **[hcc-bin-day-api](https://github.com/mynameistito/hcc-bin-day-api)** ⭐1 — TypeScript client for Hamilton City Council Fight the Landfill bin-day lookup API.
 
-🐚 **[cursor-rules](https://github.com/mynameistito/cursor-rules)** ⭐1 — My Cursor Rules and Commands.
+📦 **[im28.today](https://github.com/mynameistito/im28.today)** ⭐1 — A birthday microsite for me turning 28, 3 prompts (incl. deployment) made w/ ampcode.
 <!-- AUTO-PROJECTS:END -->
 
 ---
