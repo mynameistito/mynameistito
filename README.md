@@ -24,7 +24,7 @@
 
 🔷 **[oc-usage-limits-plugin](https://github.com/mynameistito/oc-usage-limits-plugin)** ⭐7 — OpenCode TUI plugin for usage limits of AI Providers
 
-🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐6 — CLI tool that mass-updates dependencies across multiple git repositories using your preferred package manager (npm, pnpm, yarn, or Bun). Automatically detects the package manager, commits changes, creates pull requests via gh, and opens all resulting PR URLs in the browser.
+🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐6 — A CLI tool that update deps across multiple repos with auto commits and pull requests.
 
 🔷 **[volume-master](https://github.com/mynameistito/volume-master)** ⭐2 — Per-tab volume control with up to 600% boost. Cross-browser (Chrome + Firefox).
 
