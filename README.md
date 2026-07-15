@@ -30,9 +30,9 @@
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
 
-🔷 **[oc-ctrl-enter-force-import](https://github.com/mynameistito/oc-ctrl-enter-force-import)** ⭐1 — OpenCode TUI plugin that interrupts the active run and submits the prompt with Ctrl+Enter.
+🐚 **[cursor-rules](https://github.com/mynameistito/cursor-rules)** ⭐1 — My Cursor Rules and Commands.
 
-🔷 **[hcc-bin-day](https://github.com/mynameistito/hcc-bin-day)** ⭐1 — TypeScript client for Hamilton City Council Fight the Landfill bin-day lookup API.
+🔷 **[oc-ctrl-enter-force-import](https://github.com/mynameistito/oc-ctrl-enter-force-import)** ⭐1 — OpenCode TUI plugin that interrupts the active run and submits the prompt with Ctrl+Enter.
 <!-- AUTO-PROJECTS:END -->
 
 ---
