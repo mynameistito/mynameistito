@@ -30,9 +30,9 @@
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
 
-🐚 **[cursor-rules](https://github.com/mynameistito/cursor-rules)** ⭐1 — My Cursor Rules and Commands.
-
 🔷 **[oc-ctrl-enter-force-import](https://github.com/mynameistito/oc-ctrl-enter-force-import)** ⭐1 — OpenCode TUI plugin that interrupts the active run and submits the prompt with Ctrl+Enter.
+
+🐚 **[cursor-rules](https://github.com/mynameistito/cursor-rules)** ⭐1 — My Cursor Rules and Commands.
 <!-- AUTO-PROJECTS:END -->
 
 ---
