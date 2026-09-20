@@ -24,6 +24,8 @@ jobs:
             task: typecheck
           - name: ultracite check
             task: check
+          - name: knip
+            task: knip
           - name: test
             task: test
           - name: build
