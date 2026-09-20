@@ -1,5 +1,11 @@
 # mynameistito
 
+## 0.3.1
+
+### Patch Changes
+
+- 4ae2c31: Run staged npm releases from the same main-branch push that merges the release pull request.
+
 ## 0.3.0
 
 ### Minor Changes
