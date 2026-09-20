@@ -10,10 +10,12 @@
     "dev": "bun run --cwd packages/mynameistito dev",
     "changeset": "changeset",
     "check": "ultracite check",
+    "typecheck": "tsc --noEmit",
     "fix": "ultracite fix"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",
+    "@types/node": "catalog:",
     "@typescript/native": "npm:typescript@^7.0.2",
     "eslint-plugin-github": "6.1.2",
     "eslint-plugin-sonarjs": "^4.2.0",
