@@ -11,6 +11,7 @@
     "changeset": "changeset",
     "changeset-version": "changeset version && bun install --lockfile-only",
     "check": "ultracite check",
+    "test": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "fix": "ultracite fix"
   },
@@ -18,12 +19,14 @@
     "@changesets/cli": "^3.0.3",
     "@types/node": "catalog:",
     "@typescript/native": "catalog:",
+    "@vitest/coverage-v8": "5.0.1",
     "eslint-plugin-github": "6.1.2",
     "eslint-plugin-sonarjs": "^4.2.0",
     "oxfmt": "^0.68.0",
     "oxlint": "^1.83.0",
     "typescript": "catalog:",
-    "ultracite": "7.12.0"
+    "ultracite": "7.12.0",
+    "vitest": "5.0.1"
   },
   "packageManager": "bun@1.4.2",
   "catalog": {

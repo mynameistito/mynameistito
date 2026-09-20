@@ -3,10 +3,15 @@
     "lib": ["ES2022", "ESNext.Disposable"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "skipLibCheck": true,
     "strict": true,
     "target": "ES2022",
     "types": ["node"]
   },
-  "include": ["packages/**/src/**/*.ts", "**/*.config.ts"],
+  "include": [
+    "packages/**/src/**/*.ts",
+    "packages/**/__tests__/**/*.ts",
+    "**/*.config.ts"
+  ],
   "exclude": ["**/dist"]
 }
