@@ -14,7 +14,7 @@
     "knip": "knip",
     "release:stage": "bun scripts/stage-packages.ts",
     "release:tag": "bun scripts/git-tag.ts",
-    "test": "vitest run --coverage",
+    "test": "vitest run --coverage --reporter=default --reporter=junit --outputFile.junit=test-report.junit.xml",
     "typecheck": "tsc --noEmit",
     "fix": "ultracite fix"
   },
