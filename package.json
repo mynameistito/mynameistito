@@ -9,6 +9,7 @@
     "build": "bun run --cwd packages/mynameistito build",
     "dev": "bun run --cwd packages/mynameistito dev",
     "changeset": "changeset",
+    "version-packages": "changeset version && bun install --lockfile-only",
     "check": "ultracite check",
     "typecheck": "tsc --noEmit",
     "fix": "ultracite fix"
