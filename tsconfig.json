@@ -7,6 +7,6 @@
     "target": "ES2022",
     "types": ["node"]
   },
-  "include": ["packages/**/src/**/*.ts", "*.config.ts"],
+  "include": ["packages/**/src/**/*.ts", "**/*.config.ts"],
   "exclude": ["**/dist"]
 }

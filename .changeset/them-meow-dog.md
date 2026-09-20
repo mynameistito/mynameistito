@@ -1,5 +1,5 @@
 ---
-"mynameistito": minor
+"mynameistito": patch
 ---
 
 Updated Packages and Tooling
