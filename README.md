@@ -4,20 +4,16 @@
 
 <br>
 
-![TypeScript](https://img.shields.io/badge/-TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
-![Cloudflare](https://img.shields.io/badge/-Cloudflare-F38020?style=flat-square&logo=cloudflare&logoColor=white)
-![Node.js](https://img.shields.io/badge/-Node.js-339933?style=flat-square&logo=node.js&logoColor=white)
-![PowerShell](https://img.shields.io/badge/-PowerShell-5391FE?style=flat-square&logo=powershell&logoColor=white)
-![Claude](https://img.shields.io/badge/-Claude-000000?style=flat-square&logo=anthropic&logoColor=white)
-![MCP](https://img.shields.io/badge/-MCP-7B2D8B?style=flat-square&logo=protocol&logoColor=white)
+![TypeScript](https://img.shields.io/badge/-TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white) ![Cloudflare](https://img.shields.io/badge/-Cloudflare-F38020?style=flat-square&logo=cloudflare&logoColor=white) ![Node.js](https://img.shields.io/badge/-Node.js-339933?style=flat-square&logo=node.js&logoColor=white) ![PowerShell](https://img.shields.io/badge/-PowerShell-5391FE?style=flat-square&logo=powershell&logoColor=white) ![Claude](https://img.shields.io/badge/-Claude-000000?style=flat-square&logo=anthropic&logoColor=white) ![MCP](https://img.shields.io/badge/-MCP-7B2D8B?style=flat-square&logo=protocol&logoColor=white)
 
 </div>
 
 ---
 
-## Projects 
+## Projects
 
 <!-- AUTO-PROJECTS:START -->
+
 🔷 **[create-cf-token](https://github.com/mynameistito/create-cf-token)** ⭐46 — A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.
 
 🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐22 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
@@ -55,12 +51,7 @@
 
 <div align="center">
 
-[![X](https://img.shields.io/badge/-@mynameistito-000000?style=flat-square&logo=x&logoColor=white)](https://x.com/mynameistito)
-[![Bluesky](https://img.shields.io/badge/-mynameistito.com-00A8E8?style=flat-square&logo=bluesky&logoColor=white)](https://bsky.app/mynameistito.com)
-[![Twitch](https://img.shields.io/badge/-mynameistito__-9146FF?style=flat-square&logo=twitch&logoColor=white)](https://twitch.tv/mynameistito_)
-[![YouTube](https://img.shields.io/badge/-mynameistito-FF0000?style=flat-square&logo=youtube&logoColor=white)](https://youtube.com/@mynameistito)
-[![Figma](https://img.shields.io/badge/-mynameistito-F24E1E?style=flat-square&logo=figma&logoColor=white)](https://www.figma.com/@mynameistito)
-[![Discord](https://img.shields.io/badge/-mynameistito-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.com/users/611746802122620937)
+[![X](https://img.shields.io/badge/-@mynameistito-000000?style=flat-square&logo=x&logoColor=white)](https://x.com/mynameistito) [![Bluesky](https://img.shields.io/badge/-mynameistito.com-00A8E8?style=flat-square&logo=bluesky&logoColor=white)](https://bsky.app/mynameistito.com) [![Twitch](https://img.shields.io/badge/-mynameistito__-9146FF?style=flat-square&logo=twitch&logoColor=white)](https://twitch.tv/mynameistito_) [![YouTube](https://img.shields.io/badge/-mynameistito-FF0000?style=flat-square&logo=youtube&logoColor=white)](https://youtube.com/@mynameistito) [![Figma](https://img.shields.io/badge/-mynameistito-F24E1E?style=flat-square&logo=figma&logoColor=white)](https://www.figma.com/@mynameistito) [![Discord](https://img.shields.io/badge/-mynameistito-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.com/users/611746802122620937)
 
 </div>
 
