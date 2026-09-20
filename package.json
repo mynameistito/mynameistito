@@ -10,7 +10,7 @@
     "dev": "bun run --cwd packages/mynameistito dev",
     "changeset": "changeset",
     "check": "ultracite check",
-    "typecheck": "tsc6 --noEmit",
+    "typecheck": "tsc --noEmit",
     "fix": "ultracite fix"
   },
   "devDependencies": {
