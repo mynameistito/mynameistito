@@ -28,13 +28,14 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsdown && tsc --project tsconfig.json",
+    "build": "tsdown && tsc6 --project tsconfig.json",
     "dev": "bun src/cli.ts",
     "prepublishOnly": "bun run build"
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "tsdown": "catalog:"
+    "tsdown": "catalog:",
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
   },
   "engines": {
     "node": ">=20"

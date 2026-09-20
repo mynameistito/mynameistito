@@ -10,7 +10,7 @@
     "dev": "bun run --cwd packages/mynameistito dev",
     "changeset": "changeset",
     "check": "ultracite check",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc6 --noEmit",
     "fix": "ultracite fix"
   },
   "devDependencies": {
@@ -28,6 +28,6 @@
   "packageManager": "bun@1.2.23",
   "catalog": {
     "tsdown": "^0.23.0",
-    "@types/node": "^26.6.2"
+    "@types/node": "^20.0.0"
   }
 }
