@@ -57,21 +57,16 @@ const pinnedNames = new Set(pinnedRepos.map((r) => r.name));
 // Fetch all public non-fork repos for auto-discovery padding
 let repos = [];
 let page = 1;
-while (true) {
+let pageRepos = [];
+do {
   const result = execSync(
     `gh api "users/${username}/repos?per_page=100&page=${page}"`,
     { env: { ...process.env } }
   );
-  const page_repos = JSON.parse(result.toString());
-  if (page_repos.length === 0) {
-    break;
-  }
-  repos.push(...page_repos);
-  if (page_repos.length < 100) {
-    break;
-  }
+  pageRepos = JSON.parse(result.toString());
+  repos.push(...pageRepos);
   page += 1;
-}
+} while (pageRepos.length === 100);
 repos = repos.filter((r) => !r.fork && !r.private);
 
 // Auto-discovered public repos not already pinned

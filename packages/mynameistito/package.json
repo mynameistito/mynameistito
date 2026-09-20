@@ -1,6 +1,6 @@
 {
   "name": "mynameistito",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A tiny terminal profile card for Tito.",
   "keywords": [
     "github",
@@ -28,14 +28,13 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsdown && tsgo --project tsconfig.json",
+    "build": "tsdown && tsc --project tsconfig.json",
     "dev": "bun src/cli.ts",
     "prepublishOnly": "bun run build"
   },
   "devDependencies": {
-    "@types/node": "^26.0.1",
-    "@typescript/native-preview": "7.0.0-dev.20260628.1",
-    "tsdown": "^0.22.3"
+    "@types/node": "catalog:",
+    "tsdown": "catalog:"
   },
   "engines": {
     "node": ">=20"
