@@ -19,7 +19,7 @@
     },
     "packages/mynameistito": {
       "name": "mynameistito",
-      "version": "0.2.0",
+      "version": "0.1.0",
       "bin": {
         "mynameistito": "./dist/cli.js",
       },
