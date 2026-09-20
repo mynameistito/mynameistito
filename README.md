@@ -18,21 +18,21 @@
 ## Projects 
 
 <!-- AUTO-PROJECTS:START -->
-🔷 **[create-cf-token](https://github.com/mynameistito/create-cf-token)** ⭐45 — A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.
+🔷 **[create-cf-token](https://github.com/mynameistito/create-cf-token)** ⭐46 — A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.
 
-🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐21 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
+🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐22 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
 
-🔷 **[oc-usage-limits-plugin](https://github.com/mynameistito/oc-usage-limits-plugin)** ⭐8 — OpenCode TUI plugin for usage limits of AI Providers
+🔷 **[oc-usage-limits-plugin](https://github.com/mynameistito/oc-usage-limits-plugin)** ⭐9 — OpenCode TUI plugin for usage limits of AI Providers
 
 🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐6 — A CLI tool that update deps across multiple repos with auto commits and pull requests.
+
+🔷 **[opencode-plugins](https://github.com/mynameistito/opencode-plugins)** ⭐3 — My Personal OpenCode v2 Plugins
 
 🔷 **[volume-master](https://github.com/mynameistito/volume-master)** ⭐2 — Per-tab volume control with up to 600% boost. Cross-browser (Chrome + Firefox).
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
 
 📦 **[skills](https://github.com/mynameistito/skills)** ⭐1 — skills
-
-🔷 **[x-lookup](https://github.com/mynameistito/x-lookup)** ⭐1 — Read-only, no-auth Cloudflare Worker that turns public X/Twitter statuses, threads, profiles, search, and social graphs into compact Markdown or JSON for AI agents
 <!-- AUTO-PROJECTS:END -->
 
 ---
