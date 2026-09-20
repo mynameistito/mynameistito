@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
-    "lib": ["ES2022", "ESNext.Disposable"],
+    "lib": ["DOM", "ES2022", "ESNext.Disposable"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "skipLibCheck": true,
     "strict": true,
     "target": "ES2022",
     "types": ["node"]

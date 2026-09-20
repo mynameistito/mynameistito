@@ -6,6 +6,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -48,7 +52,7 @@ jobs:
         run: bun run ${{ matrix.task }}
 
       - name: Upload coverage to Codecov
-        if: matrix.task == 'test' && env.CODECOV_TOKEN_AVAILABLE == 'true'
+        if: always() && matrix.task == 'test' && env.CODECOV_TOKEN_AVAILABLE == 'true'
         uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           disable_search: true
