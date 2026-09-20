@@ -12,12 +12,31 @@ if (!type || !types.has(type) || !summary) {
   process.exit(1);
 }
 
-const filename = `${randomBytes(4).toString("hex")}.md`;
 const changesetDirectory = path.resolve(".changeset");
 await mkdir(changesetDirectory, { recursive: true });
-await writeFile(
-  path.resolve(changesetDirectory, filename),
-  `---\n"${packageName}": ${type}\n---\n\n${summary}\n`,
-  "utf-8"
+const changeset = `---\n"${packageName}": ${type}\n---\n\n${summary}\n`;
+
+const createChangeset = async (filename: string): Promise<string> => {
+  try {
+    await writeFile(path.resolve(changesetDirectory, filename), changeset, {
+      encoding: "utf-8",
+      flag: "wx",
+    });
+    return filename;
+  } catch (error) {
+    if (
+      !(error instanceof Error) ||
+      !("code" in error) ||
+      error.code !== "EEXIST"
+    ) {
+      throw error;
+    }
+
+    return createChangeset(`${randomBytes(4).toString("hex")}.md`);
+  }
+};
+
+const createdFilename = await createChangeset(
+  `${randomBytes(4).toString("hex")}.md`
 );
-console.log(`Created .changeset/${filename} for ${packageName}`);
+console.log(`Created .changeset/${createdFilename} for ${packageName}`);
