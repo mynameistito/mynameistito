@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
   workflow_dispatch:
     inputs:
       publish_release:
@@ -19,6 +24,7 @@ permissions:
 jobs:
   version:
     name: Version packages
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -56,9 +62,20 @@ jobs:
     name: Stage npm package
     needs: version
     if: |
-      needs.version.outputs.has_changesets == 'false' && (
-        contains(github.event.head_commit.message, 'chore: release packages') ||
-        (github.event_name == 'workflow_dispatch' && inputs.publish_release == true)
+      always() && (
+        (
+          github.event_name == 'pull_request' &&
+          github.event.action == 'closed' &&
+          github.event.pull_request.merged == true &&
+          github.event.pull_request.base.ref == 'main' &&
+          github.event.pull_request.head.ref == 'changeset-release/main'
+        ) ||
+        (
+          needs.version.result == 'success' &&
+          needs.version.outputs.has_changesets == 'false' &&
+          github.event_name == 'workflow_dispatch' &&
+          inputs.publish_release == true
+        )
       )
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -70,6 +87,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.merge_commit_sha || github.sha }}
           persist-credentials: false
 
       - name: Set up Bun

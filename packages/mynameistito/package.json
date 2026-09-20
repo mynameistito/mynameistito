@@ -12,7 +12,8 @@
   "author": "Tito <https://github.com/mynameistito>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mynameistito/mynameistito.git"
+    "url": "git+https://github.com/mynameistito/mynameistito.git",
+    "directory": "packages/mynameistito"
   },
   "bin": {
     "mynameistito": "./dist/cli.js"
