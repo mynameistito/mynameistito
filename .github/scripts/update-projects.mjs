@@ -55,19 +55,13 @@ const pinnedRepos = pinnedData.data.user.pinnedItems.nodes.map((r) => ({
 const pinnedNames = new Set(pinnedRepos.map((r) => r.name));
 
 // Fetch all public non-fork repos for auto-discovery padding
-let repos = [];
-let page = 1;
-let pageRepos = [];
-do {
-  const result = execSync(
-    `gh api "users/${username}/repos?per_page=100&page=${page}"`,
-    { env: { ...process.env } }
-  );
-  pageRepos = JSON.parse(result.toString());
-  repos.push(...pageRepos);
-  page += 1;
-} while (pageRepos.length === 100);
-repos = repos.filter((r) => !r.fork && !r.private);
+const reposResult = execSync(
+  `gh api --paginate --slurp "users/${username}/repos?per_page=100"`,
+  { env: { ...process.env } }
+);
+const repos = JSON.parse(reposResult.toString())
+  .flat()
+  .filter((r) => !r.fork && !r.private);
 
 // Auto-discovered public repos not already pinned
 const autoRepos = repos
