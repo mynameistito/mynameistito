@@ -28,14 +28,16 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsdown && tsgo --project tsconfig.json",
+    "build": "tsdown && tsc --project tsconfig.json",
     "dev": "bun src/cli.ts",
+    "typecheck": "tsc --noEmit",
     "prepublishOnly": "bun run build"
   },
   "devDependencies": {
-    "@types/node": "^26.0.1",
-    "@typescript/native-preview": "7.0.0-dev.20260628.1",
-    "tsdown": "^0.22.3"
+    "@types/node": "catalog:",
+    "@typescript/native": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:"
   },
   "engines": {
     "node": ">=20"
