@@ -27,7 +27,7 @@
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
 
-📦 **[skills](https://github.com/mynameistito/skills)** ⭐1 — skills
+🔷 **[x-lookup](https://github.com/mynameistito/x-lookup)** ⭐1 — Read-only, no-auth Cloudflare Worker that turns public X/Twitter statuses, threads, profiles, search, and social graphs into compact Markdown or JSON for AI agents
 <!-- AUTO-PROJECTS:END -->
 
 ---
