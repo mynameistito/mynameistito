@@ -23,11 +23,11 @@
 
 🔷 **[opencode-plugins](https://github.com/mynameistito/opencode-plugins)** ⭐3 — My Personal OpenCode v2 Plugins
 
+🔷 **[fxinstagram](https://github.com/mynameistito/fxinstagram)** ⭐2 — Effect and Alchemy service for fixing Instagram embeds in Discord
+
 🔷 **[volume-master](https://github.com/mynameistito/volume-master)** ⭐2 — Per-tab volume control with up to 600% boost. Cross-browser (Chrome + Firefox).
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
-
-🔷 **[x-lookup](https://github.com/mynameistito/x-lookup)** ⭐1 — Read-only, no-auth Cloudflare Worker that turns public X/Twitter statuses, threads, profiles, search, and social graphs into compact Markdown or JSON for AI agents
 <!-- AUTO-PROJECTS:END -->
 
 ---
