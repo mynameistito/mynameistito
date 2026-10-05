@@ -28,6 +28,8 @@
 🔷 **[volume-master](https://github.com/mynameistito/volume-master)** ⭐2 — Per-tab volume control with up to 600% boost. Cross-browser (Chrome + Firefox).
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
+
+🔷 **[hcc-bin-day](https://github.com/mynameistito/hcc-bin-day)** ⭐1 — TypeScript client for Hamilton City Council Fight the Landfill bin-day lookup API.
 <!-- AUTO-PROJECTS:END -->
 
 ---
