@@ -1,167 +1,122 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 
-import { cn } from "@/lib/utils";
+import { projects } from "@/lib/projects";
 
 const profile = {
   description:
-    "Tito builds TypeScript CLIs, Cloudflare tools, browser extensions, and small useful internet things.",
-  name: "My Name is Tito",
+    "I build TypeScript tools, Cloudflare projects, browser extensions, and other useful things for the open web.",
+  name: "Tito",
+  username: "@mynameistito",
 };
 
 const links = [
-  { label: "Website", url: "https://mynameistito.com" },
   { label: "GitHub", url: "https://github.com/mynameistito" },
   { label: "npm", url: "https://www.npmjs.com/~mynameistito" },
   { label: "X", url: "https://x.com/mynameistito" },
 ] as const;
 
-const projects = [
-  {
-    description:
-      "A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.",
-    name: "create-cf-token",
-    url: "https://github.com/mynameistito/create-cf-token",
-  },
-  {
-    description:
-      "Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.",
-    name: "justfuckingusecloudflare",
-    url: "https://github.com/mynameistito/justfuckingusecloudflare",
-  },
-  {
-    description: "OpenCode TUI plugin for usage limits of AI Providers",
-    name: "oc-usage-limits-plugin",
-    url: "https://github.com/mynameistito/oc-usage-limits-plugin",
-  },
-  {
-    description:
-      "A CLI tool that update deps across multiple repos with auto commits and pull requests.",
-    name: "repo-updater",
-    url: "https://github.com/mynameistito/repo-updater",
-  },
-  {
-    description: "My Personal OpenCode v2 Plugins",
-    name: "opencode-plugins",
-    url: "https://github.com/mynameistito/opencode-plugins",
-  },
-  {
-    description:
-      "Effect and Alchemy service for fixing Instagram embeds in Discord",
-    name: "fxinstagram",
-    url: "https://github.com/mynameistito/fxinstagram",
-  },
-  {
-    description:
-      "Per-tab volume control with up to 600% boost. Cross-browser (Chrome + Firefox).",
-    name: "volume-master",
-    url: "https://github.com/mynameistito/volume-master",
-  },
-  {
-    description: "CLI for inspecting Codex usage windows and reset credits",
-    name: "codex-usage",
-    url: "https://github.com/mynameistito/codex-usage",
-  },
-  {
-    description:
-      "TypeScript client for Hamilton City Council Fight the Landfill bin-day lookup API.",
-    name: "hcc-bin-day",
-    url: "https://github.com/mynameistito/hcc-bin-day",
-  },
-] as const;
-
 const Home = () => (
-  <main className="mx-auto min-h-screen w-full max-w-7xl px-6 pb-16 sm:px-10 lg:px-16">
-    <header className="flex min-h-18 items-center justify-between border-b border-border">
+  <main
+    className="mx-auto w-[calc(100%-40px)] max-w-[644px] pt-18 pb-10.5 max-[520px]:w-[calc(100%-36px)] max-[520px]:pt-10"
+    id="home"
+  >
+    <header className="flex items-center justify-between gap-6">
       <a
-        className="font-mono text-sm font-semibold tracking-tight"
+        aria-label="Tito, home"
+        className="flex min-w-0 items-center gap-3.5"
         href="#home"
       >
-        tito<span className="text-primary">.</span>
+        <img
+          alt=""
+          className="h-[52px] w-[52px] flex-none rounded-full border border-line bg-surface object-cover max-[520px]:size-[46px]"
+          height="52"
+          src="https://github.com/mynameistito.png"
+          width="52"
+        />
+        <span className="grid min-w-0 gap-0.75">
+          <span className="font-semibold tracking-tight">{profile.name}</span>
+          <span className="text-xs text-muted">{profile.username}</span>
+        </span>
       </a>
-      <nav aria-label="Main navigation" className="flex items-center gap-6">
-        <a
-          className="text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-          href="#projects"
-        >
-          Projects
-        </a>
-        <a
-          className="text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-          href="#links"
-        >
-          Links
-        </a>
-      </nav>
+      <a
+        className="text-xs text-muted transition-colors duration-150 hover:text-accent"
+        href="https://github.com/mynameistito"
+        rel="noreferrer"
+        target="_blank"
+      >
+        GitHub <span aria-hidden="true">↗</span>
+      </a>
     </header>
 
     <section
-      aria-labelledby="home-title"
-      className="grid gap-10 border-b border-border py-20 sm:py-28 md:grid-cols-[1.25fr_0.75fr] md:items-end md:gap-16"
-      id="home"
+      aria-label="About me"
+      className="mt-[27px] grid gap-3.5 text-muted leading-7 max-[520px]:mt-6 max-[520px]:text-sm"
     >
-      <div>
-        <p className="mb-5 font-mono text-xs tracking-widest text-primary uppercase">
-          Independent developer
-        </p>
-        <h1
-          className="max-w-3xl text-5xl leading-tight font-semibold tracking-tight text-foreground sm:text-6xl lg:text-7xl"
-          id="home-title"
-        >
-          {profile.name}
-        </h1>
-      </div>
-      <div className="max-w-md md:justify-self-end">
-        <p className="text-lg leading-8 text-muted-foreground">
-          {profile.description}
-        </p>
+      <p>{profile.description}</p>
+      <p>
+        I enjoy contributing to open source, exploring new ideas, and making
+        small tools that solve real problems. Browse my{" "}
         <a
-          className={cn(
-            "mt-7 inline-flex items-center gap-2 border-b border-primary pb-1 text-sm font-medium text-foreground transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-          )}
+          className="font-semibold text-text underline decoration-subtle underline-offset-4 transition-colors hover:decoration-accent"
           href="#projects"
         >
-          Browse projects <span aria-hidden="true">↘</span>
+          projects
+        </a>{" "}
+        or find me on{" "}
+        <a
+          className="font-semibold text-text underline decoration-subtle underline-offset-4 transition-colors hover:decoration-accent"
+          href={links[0].url}
+        >
+          GitHub
         </a>
-      </div>
+        .
+      </p>
     </section>
 
     <section
       aria-labelledby="projects-title"
-      className="py-16 sm:py-20"
+      className="mt-10 max-[520px]:mt-[34px]"
       id="projects"
     >
-      <div className="mb-8 flex items-end justify-between gap-6">
-        <h2
-          className="text-3xl font-semibold tracking-tight text-foreground"
+      <div className="flex items-baseline justify-between gap-4 border-b border-line pb-3.5">
+        <h1
+          className="m-0 text-base font-semibold tracking-tight"
           id="projects-title"
         >
           Projects
-        </h2>
-        <p className="pb-1 font-mono text-xs text-muted-foreground">
-          A selection from GitHub
-        </p>
+        </h1>
+        <Link
+          className="text-xs text-muted transition-colors duration-150 hover:text-accent"
+          to="/projects"
+        >
+          View all <span aria-hidden="true">→</span>
+        </Link>
       </div>
-      <ul className="divide-y divide-border border-y border-border">
-        {projects.map((project, index) => (
-          <li key={project.name}>
+      <ul className="m-0 list-none p-0">
+        {projects.slice(0, 5).map((project) => (
+          <li className="border-b border-line" key={project.name}>
             <a
-              className="group grid gap-2 py-5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-primary sm:grid-cols-[3rem_minmax(10rem,0.8fr)_1.2fr_auto] sm:items-baseline sm:gap-4"
+              className="group flex min-h-[72px] items-center justify-between gap-4.5 py-3.5"
               href={project.url}
               rel="noreferrer"
               target="_blank"
             >
-              <span className="font-mono text-xs text-muted-foreground">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <span className="font-medium text-foreground group-hover:text-primary">
-                {project.name}
-              </span>
-              <span className="max-w-2xl text-sm leading-6 text-muted-foreground">
-                {project.description}
+              <span className="grid min-w-0 gap-1">
+                <span className="flex min-w-0 flex-wrap items-baseline gap-2">
+                  <span className="text-sm font-semibold tracking-tight transition-colors duration-150 group-hover:text-accent">
+                    {project.name}
+                  </span>
+                  <span className="text-xs text-muted">
+                    {project.languages.join(" / ")}
+                  </span>
+                </span>
+                <span className="overflow-hidden text-ellipsis whitespace-nowrap text-xs leading-normal text-muted max-[520px]:line-clamp-2 max-[520px]:whitespace-normal">
+                  {project.description}
+                </span>
               </span>
               <span
                 aria-hidden="true"
-                className="hidden text-muted-foreground transition-transform group-hover:translate-x-1 sm:inline"
+                className="flex-none text-sm text-muted transition duration-150 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-accent"
               >
                 ↗
               </span>
@@ -172,30 +127,26 @@ const Home = () => (
     </section>
 
     <footer
-      aria-labelledby="links-title"
-      className="flex flex-col gap-6 border-t border-border pt-8 sm:flex-row sm:items-center sm:justify-between"
+      className="flex flex-wrap justify-between gap-x-6 gap-y-4 pt-5.5 text-xs text-muted max-[520px]:justify-start"
       id="links"
     >
-      <h2
-        className="text-sm font-medium text-muted-foreground"
-        id="links-title"
-      >
-        Find me elsewhere
-      </h2>
-      <ul className="flex flex-wrap gap-x-6 gap-y-3">
+      <span>Elsewhere</span>
+      <nav aria-label="Social links" className="flex flex-wrap gap-4.5">
         {links.map((link) => (
-          <li key={link.label}>
-            <a
-              className="text-sm text-muted-foreground underline decoration-border underline-offset-4 transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-              href={link.url}
-              rel="noreferrer"
-              target="_blank"
-            >
-              {link.label}
-            </a>
-          </li>
+          <a
+            className="transition-colors duration-150 hover:text-accent"
+            href={link.url}
+            key={link.label}
+            rel="noreferrer"
+            target="_blank"
+          >
+            {link.label}
+          </a>
         ))}
-      </ul>
+      </nav>
+      <a className="ml-auto" href="#home">
+        Back to top ↑
+      </a>
     </footer>
   </main>
 );
