@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/package.json",
   "name": "mynameistito-workspace",
   "private": true,
   "workspaces": [
@@ -18,24 +19,31 @@
     "release:tag": "bun scripts/cicd/git-tag.ts",
     "test": "vitest run --coverage --reporter=default --reporter=junit --outputFile.junit=test-report.junit.xml",
     "typecheck": "tsc --noEmit && bun run --cwd apps/website typecheck",
-    "fix": "ultracite fix"
+    "fix": "ultracite fix",
+    "prepare": "lefthook install"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",
+    "@shadcn/lint": "^0.2.0",
     "@types/node": "catalog:",
     "@typescript/native": "catalog:",
     "@vitest/coverage-v8": "5.0.1",
     "eslint-plugin-github": "6.1.2",
-    "eslint-plugin-sonarjs": "^4.2.0",
+    "eslint-plugin-jsdoc": "^65.1.0",
+    "eslint-plugin-sonarjs": "^4.2.2",
+    "eslint-plugin-tsdoc": "^0.5.4",
     "knip": "6.37.0",
-    "oxfmt": "^0.68.0",
-    "oxlint": "^1.83.0",
+    "lefthook": "^2.1.17",
+    "oxfmt": "^0.72.0",
+    "oxlint": "^1.87.0",
+    "oxlint-plugin-react-doctor": "^0.9.16",
     "typescript": "catalog:",
-    "ultracite": "7.12.0",
+    "ultracite": "7.12.4",
     "vitest": "5.0.1"
   },
   "packageManager": "bun@1.4.2",
   "catalog": {
+    "effect": "4.0.0",
     "@typescript/native": "npm:typescript@^7.0.2",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "tsdown": "^0.23.0",

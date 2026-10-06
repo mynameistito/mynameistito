@@ -1,5 +1,28 @@
 @import "tailwindcss";
 
+@theme inline {
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+}
+
+:root {
+  --border: #e4e4e7;
+  --foreground: #18181b;
+  --muted-foreground: #52525b;
+  --primary: #c2410c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --border: #27272a;
+    --foreground: #fafafa;
+    --muted-foreground: #a1a1aa;
+    --primary: #fb923c;
+  }
+}
+
 * {
   box-sizing: border-box;
 }

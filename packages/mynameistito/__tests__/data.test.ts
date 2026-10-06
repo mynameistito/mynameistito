@@ -4,7 +4,7 @@ import { links, profile } from "../src/index.js";
 
 describe("profile data", () => {
   it("exposes the profile metadata", () => {
-    expect(profile).toEqual({
+    expect(profile).toStrictEqual({
       description:
         "Tito builds TypeScript CLIs, Cloudflare tools, browser extensions, and small useful internet things.",
       name: "My Name is Tito",
@@ -12,7 +12,7 @@ describe("profile data", () => {
   });
 
   it("exposes labeled portfolio links", () => {
-    expect(links).toEqual([
+    expect(links).toStrictEqual([
       { label: "Website", url: "https://mynameistito.com" },
       { label: "GitHub", url: "https://github.com/mynameistito" },
       { label: "npm", url: "https://www.npmjs.com/~mynameistito" },
