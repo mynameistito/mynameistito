@@ -1,0 +1,193 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { links, profile } from "mynameistito";
+
+import { cn } from "@/lib/utils";
+
+const projects = [
+  {
+    description:
+      "A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.",
+    name: "create-cf-token",
+    url: "https://github.com/mynameistito/create-cf-token",
+  },
+  {
+    description:
+      "Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.",
+    name: "justfuckingusecloudflare",
+    url: "https://github.com/mynameistito/justfuckingusecloudflare",
+  },
+  {
+    description: "OpenCode TUI plugin for usage limits of AI Providers",
+    name: "oc-usage-limits-plugin",
+    url: "https://github.com/mynameistito/oc-usage-limits-plugin",
+  },
+  {
+    description:
+      "A CLI tool that update deps across multiple repos with auto commits and pull requests.",
+    name: "repo-updater",
+    url: "https://github.com/mynameistito/repo-updater",
+  },
+  {
+    description: "My Personal OpenCode v2 Plugins",
+    name: "opencode-plugins",
+    url: "https://github.com/mynameistito/opencode-plugins",
+  },
+  {
+    description:
+      "Effect and Alchemy service for fixing Instagram embeds in Discord",
+    name: "fxinstagram",
+    url: "https://github.com/mynameistito/fxinstagram",
+  },
+  {
+    description:
+      "Per-tab volume control with up to 600% boost. Cross-browser (Chrome + Firefox).",
+    name: "volume-master",
+    url: "https://github.com/mynameistito/volume-master",
+  },
+  {
+    description: "CLI for inspecting Codex usage windows and reset credits",
+    name: "codex-usage",
+    url: "https://github.com/mynameistito/codex-usage",
+  },
+  {
+    description:
+      "TypeScript client for Hamilton City Council Fight the Landfill bin-day lookup API.",
+    name: "hcc-bin-day",
+    url: "https://github.com/mynameistito/hcc-bin-day",
+  },
+] as const;
+
+const Home = () => (
+  <main className="mx-auto min-h-screen w-full max-w-7xl px-6 pb-16 sm:px-10 lg:px-16">
+    <header className="flex min-h-18 items-center justify-between border-b border-zinc-200 dark:border-zinc-800">
+      <a
+        className="font-mono text-sm font-semibold tracking-tight"
+        href="#home"
+      >
+        tito<span className="text-orange-600">.</span>
+      </a>
+      <nav aria-label="Main navigation" className="flex items-center gap-6">
+        <a
+          className="text-sm text-zinc-600 transition-colors hover:text-zinc-950 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-600 dark:text-zinc-400 dark:hover:text-white"
+          href="#projects"
+        >
+          Projects
+        </a>
+        <a
+          className="text-sm text-zinc-600 transition-colors hover:text-zinc-950 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-600 dark:text-zinc-400 dark:hover:text-white"
+          href="#links"
+        >
+          Links
+        </a>
+      </nav>
+    </header>
+
+    <section
+      aria-labelledby="home-title"
+      className="grid gap-10 border-b border-zinc-200 py-20 sm:py-28 md:grid-cols-[1.25fr_0.75fr] md:items-end md:gap-16 dark:border-zinc-800"
+      id="home"
+    >
+      <div>
+        <p className="mb-5 font-mono text-xs tracking-[0.18em] text-orange-700 uppercase dark:text-orange-400">
+          Independent developer
+        </p>
+        <h1
+          className="max-w-3xl text-5xl leading-[1.04] font-semibold tracking-[-0.055em] text-zinc-950 sm:text-6xl lg:text-7xl dark:text-zinc-50"
+          id="home-title"
+        >
+          {profile.name}
+        </h1>
+      </div>
+      <div className="max-w-md md:justify-self-end">
+        <p className="text-lg leading-8 text-zinc-600 dark:text-zinc-300">
+          {profile.description}
+        </p>
+        <a
+          className={cn(
+            "mt-7 inline-flex items-center gap-2 border-b border-orange-700 pb-1 text-sm font-medium text-zinc-950 transition-colors hover:text-orange-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-600 dark:border-orange-400 dark:text-zinc-50 dark:hover:text-orange-300"
+          )}
+          href="#projects"
+        >
+          Browse projects <span aria-hidden="true">↘</span>
+        </a>
+      </div>
+    </section>
+
+    <section
+      aria-labelledby="projects-title"
+      className="py-16 sm:py-20"
+      id="projects"
+    >
+      <div className="mb-8 flex items-end justify-between gap-6">
+        <h2
+          className="text-3xl font-semibold tracking-[-0.04em] text-zinc-950 dark:text-zinc-50"
+          id="projects-title"
+        >
+          Projects
+        </h2>
+        <p className="pb-1 font-mono text-xs text-zinc-500 dark:text-zinc-400">
+          A selection from GitHub
+        </p>
+      </div>
+      <ul className="divide-y divide-zinc-200 border-y border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+        {projects.map((project, index) => (
+          <li key={project.name}>
+            <a
+              className="group grid gap-2 py-5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-orange-600 sm:grid-cols-[3rem_minmax(10rem,0.8fr)_1.2fr_auto] sm:items-baseline sm:gap-4"
+              href={project.url}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <span className="font-mono text-xs text-zinc-400 dark:text-zinc-500">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span className="font-medium text-zinc-950 group-hover:text-orange-700 dark:text-zinc-50 dark:group-hover:text-orange-300">
+                {project.name}
+              </span>
+              <span className="max-w-2xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+                {project.description}
+              </span>
+              <span
+                aria-hidden="true"
+                className="hidden text-zinc-400 transition-transform group-hover:translate-x-1 sm:inline"
+              >
+                ↗
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <footer
+      aria-labelledby="links-title"
+      className="flex flex-col gap-6 border-t border-zinc-200 pt-8 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800"
+      id="links"
+    >
+      <h2
+        className="text-sm font-medium text-zinc-600 dark:text-zinc-300"
+        id="links-title"
+      >
+        Find me elsewhere
+      </h2>
+      <ul className="flex flex-wrap gap-x-6 gap-y-3">
+        {links.map((link) => (
+          <li key={link.label}>
+            <a
+              className="text-sm text-zinc-600 underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-orange-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-600 dark:text-zinc-400 dark:decoration-zinc-700 dark:hover:text-orange-300"
+              href={link.url}
+              rel="noreferrer"
+              target="_blank"
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </footer>
+  </main>
+);
+
+export const Route = createFileRoute("/")({
+  component: Home,
+});
