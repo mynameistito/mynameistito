@@ -1,0 +1,42 @@
+{
+  "name": "@mynameistito/website",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "scripts": {
+    "dev": "bun run --cwd ../../packages/mynameistito build && vite dev --port 3000",
+    "generate-routes": "tsr generate",
+    "build": "bun run --cwd ../../packages/mynameistito build && vite build",
+    "preview": "vite preview",
+    "typecheck": "bun run --cwd ../../packages/mynameistito build && tsc --noEmit"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "@tanstack/react-router": "1.170.41",
+    "@tanstack/react-start": "1.168.60",
+    "clsx": "^2.1.1",
+    "mynameistito": "workspace:*",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.18"
+  },
+  "devDependencies": {
+    "@tanstack/devtools-vite": "0.8.5",
+    "@tanstack/router-cli": "^1.132.0",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.0.1",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "lightningcss"
+    ]
+  }
+}

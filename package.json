@@ -2,11 +2,12 @@
   "name": "mynameistito-workspace",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "type": "module",
   "scripts": {
-    "build": "bun run --cwd packages/mynameistito build",
+    "build": "bun run --cwd apps/website build",
     "dev": "bun run --cwd packages/mynameistito dev",
     "changeset": "changeset",
     "changeset-add": "bun run scripts/changeset-add.ts",
@@ -16,7 +17,7 @@
     "release:stage": "bun scripts/cicd/stage-packages.ts",
     "release:tag": "bun scripts/cicd/git-tag.ts",
     "test": "vitest run --coverage --reporter=default --reporter=junit --outputFile.junit=test-report.junit.xml",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && bun run --cwd apps/website typecheck",
     "fix": "ultracite fix"
   },
   "devDependencies": {
