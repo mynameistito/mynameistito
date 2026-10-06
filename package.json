@@ -10,7 +10,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "bun run --cwd packages/mynameistito dev",
-    "dev:all": "turbo run dev",
+    "dev:all": "turbo run dev --ui=tui",
     "changeset": "changeset",
     "changeset-add": "bun run scripts/changeset-add.ts",
     "changeset-version": "changeset version && bun install --lockfile-only",
