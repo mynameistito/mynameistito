@@ -1,7 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { links, profile } from "mynameistito";
 
 import { cn } from "@/lib/utils";
+
+const profile = {
+  description:
+    "Tito builds TypeScript CLIs, Cloudflare tools, browser extensions, and small useful internet things.",
+  name: "My Name is Tito",
+};
+
+const links = [
+  { label: "Website", url: "https://mynameistito.com" },
+  { label: "GitHub", url: "https://github.com/mynameistito" },
+  { label: "npm", url: "https://www.npmjs.com/~mynameistito" },
+  { label: "X", url: "https://x.com/mynameistito" },
+] as const;
 
 const projects = [
   {

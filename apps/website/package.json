@@ -6,18 +6,16 @@
     "#/*": "./src/*"
   },
   "scripts": {
-    "dev": "bun run --cwd ../../packages/mynameistito build && vite dev --port 3000",
-    "generate-routes": "tsr generate",
-    "build": "bun run --cwd ../../packages/mynameistito build && vite build",
+    "dev": "vite dev --port 3000",
+    "build": "vite build",
     "preview": "vite preview",
-    "typecheck": "bun run --cwd ../../packages/mynameistito build && tsc --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-router": "1.170.41",
     "@tanstack/react-start": "1.168.60",
     "clsx": "^2.1.1",
-    "mynameistito": "workspace:*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwind-merge": "^3.3.1",
@@ -25,7 +23,6 @@
   },
   "devDependencies": {
     "@tanstack/devtools-vite": "0.8.5",
-    "@tanstack/router-cli": "^1.132.0",
     "@types/node": "^22.10.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
