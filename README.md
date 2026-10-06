@@ -20,7 +20,7 @@
 
 🔷 **[oc-usage-limits-plugin](https://github.com/mynameistito/oc-usage-limits-plugin)** ⭐9 — OpenCode TUI plugin for usage limits of AI Providers
 
-🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐6 — A CLI tool that update deps across multiple repos with auto commits and pull requests.
+🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐6 — A CLI tool that updates dependencies across multiple repositories, then creates commits and pull requests automatically.
 
 🔷 **[opencode-plugins](https://github.com/mynameistito/opencode-plugins)** ⭐3 — My Personal OpenCode v2 Plugins
 
