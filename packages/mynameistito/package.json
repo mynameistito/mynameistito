@@ -38,6 +38,9 @@
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "bun run build"
   },
+  "dependencies": {
+    "effect": "catalog:"
+  },
   "devDependencies": {
     "@types/node": "catalog:",
     "@typescript/native": "catalog:",
