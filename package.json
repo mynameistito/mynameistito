@@ -8,8 +8,9 @@
   ],
   "type": "module",
   "scripts": {
-    "build": "bun run --cwd apps/website build",
+    "build": "turbo run build",
     "dev": "bun run --cwd packages/mynameistito dev",
+    "dev:all": "turbo run dev",
     "changeset": "changeset",
     "changeset-add": "bun run scripts/changeset-add.ts",
     "changeset-version": "changeset version && bun install --lockfile-only",
@@ -17,8 +18,10 @@
     "knip": "knip",
     "release:stage": "bun scripts/cicd/stage-packages.ts",
     "release:tag": "bun scripts/cicd/git-tag.ts",
-    "test": "vitest run --coverage --reporter=default --reporter=junit --outputFile.junit=test-report.junit.xml",
-    "typecheck": "tsc --noEmit && bun run --cwd apps/website typecheck",
+    "test": "turbo run test:root",
+    "test:root": "vitest run --coverage --reporter=default --reporter=junit --outputFile.junit=test-report.junit.xml",
+    "typecheck": "turbo run typecheck typecheck:root",
+    "typecheck:root": "tsc --noEmit",
     "fix": "ultracite fix",
     "prepare": "lefthook install"
   },
@@ -37,6 +40,7 @@
     "oxfmt": "^0.72.0",
     "oxlint": "^1.87.0",
     "oxlint-plugin-react-doctor": "^0.9.16",
+    "turbo": "^2.11.7",
     "typescript": "catalog:",
     "ultracite": "7.12.4",
     "vitest": "5.0.1"
