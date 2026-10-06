@@ -29,7 +29,7 @@
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
 
-🔷 **[hcc-bin-day](https://github.com/mynameistito/hcc-bin-day)** ⭐1 — TypeScript client for Hamilton City Council Fight the Landfill bin-day lookup API.
+📦 **[skills](https://github.com/mynameistito/skills)** ⭐1 — skills
 <!-- AUTO-PROJECTS:END -->
 
 ---
