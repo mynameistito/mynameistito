@@ -13,7 +13,7 @@ interface SiteHeaderProps {
  */
 const siteHeader = ({ backTo, backLabel }: SiteHeaderProps) =>
   backTo && backLabel ? (
-    <header className="fixed inset-x-0 top-0 z-20 h-16 border-b border-line bg-page">
+    <header className="fixed inset-x-0 top-0 z-20 h-14 border-b border-line bg-page">
       <div className="mx-auto flex h-full w-[min(100%-48px,528px)] items-center justify-between">
         <Link
           className="flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-text"

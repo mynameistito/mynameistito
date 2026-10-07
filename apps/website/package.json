@@ -17,6 +17,7 @@
     "typecheck": "cf workers types && tsc --noEmit"
   },
   "dependencies": {
+    "@tabler/icons-react": "^3.49.0",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-router": "1.170.41",
     "@tanstack/react-start": "1.168.60",

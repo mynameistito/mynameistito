@@ -12,6 +12,9 @@
   --color-surface-raised: #1d2021;
   --color-surface-hover: #141617;
   --color-line-strong: #363a3d;
+  --color-pr-open: #35f58a;
+  --color-pr-merged: #b8a0ff;
+  --color-pr-closed: #ff6174;
   --font-sans: Inter, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   --text-page-title: 30px;
