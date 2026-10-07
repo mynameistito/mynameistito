@@ -113,6 +113,11 @@
   }
 }
 
+:where(button, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
 .project-hover-preview {
   display: none;
   position: absolute;

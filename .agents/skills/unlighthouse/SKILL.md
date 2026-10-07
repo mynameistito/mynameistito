@@ -5,9 +5,7 @@ description: Run Google Lighthouse on every page of a site with the unlighthouse
 
 # unlighthouse
 
-Tested on Node 24 against the `unlighthouse` release that ships this Skill (requires Node `>=22.18.0`).
-The package finds the URLs of a site and runs Lighthouse on each one in parallel Chrome instances.
-It ships two binaries: `unlighthouse` opens a live dashboard, and `unlighthouse-ci` exits with a status code. Docs: https://unlighthouse.dev
+Tested on Node 24 against the `unlighthouse` release that ships this Skill (requires Node `>=22.18.0`). The package finds the URLs of a site and runs Lighthouse on each one in parallel Chrome instances. It ships two binaries: `unlighthouse` opens a live dashboard, and `unlighthouse-ci` exits with a status code. Docs: https://unlighthouse.dev
 
 ## Setup
 
@@ -45,19 +43,24 @@ npx unlighthouse-ci --site https://example.com --budget 80
 Per category budgets, reporters, and scope in one config:
 
 ```ts
-import { defineUnlighthouseConfig } from 'unlighthouse/config'
+import { defineUnlighthouseConfig } from "unlighthouse/config";
 
 export default defineUnlighthouseConfig({
-  site: 'https://staging.example.com',
+  site: "https://staging.example.com",
   scanner: {
-    exclude: ['/admin/**', '/api/**'],
-    include: ['/', /^\/blog\//, '/docs/**'], // keep '/' so the crawler can start
+    exclude: ["/admin/**", "/api/**"],
+    include: ["/", /^\/blog\//, "/docs/**"], // keep '/' so the crawler can start
   },
   ci: {
-    budget: { 'performance': 70, 'accessibility': 95, 'best-practices': 90, 'seo': 90 },
-    reporter: 'jsonExpanded',
+    budget: {
+      performance: 70,
+      accessibility: 95,
+      "best-practices": 90,
+      seo: 90,
+    },
+    reporter: "jsonExpanded",
   },
-})
+});
 ```
 
 - Budgets use 0 to 100. Report scores use 0 to 1. A budget of 80 fails a score of 0.79.
@@ -69,49 +72,58 @@ Static HTML report: pass `--build-static`, or set `ci.buildStatic: true`. It wri
 Authentication: the `authenticate` hook gets the Puppeteer `Page` as its first argument. It runs once. Its cookies reach every scanned page, including the Lighthouse run, and only the hosts they belong to.
 
 ```ts
-import { defineUnlighthouseConfig } from 'unlighthouse/config'
+import { defineUnlighthouseConfig } from "unlighthouse/config";
 
 export default defineUnlighthouseConfig({
-  auth: { username: 'admin', password: process.env.AUTH_PASS! },
+  auth: { username: "admin", password: process.env.AUTH_PASS! },
   hooks: {
     async authenticate(page) {
-      await page.goto('https://example.com/login')
-      await page.type('input[name="email"]', 'test@example.com')
-      await Promise.all([page.waitForNavigation(), page.click('button[type="submit"]')])
+      await page.goto("https://example.com/login");
+      await page.type('input[name="email"]', "test@example.com");
+      await Promise.all([
+        page.waitForNavigation(),
+        page.click('button[type="submit"]'),
+      ]);
     },
   },
-})
+});
 ```
 
 Read scores in a hook: `task-complete` fires once per task, so check `taskName`. `categories` is an array of `{ key, id, title, score }`.
 
 ```ts
-import { defineUnlighthouseConfig } from 'unlighthouse/config'
+import { defineUnlighthouseConfig } from "unlighthouse/config";
 
 export default defineUnlighthouseConfig({
   hooks: {
-    'task-complete': (path, report, taskName) => {
-      if (taskName !== 'runLighthouseTask')
-        return
-      const performance = report.report?.categories.find(category => category.key === 'performance')
-      console.log(path, report.report?.score, performance?.score)
+    "task-complete": (path, report, taskName) => {
+      if (taskName !== "runLighthouseTask") return;
+      const performance = report.report?.categories.find(
+        (category) => category.key === "performance"
+      );
+      console.log(path, report.report?.score, performance?.score);
     },
   },
-})
+});
 ```
 
 Programmatic scan: register `worker-finished` before `start()`. Without a provider, reports go to `.unlighthouse/<host>/<config hash>/`.
 
 ```ts
-import { createUnlighthouse } from 'unlighthouse'
+import { createUnlighthouse } from "unlighthouse";
 
-const unlighthouse = await createUnlighthouse({ site: 'https://example.com', urls: ['/', '/about'] })
-unlighthouse.hooks.hook('worker-finished', async () => {
-  console.log(unlighthouse.worker.reports().map(r => [r.route.path, r.report?.score]))
-  await unlighthouse.worker.cluster.close()
-  process.exit(0)
-})
-await unlighthouse.start()
+const unlighthouse = await createUnlighthouse({
+  site: "https://example.com",
+  urls: ["/", "/about"],
+});
+unlighthouse.hooks.hook("worker-finished", async () => {
+  console.log(
+    unlighthouse.worker.reports().map((r) => [r.route.path, r.report?.score])
+  );
+  await unlighthouse.worker.cluster.close();
+  process.exit(0);
+});
+await unlighthouse.start();
 ```
 
 ## Traps
