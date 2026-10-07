@@ -13,8 +13,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "bun run --cwd ../.. alchemy deploy --stage prod --yes",
-    "cf-typegen": "cf workers types",
-    "typecheck": "cf workers types && tsc --noEmit"
+    "cf-typegen": "cf workers types --quiet",
+    "typecheck": "bun run cf-typegen && tsc --noEmit"
   },
   "dependencies": {
     "@fontsource-variable/source-sans-3": "^5.3.0",
