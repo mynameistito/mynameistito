@@ -29,14 +29,14 @@ export const SocialDock = () => {
     >
       {socialItems.map((item) => (
         <a
-          aria-label={item.label}
+          aria-label={`${item.label} ${item.text}`}
           className="grid size-9 place-items-center rounded-full text-xs font-medium text-muted transition-colors hover:bg-surface-hover hover:text-text"
           href={item.href}
           key={item.label}
           rel="noreferrer"
           target="_blank"
         >
-          {item.text}
+          <span aria-hidden="true">{item.text}</span>
         </a>
       ))}
       <Link
@@ -44,7 +44,8 @@ export const SocialDock = () => {
         className="grid size-9 place-items-center rounded-full text-xs font-medium text-muted transition-colors hover:bg-surface-hover hover:text-text"
         to="/links"
       >
-        ↗
+        <span aria-hidden="true">↗</span>
+        <span className="sr-only">All links</span>
       </Link>
     </nav>
   );

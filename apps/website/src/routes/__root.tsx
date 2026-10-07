@@ -26,6 +26,11 @@ export const Route = createRootRoute({
   head: () => ({
     links: [
       {
+        href: "/paper-assets/6S9J9JCVBGPWN32S6BFT2JGVX2.jpg",
+        rel: "icon",
+        type: "image/jpeg",
+      },
+      {
         href: appCss,
         rel: "stylesheet",
       },

@@ -65,7 +65,6 @@ const LinksPage = () => (
     <nav aria-label="Akshar's links" className="grid w-full gap-2">
       {links.map((link) => (
         <a
-          aria-label={`${link.label}, opens in a new tab`}
           className="grid min-h-[58px] grid-cols-[38px_minmax(0,1fr)_auto] items-center gap-3 rounded-control border border-line bg-surface px-3 transition-colors hover:border-line-strong hover:bg-surface-hover active:scale-[0.99]"
           href={link.href}
           key={link.label}
@@ -91,6 +90,7 @@ const LinksPage = () => (
           <span aria-hidden="true" className="text-xs text-subtle">
             ↗
           </span>
+          <span className="sr-only">Opens in a new tab</span>
         </a>
       ))}
     </nav>

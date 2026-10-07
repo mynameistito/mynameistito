@@ -319,7 +319,7 @@ const repositories: readonly Repository[] = [
     name: "Ralphy",
     repo: "michaelshimeles/ralphy",
     stars: "2,977",
-    image: "4PX42DY9GH109VMS8WGXF0K80B.png",
+    image: "4PX42DY0P5P1XMWRFWAYD7TA7K.png",
     pullRequests: [
       {
         title: "feat: add --json flag for json PRD support",
