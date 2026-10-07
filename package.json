@@ -54,15 +54,5 @@
     "@typescript/native": "npm:typescript@^7.0.2",
     "effect": "4.0.1",
     "typescript": "npm:@typescript/typescript6@^6.0.2"
-  },
-  "knip": {
-    "workspaces": {
-      "apps/website": {
-        "entry": [
-          "cloudflare.config.ts",
-          "src/lib/utils.ts"
-        ]
-      }
-    }
   }
 }
