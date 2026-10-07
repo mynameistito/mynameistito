@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "name": "mynameistito-workspace1",
+  "name": "mynameistito-workspace",
   "private": true,
   "workspaces": [
     "packages/*",
