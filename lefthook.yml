@@ -11,3 +11,9 @@ pre-commit:
         - "*.jsonc"
         - "*.css"
       stage_fixed: true
+pre-push:
+  jobs:
+    - run: bun run knip
+    - run: bun run build
+    - run: bun run test
+    - run: bun run typecheck
