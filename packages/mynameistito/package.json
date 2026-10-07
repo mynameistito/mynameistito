@@ -35,6 +35,8 @@
   "scripts": {
     "build": "tsdown && tsc --project tsconfig.json",
     "dev": "bun src/cli.ts",
+    "fix": "ultracite fix",
+    "lint": "ultracite check",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "bun run build"
   },
