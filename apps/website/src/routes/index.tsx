@@ -49,7 +49,7 @@ const skillIcons = [
 ] as const;
 
 const Home = () => (
-  <main className="mx-auto w-[min(100%-48px,825px)] pt-10 pb-28 sm:pt-page-top sm:pb-page-bottom">
+  <main className="page-shell pt-page-top pb-page-bottom">
     <SiteHeader />
 
     <section aria-label="About Akshar" className="mt-2 grid gap-3.5">

@@ -9,7 +9,7 @@ export const ExperienceSection = () => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <section aria-labelledby="experience-title" className="mt-[38px]">
+    <section aria-labelledby="experience-title" className="mt-section">
       <div className="mb-3 flex min-h-7 items-center justify-between gap-6">
         <h2
           className="m-0 text-base font-semibold leading-heading tracking-heading text-text"

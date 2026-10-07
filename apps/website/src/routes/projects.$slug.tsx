@@ -29,10 +29,10 @@ const ProjectPage = () => {
   const sourceUrl = projectSourceUrl(project.name);
 
   return (
-    <main className="mx-auto w-[min(100%-48px,825px)] pt-20 pb-28 sm:pt-24">
+    <main className="page-shell pt-page-top-header pb-page-bottom">
       <SiteHeader backLabel="Projects" backTo="/projects" />
       <article>
-        <header className="mt-7">
+        <header className="mt-section">
           <h1 className="m-0 text-page-title font-semibold leading-tight tracking-title text-text">
             {project.name}
           </h1>
@@ -88,7 +88,7 @@ const ProjectPage = () => {
         />
 
         {isRadioAtlas && (
-          <div className="mt-8 grid gap-8" id="story">
+          <div className="mt-section grid gap-8" id="story">
             <section aria-labelledby="why-title">
               <h2
                 className="m-0 text-base font-semibold text-text"
@@ -146,7 +146,7 @@ const ProjectPage = () => {
           </div>
         )}
 
-        <section aria-labelledby="more-projects-title" className="mt-10">
+        <section aria-labelledby="more-projects-title" className="mt-section">
           <h2
             className="m-0 text-base font-semibold text-text"
             id="more-projects-title"

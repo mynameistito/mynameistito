@@ -386,9 +386,9 @@ export const OpenSourceBrowser = () => {
     );
 
   return (
-    <main className="mx-auto w-[min(100%-48px,825px)] pt-12 pb-28">
+    <main className="page-shell pt-page-top-header pb-page-bottom">
       <SiteHeader backLabel="Portfolio" backTo="/" />
-      <section className="mt-7">
+      <section className="mt-section">
         <h1 className="m-0 text-page-title font-semibold leading-tight tracking-title text-text">
           Open source
         </h1>

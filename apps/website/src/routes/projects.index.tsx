@@ -8,10 +8,10 @@ const featuredProjects = projects.filter((project) => project.featured);
 const otherProjects = projects.filter((project) => !project.featured);
 
 const ProjectsPage = () => (
-  <main className="mx-auto w-[min(100%-48px,825px)] pt-20 pb-28 sm:pt-24">
+  <main className="page-shell pt-page-top-header pb-page-bottom">
     <SiteHeader backLabel="Portfolio" backTo="/" />
 
-    <section className="mt-7">
+    <section className="mt-section">
       <h1 className="m-0 text-page-title font-semibold leading-tight tracking-title text-text">
         Projects
       </h1>
@@ -20,7 +20,7 @@ const ProjectsPage = () => (
       </p>
     </section>
 
-    <section aria-labelledby="featured-title" className="mt-8">
+    <section aria-labelledby="featured-title" className="mt-section">
       <div className="mb-3 flex items-center justify-between gap-6">
         <h2
           className="m-0 text-base font-semibold text-text"
@@ -35,7 +35,7 @@ const ProjectsPage = () => (
       <ProjectList items={featuredProjects} showImages />
     </section>
 
-    <section aria-labelledby="other-title" className="mt-9">
+    <section aria-labelledby="other-title" className="mt-section">
       <div className="mb-3 flex items-center justify-between gap-6">
         <h2 className="m-0 text-base font-semibold text-text" id="other-title">
           Other projects

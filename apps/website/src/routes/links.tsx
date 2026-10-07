@@ -30,7 +30,7 @@ const links = [
 ] as const;
 
 const LinksPage = () => (
-  <main className="mx-auto flex min-h-dvh w-[min(100%-40px,688px)] flex-col items-center px-0 pt-10 pb-28 sm:justify-center sm:pt-12">
+  <main className="page-shell-narrow flex min-h-dvh flex-col items-center pt-page-top pb-page-bottom sm:justify-center">
     <nav
       aria-label="Page controls"
       className="mb-12 flex w-full items-center justify-between"

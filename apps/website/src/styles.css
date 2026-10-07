@@ -36,14 +36,29 @@
   --leading-row: 18px;
   --leading-meta: 19px;
   --leading-small: 17px;
+  --spacing-page-gutter: 24px;
   --spacing-page-top: 64px;
-  --spacing-page-bottom: 170px;
-  --spacing-section: 38px;
+  --spacing-page-top-header: 80px;
+  --spacing-page-bottom: 112px;
+  --spacing-section: 40px;
   --radius-control: 7px;
+}
+
+@layer components {
+  .page-shell {
+    width: min(calc(100% - var(--page-gutter) * 2), 825px);
+    margin-inline: auto;
+  }
+
+  .page-shell-narrow {
+    width: min(calc(100% - var(--page-gutter) * 2), 688px);
+    margin-inline: auto;
+  }
 }
 
 :root {
   color-scheme: dark;
+  --page-gutter: 24px;
   --page: #101112;
   --surface: #151718;
   --text: #f1f2f2;

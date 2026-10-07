@@ -5,7 +5,7 @@ import { Link } from "@tanstack/react-router";
  * @returns The rendered 404 page.
  */
 export const NotFoundPage = () => (
-  <main className="mx-auto grid min-h-screen w-[min(100%-48px,825px)] content-center gap-3">
+  <main className="page-shell grid min-h-screen content-center gap-3">
     <p className="m-0 text-xs font-medium uppercase tracking-wider text-muted">
       404
     </p>
