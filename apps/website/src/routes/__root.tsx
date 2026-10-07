@@ -31,11 +31,11 @@ export const Route = createRootRoute({
         name: "viewport",
       },
       {
-        title: "My Name is Tito | Developer",
+        title: "Akshar Patel | apunlisted.com",
       },
       {
         content:
-          "Tito builds TypeScript CLIs, Cloudflare tools, browser extensions, and small useful internet things.",
+          "Akshar Patel is a data analyst, open-source contributor, and builder.",
         name: "description",
       },
     ],

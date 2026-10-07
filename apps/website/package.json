@@ -8,11 +8,11 @@
   },
   "scripts": {
     "fix": "ultracite fix",
-    "lint": "ultracite check",
-    "dev": "cf dev",
-    "build": "cf build",
+    "check": "ultracite check",
+    "dev": "vite dev",
+    "build": "vite build",
     "preview": "vite preview",
-    "deploy": "cf deploy",
+    "deploy": "bun run --cwd ../.. alchemy deploy --stage prod --yes",
     "cf-typegen": "cf workers types",
     "typecheck": "cf workers types && tsc --noEmit"
   },

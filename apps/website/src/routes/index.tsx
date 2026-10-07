@@ -1,124 +1,159 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 
+import { ExperienceSection } from "@/components/experience-section";
+import { ProjectList } from "@/components/project-list";
+import { SiteHeader } from "@/components/site-header";
+import { profile } from "@/lib/profile";
 import { projects } from "@/lib/projects";
 
-const profile = {
-  description:
-    "I build TypeScript tools, Cloudflare projects, browser extensions, and other useful things for the open web.",
-  name: "Tito",
-  username: "@mynameistito",
-};
+const repositories = [
+  {
+    name: "HyperFrames",
+    repo: "heygen-com/hyperframes",
+    stars: "58.1k",
+    image: "71RASVRXFP2YGBJEHBAHPYX3TR.png",
+  },
+  {
+    name: "OpenCode",
+    repo: "anomalyco/opencode",
+    stars: "212.1k",
+    image: "2NNAKS92CEBF42T0HZHGGMDMZ0.png",
+  },
+  {
+    name: "Omarchy",
+    repo: "omacom/omarchy",
+    stars: "44.1k",
+    image: "65HVBPGYC2SFE9VSGFR38NMRWM.png",
+  },
+  {
+    name: "T3 Code",
+    repo: "pingdotgg/t3code",
+    stars: "25.9k",
+    image: "1H4A1TRND6EZ06JYHVGKPKWKYR.png",
+  },
+] as const;
 
-const links = [
-  { label: "GitHub", url: "https://github.com/mynameistito" },
-  { label: "npm", url: "https://www.npmjs.com/~mynameistito" },
-  { label: "X", url: "https://x.com/mynameistito" },
+const skillIcons = [
+  "3F41YWXETCF4XDE2256VHX80D2.png",
+  "4XY9SK1JFYXYPEBYNVQ3RTC5RM.png",
+  "7FP20MN0T40PFCFT1SWAXNS7FP.png",
+  "049Y71J6236AYHRSW6668BQJPN.png",
+  "7DW8QT8GFP8CM1AAKQDHMZXJSG.png",
+  "08HNNBFQ51QVXW09925ZTDKNMK.png",
+  "10QY973Q0B9TPQGDYAH5A06HH5.png",
+  "7CX5SFFE55BSHP9RAAHY8DVXKV.png",
+  "3KT9PRSNW647RAQAJ5MK7VW688.png",
+  "60X4F0FQ05S91XG0BPQYADV0KV.png",
+  "3FC8WNSESY4P47E2N1CJ1TDVDG.png",
+  "368NRBYEQSYHSVW7982X9B331B.png",
 ] as const;
 
 const Home = () => (
-  <main
-    className="mx-auto w-[calc(100%-40px)] max-w-[644px] pt-18 pb-10.5 max-[520px]:w-[calc(100%-36px)] max-[520px]:pt-10"
-    id="home"
-  >
-    <header className="flex items-center justify-between gap-6">
-      <a
-        aria-label="Tito, home"
-        className="flex min-w-0 items-center gap-3.5"
-        href="#home"
-      >
-        <img
-          alt=""
-          className="h-[52px] w-[52px] flex-none rounded-full border border-line bg-surface object-cover max-[520px]:size-[46px]"
-          height="52"
-          src="https://github.com/mynameistito.png"
-          width="52"
-        />
-        <span className="grid min-w-0 gap-0.75">
-          <span className="font-semibold tracking-tight">{profile.name}</span>
-          <span className="text-xs text-muted">{profile.username}</span>
-        </span>
-      </a>
-      <a
-        className="text-xs text-muted transition-colors duration-150 hover:text-accent"
-        href="https://github.com/mynameistito"
-        rel="noreferrer"
-        target="_blank"
-      >
-        GitHub <span aria-hidden="true">↗</span>
-      </a>
-    </header>
+  <main className="mx-auto w-[min(100%-48px,644px)] pt-10 pb-24 sm:pt-page-top sm:pb-page-bottom">
+    <SiteHeader />
 
-    <section
-      aria-label="About me"
-      className="mt-[27px] grid gap-3.5 text-muted leading-7 max-[520px]:mt-6 max-[520px]:text-sm"
-    >
-      <p>{profile.description}</p>
-      <p>
-        I enjoy contributing to open source, exploring new ideas, and making
-        small tools that solve real problems. Browse my{" "}
-        <a
-          className="font-semibold text-text underline decoration-subtle underline-offset-4 transition-colors hover:decoration-accent"
-          href="#projects"
+    <section aria-label="About Akshar" className="mt-[22px] grid gap-3.5">
+      <p className="m-0 text-base leading-copy tracking-copy text-muted">
+        I currently work at Dow Jones.
+      </p>
+      <p className="m-0 text-base leading-copy tracking-copy text-muted">
+        Outside work, I enjoy contributing to open source, building things, and
+        following whatever has my attention. Browse my{" "}
+        <Link
+          className="text-text underline decoration-subtle underline-offset-4"
+          to="/projects"
         >
           projects
-        </a>{" "}
-        or find me on{" "}
+        </Link>{" "}
+        or take a look at my{" "}
         <a
-          className="font-semibold text-text underline decoration-subtle underline-offset-4 transition-colors hover:decoration-accent"
-          href={links[0].url}
+          className="text-text underline decoration-subtle underline-offset-4"
+          href="https://www.apunlisted.com/taste"
         >
-          GitHub
+          taste
         </a>
-        .
+        . You can also read my{" "}
+        <a
+          className="text-text underline decoration-subtle underline-offset-4"
+          href="https://www.apunlisted.com/blog"
+        >
+          blog
+        </a>
+        . Everyone has one. Mine is obviously different.
       </p>
     </section>
 
+    <ExperienceSection />
+
     <section
       aria-labelledby="projects-title"
-      className="mt-10 max-[520px]:mt-[34px]"
+      className="mt-section"
       id="projects"
     >
-      <div className="flex items-baseline justify-between gap-4 border-b border-line pb-3.5">
-        <h1
-          className="m-0 text-base font-semibold tracking-tight"
+      <div className="mb-3 flex min-h-7 items-center justify-between gap-6">
+        <h2
+          className="m-0 text-base font-semibold leading-heading tracking-heading text-text"
           id="projects-title"
         >
           Projects
-        </h1>
+        </h2>
         <Link
-          className="text-xs text-muted transition-colors duration-150 hover:text-accent"
+          className="py-1 text-xs leading-5 text-muted transition-colors hover:text-text"
           to="/projects"
         >
-          View all <span aria-hidden="true">→</span>
+          View all
         </Link>
       </div>
-      <ul className="m-0 list-none p-0">
-        {projects.slice(0, 5).map((project) => (
-          <li className="border-b border-line" key={project.name}>
+      <ProjectList
+        items={projects.filter((project) => project.featured)}
+        previewOnHover
+      />
+    </section>
+
+    <section aria-labelledby="open-source-title" className="mt-section">
+      <div className="mb-3 flex min-h-7 items-center justify-between gap-6">
+        <h2
+          className="m-0 text-base font-semibold leading-heading tracking-heading text-text"
+          id="open-source-title"
+        >
+          Open source
+        </h2>
+        <Link
+          className="py-1 text-xs leading-5 text-muted transition-colors hover:text-text"
+          to="/open-source"
+        >
+          See more
+        </Link>
+      </div>
+      <ul className="m-0 list-none border-t border-line p-0">
+        {repositories.map((repository) => (
+          <li className="border-b border-line" key={repository.repo}>
             <a
-              className="group flex min-h-[72px] items-center justify-between gap-4.5 py-3.5"
-              href={project.url}
+              className="grid min-h-[66px] grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-3 py-2.5 transition-colors hover:bg-surface-hover"
+              href={`https://github.com/${repository.repo}`}
               rel="noreferrer"
               target="_blank"
             >
-              <span className="grid min-w-0 gap-1">
-                <span className="flex min-w-0 flex-wrap items-baseline gap-2">
-                  <span className="text-sm font-semibold tracking-tight transition-colors duration-150 group-hover:text-accent">
-                    {project.name}
-                  </span>
-                  <span className="text-xs text-muted">
-                    {project.languages.join(" / ")}
-                  </span>
+              <span className="grid size-8 place-items-center overflow-hidden rounded-control border border-line-strong bg-surface-raised">
+                <img
+                  alt=""
+                  className="size-full object-cover"
+                  height="32"
+                  loading="lazy"
+                  src={`/paper-assets/${repository.image}`}
+                  width="32"
+                />
+              </span>
+              <span className="grid min-w-0 gap-0.5">
+                <span className="truncate text-meta font-semibold leading-meta text-text">
+                  {repository.name}
                 </span>
-                <span className="overflow-hidden text-ellipsis whitespace-nowrap text-xs leading-normal text-muted max-[520px]:line-clamp-2 max-[520px]:whitespace-normal">
-                  {project.description}
+                <span className="truncate text-small leading-small text-muted">
+                  {repository.repo}
                 </span>
               </span>
-              <span
-                aria-hidden="true"
-                className="flex-none text-sm text-muted transition duration-150 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-accent"
-              >
-                ↗
+              <span className="text-small leading-small text-muted">
+                {repository.stars}
               </span>
             </a>
           </li>
@@ -126,31 +161,82 @@ const Home = () => (
       </ul>
     </section>
 
-    <footer
-      className="flex flex-wrap justify-between gap-x-6 gap-y-4 pt-5.5 text-xs text-muted max-[520px]:justify-start"
-      id="links"
-    >
-      <span>Elsewhere</span>
-      <nav aria-label="Social links" className="flex flex-wrap gap-4.5">
-        {links.map((link) => (
-          <a
-            className="transition-colors duration-150 hover:text-accent"
-            href={link.url}
-            key={link.label}
-            rel="noreferrer"
-            target="_blank"
-          >
-            {link.label}
-          </a>
+    <section aria-labelledby="skills-title" className="mt-section">
+      <h2
+        className="m-0 text-base font-semibold leading-heading tracking-heading text-text"
+        id="skills-title"
+      >
+        Skills
+      </h2>
+      <ul className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 p-0">
+        {profile.skills.map((skill, index) => (
+          <li className="list-none" key={skill}>
+            <img
+              alt={skill}
+              className="size-[23px] object-contain opacity-75 grayscale"
+              height="23"
+              loading="lazy"
+              src={`/paper-assets/${skillIcons[index]}`}
+              title={skill}
+              width="23"
+            />
+          </li>
         ))}
-      </nav>
-      <a className="ml-auto" href="#home">
-        Back to top ↑
-      </a>
-    </footer>
+      </ul>
+    </section>
+
+    <section aria-labelledby="education-title" className="mt-section">
+      <h2
+        className="m-0 text-base font-semibold leading-heading tracking-heading text-text"
+        id="education-title"
+      >
+        Education
+      </h2>
+      <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] gap-4 border-t border-line py-3 text-sm">
+        <div>
+          <p className="m-0 font-medium text-text">
+            {profile.education.degree}
+          </p>
+          <p className="m-0 text-xs leading-5 text-muted">
+            {profile.education.institution}
+          </p>
+        </div>
+        <div className="text-right text-xs leading-5 text-muted">
+          <p className="m-0">{profile.education.period}</p>
+          <p className="m-0">{profile.education.detail}</p>
+        </div>
+      </div>
+    </section>
+
+    <section className="mt-section flex flex-wrap items-center justify-between gap-4 border-t border-line pt-5">
+      <div>
+        <h2 className="m-0 text-sm font-semibold text-text">
+          Have something in mind?
+        </h2>
+        <p className="mt-1 mb-0 text-sm text-muted">
+          I&apos;m always open to a good conversation.
+        </p>
+      </div>
+      <Link
+        className="rounded-control border border-line bg-surface px-3 py-2 text-sm font-medium text-text transition-colors hover:border-accent"
+        to="/contact"
+      >
+        Let&apos;s talk
+      </Link>
+    </section>
   </main>
 );
 
 export const Route = createFileRoute("/")({
   component: Home,
+  head: () => ({
+    meta: [
+      { title: "Akshar Patel — apunlisted.com" },
+      {
+        content:
+          "Akshar Patel. Data analyst, open-source contributor, and builder.",
+        name: "description",
+      },
+    ],
+  }),
 });
