@@ -1,3 +1,4 @@
+import { Moon, Sun, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useSyncExternalStore } from "react";
 
 type Theme = "dark" | "light";
@@ -78,12 +79,16 @@ export const SiteControls = () => {
   return (
     <div className="flex items-center gap-1">
       <button
-        aria-label="Toggle click sounds"
+        aria-label={soundOn ? "Turn click sounds off" : "Turn click sounds on"}
         className="grid size-[30px] place-items-center rounded-control border border-line bg-surface text-xs text-muted transition-colors hover:text-text"
         onClick={() => updateSetting("sound", soundOn ? "off" : "on")}
         type="button"
       >
-        ♪
+        {soundOn ? (
+          <Volume2 aria-hidden="true" size={15} />
+        ) : (
+          <VolumeX aria-hidden="true" size={15} />
+        )}
       </button>
       <button
         aria-label="Toggle color theme"
@@ -93,7 +98,11 @@ export const SiteControls = () => {
         }
         type="button"
       >
-        ◐
+        {theme === "dark" ? (
+          <Moon aria-hidden="true" size={15} />
+        ) : (
+          <Sun aria-hidden="true" size={15} />
+        )}
       </button>
     </div>
   );

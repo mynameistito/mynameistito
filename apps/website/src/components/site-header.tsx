@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { ArrowLeft, UsersRound } from "lucide-react";
 
 import { SiteControls } from "@/components/site-controls";
 import { profile } from "@/lib/profile";
@@ -19,9 +20,7 @@ const siteHeader = ({ backTo, backLabel }: SiteHeaderProps) =>
           className="flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-text"
           to={backTo}
         >
-          <span aria-hidden="true" className="text-sm leading-none">
-            ←
-          </span>
+          <ArrowLeft aria-hidden="true" size={14} />
           {backLabel}
         </Link>
         <SiteControls />
@@ -58,7 +57,7 @@ const siteHeader = ({ backTo, backLabel }: SiteHeaderProps) =>
         className="flex shrink-0 items-center gap-1"
       >
         <span className="mr-1 inline-flex h-[30px] items-center gap-1 rounded-control border border-line bg-surface px-2 text-micro text-muted">
-          <span aria-hidden="true">◉</span> 305
+          <UsersRound aria-hidden="true" size={12} /> 305
         </span>
         <SiteControls />
       </nav>

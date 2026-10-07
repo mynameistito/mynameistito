@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { ArrowUpRight } from "lucide-react";
 
 import { projectSlug, projects } from "@/lib/projects";
 
@@ -55,12 +56,11 @@ export const ProjectList = ({
               {project.description}
             </span>
           </span>
-          <span
+          <ArrowUpRight
             aria-hidden="true"
-            className="text-xs text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-accent"
-          >
-            ↗
-          </span>
+            className="text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-accent"
+            size={14}
+          />
           {previewOnHover && (
             <span aria-hidden="true" className="project-hover-preview">
               <img

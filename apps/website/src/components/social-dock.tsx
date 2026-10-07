@@ -1,13 +1,14 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { ArrowUpRight, Github, Linkedin, Youtube } from "lucide-react";
 
 import { profile } from "@/lib/profile";
 
 const socialItems = [
-  { label: "GitHub", text: "GH", href: profile.github },
-  { label: "LinkedIn", text: "in", href: profile.linkedin },
-  { label: "X", text: "𝕏", href: profile.x },
-  { label: "YouTube", text: "▶", href: profile.youtube },
-  { label: "Resume", text: "CV", href: profile.resume },
+  { label: "GitHub", Icon: Github, href: profile.github },
+  { label: "LinkedIn", Icon: Linkedin, href: profile.linkedin },
+  { label: "X", href: profile.x, mark: "𝕏" },
+  { label: "YouTube", Icon: Youtube, href: profile.youtube },
+  { label: "Resume", href: profile.resume, mark: "CV" },
 ] as const;
 
 /** Fixed social navigation matching the compact reference-site footer.
@@ -29,14 +30,18 @@ export const SocialDock = () => {
     >
       {socialItems.map((item) => (
         <a
-          aria-label={`${item.label} ${item.text}`}
+          aria-label={item.label}
           className="grid size-9 place-items-center rounded-full text-xs font-medium text-muted transition-colors hover:bg-surface-hover hover:text-text"
           href={item.href}
           key={item.label}
           rel="noreferrer"
           target="_blank"
         >
-          <span aria-hidden="true">{item.text}</span>
+          {"Icon" in item ? (
+            <item.Icon aria-hidden="true" size={16} />
+          ) : (
+            <span aria-hidden="true">{item.mark}</span>
+          )}
         </a>
       ))}
       <Link
@@ -44,7 +49,7 @@ export const SocialDock = () => {
         className="grid size-9 place-items-center rounded-full text-xs font-medium text-muted transition-colors hover:bg-surface-hover hover:text-text"
         to="/links"
       >
-        <span aria-hidden="true">↗</span>
+        <ArrowUpRight aria-hidden="true" size={16} />
         <span className="sr-only">All links</span>
       </Link>
     </nav>

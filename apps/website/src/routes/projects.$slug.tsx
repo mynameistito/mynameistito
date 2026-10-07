@@ -1,4 +1,5 @@
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 import { SiteHeader } from "@/components/site-header";
 import { projectSlug, projectSourceUrl, projects } from "@/lib/projects";
@@ -65,7 +66,7 @@ const ProjectPage = () => {
                 rel="noreferrer"
                 target="_blank"
               >
-                View live project <span aria-hidden="true">↗</span>
+                View live project <ArrowUpRight aria-hidden="true" size={14} />
               </a>
             )}
             <a
@@ -74,7 +75,7 @@ const ProjectPage = () => {
               rel="noreferrer"
               target="_blank"
             >
-              View source <span aria-hidden="true">↗</span>
+              View source <ArrowUpRight aria-hidden="true" size={14} />
             </a>
           </nav>
         </header>
@@ -138,9 +139,7 @@ const ProjectPage = () => {
                 target="_blank"
               >
                 Read the full story{" "}
-                <span aria-hidden="true" className="ml-1">
-                  ↗
-                </span>
+                <ArrowUpRight aria-hidden="true" className="ml-1" size={14} />
               </a>
             </section>
           </div>
@@ -165,9 +164,11 @@ const ProjectPage = () => {
                     to="/projects/$slug"
                   >
                     <span>{item.name}</span>
-                    <span aria-hidden="true" className="text-muted">
-                      →
-                    </span>
+                    <ArrowRight
+                      aria-hidden="true"
+                      className="text-muted"
+                      size={14}
+                    />
                   </Link>
                 </li>
               ))}

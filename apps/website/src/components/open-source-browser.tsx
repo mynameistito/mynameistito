@@ -1,9 +1,10 @@
 import {
-  IconExternalLink,
-  IconGitMerge,
-  IconGitPullRequest,
-  IconGitPullRequestClosed,
-} from "@tabler/icons-react";
+  ExternalLink,
+  ChevronDown,
+  GitMerge,
+  GitPullRequest,
+  GitPullRequestClosed,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { SiteHeader } from "@/components/site-header";
@@ -332,12 +333,12 @@ const repositories: readonly Repository[] = [
 
 const pullRequestStates = ["All", "Open", "Merged", "Closed"] as const;
 const pullRequestStatus = {
-  Open: { Icon: IconGitPullRequest, color: "text-pr-open" },
-  Merged: { Icon: IconGitMerge, color: "text-pr-merged" },
-  Closed: { Icon: IconGitPullRequestClosed, color: "text-pr-closed" },
+  Open: { Icon: GitPullRequest, color: "text-pr-open" },
+  Merged: { Icon: GitMerge, color: "text-pr-merged" },
+  Closed: { Icon: GitPullRequestClosed, color: "text-pr-closed" },
 } satisfies Record<
   PullRequestState,
-  { readonly Icon: typeof IconGitPullRequest; readonly color: string }
+  { readonly Icon: typeof GitPullRequest; readonly color: string }
 >;
 const pullRequestCount = repositories.reduce(
   (total, repository) => total + repository.pullRequests.length,
@@ -481,12 +482,11 @@ export const OpenSourceBrowser = () => {
                       {repository.pullRequests.length} PR
                       {repository.pullRequests.length === 1 ? "" : "s"}
                     </span>
-                    <span
+                    <ChevronDown
                       aria-hidden="true"
-                      className="shrink-0 text-micro text-subtle transition-transform group-open:rotate-180"
-                    >
-                      ⌄
-                    </span>
+                      className="shrink-0 text-subtle transition-transform group-open:rotate-180"
+                      size={14}
+                    />
                   </summary>
                   <div className="pl-10">
                     <div className="-ml-10 border-b border-line pl-4">
@@ -497,11 +497,11 @@ export const OpenSourceBrowser = () => {
                         target="_blank"
                       >
                         Open repository
-                        <IconExternalLink
+                        <ExternalLink
                           aria-hidden="true"
                           className="ml-1"
                           size={12}
-                          stroke={1.75}
+                          strokeWidth={1.75}
                         />
                       </a>
                     </div>
@@ -524,7 +524,7 @@ export const OpenSourceBrowser = () => {
                               aria-hidden="true"
                               className={`shrink-0 ${statusColor}`}
                               size={14}
-                              stroke={1.75}
+                              strokeWidth={1.75}
                             />
                             {pullRequest.title}
                           </a>

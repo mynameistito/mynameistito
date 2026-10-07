@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ArrowUpRight } from "lucide-react";
 import { useRef, useState } from "react";
 import type { FormEvent } from "react";
 
@@ -78,9 +79,11 @@ const ContactPage = () => {
           target="_blank"
         >
           DM on X{" "}
-          <span aria-hidden="true" className="ml-2 text-muted">
-            ↗
-          </span>
+          <ArrowUpRight
+            aria-hidden="true"
+            className="ml-2 text-muted"
+            size={14}
+          />
         </a>
       </section>
 

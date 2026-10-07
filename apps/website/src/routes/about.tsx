@@ -1,4 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
+import { ArrowUpRight } from "lucide-react";
 
 import { SiteHeader } from "@/components/site-header";
 import { profile } from "@/lib/profile";
@@ -21,9 +22,7 @@ const AboutPage = () => (
         to="/contact"
       >
         Let&apos;s talk{" "}
-        <span aria-hidden="true" className="ml-1">
-          ↗
-        </span>
+        <ArrowUpRight aria-hidden="true" className="ml-1" size={14} />
       </Link>
     </section>
   </main>

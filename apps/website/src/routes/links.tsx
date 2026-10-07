@@ -1,4 +1,15 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  Coffee,
+  FileText,
+  Github,
+  Instagram,
+  Linkedin,
+  Music2,
+  Youtube,
+} from "lucide-react";
 
 import { SiteControls } from "@/components/site-controls";
 import { profile } from "@/lib/profile";
@@ -8,25 +19,30 @@ const links = [
     label: "GitHub",
     detail: "Projects and open source",
     href: profile.github,
-    mark: "GH",
+    Icon: Github,
   },
-  { label: "X", detail: "Thoughts and updates", href: profile.x, mark: "𝕏" },
+  {
+    label: "X",
+    detail: "Thoughts and updates",
+    href: profile.x,
+    mark: "𝕏",
+  },
   {
     label: "LinkedIn",
     detail: "Professional profile",
     href: profile.linkedin,
-    mark: "in",
+    Icon: Linkedin,
   },
   {
     label: "YouTube",
     detail: "Videos and demos",
     href: profile.youtube,
-    mark: "▶",
+    Icon: Youtube,
   },
-  { label: "Instagram", detail: "", href: profile.instagram, mark: "◎" },
-  { label: "TikTok", detail: "", href: profile.tiktok, mark: "♪" },
-  { label: "Buy Me a Coffee", detail: "", href: profile.coffee, mark: "☕" },
-  { label: "Resume", detail: "", href: profile.resume, mark: "↗" },
+  { label: "Instagram", detail: "", href: profile.instagram, Icon: Instagram },
+  { label: "TikTok", detail: "", href: profile.tiktok, Icon: Music2 },
+  { label: "Buy Me a Coffee", detail: "", href: profile.coffee, Icon: Coffee },
+  { label: "Resume", detail: "", href: profile.resume, Icon: FileText },
 ] as const;
 
 const LinksPage = () => (
@@ -36,10 +52,11 @@ const LinksPage = () => (
       className="mb-12 flex w-full items-center justify-between"
     >
       <Link
-        className="text-xs text-muted transition-colors hover:text-text"
+        className="inline-flex items-center gap-1 text-xs text-muted transition-colors hover:text-text"
         to="/"
       >
-        ← Back to portfolio
+        <ArrowLeft aria-hidden="true" size={14} />
+        Back to portfolio
       </Link>
       <SiteControls />
     </nav>
@@ -75,7 +92,11 @@ const LinksPage = () => (
             aria-hidden="true"
             className="grid size-8 place-items-center rounded-control border border-line-strong bg-surface-raised text-xs font-medium text-muted"
           >
-            {link.mark}
+            {"Icon" in link ? (
+              <link.Icon aria-hidden="true" size={16} />
+            ) : (
+              link.mark
+            )}
           </span>
           <span className="min-w-0">
             <span className="block text-sm font-medium text-text">
@@ -87,9 +108,7 @@ const LinksPage = () => (
               </span>
             )}
           </span>
-          <span aria-hidden="true" className="text-xs text-subtle">
-            ↗
-          </span>
+          <ArrowUpRight aria-hidden="true" className="text-subtle" size={14} />
           <span className="sr-only">Opens in a new tab</span>
         </a>
       ))}
