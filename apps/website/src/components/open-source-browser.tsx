@@ -434,7 +434,7 @@ export const OpenSourceBrowser = () => {
             {pullRequestStates.map((state) => (
               <button
                 aria-pressed={stateFilter === state}
-                className={`flex min-w-0 items-center gap-1 border border-line px-1.5 text-micro transition-colors first:rounded-l-control last:rounded-r-control ${stateFilter === state ? "bg-surface-raised text-text" : "bg-surface text-muted hover:text-text"}`}
+                className={`flex min-w-0 items-center gap-1 border border-line px-1.5 text-micro transition-colors first-of-type:rounded-l-control last:rounded-r-control ${stateFilter === state ? "bg-surface-raised text-text" : "bg-surface text-muted hover:text-text"}`}
                 key={state}
                 onClick={() => setStateFilter(state)}
                 type="button"
