@@ -5,6 +5,10 @@ import { SocialDock } from "@/components/social-dock";
 
 import appCss from "@/styles.css?url";
 
+if (import.meta.env.DEV && typeof window !== "undefined") {
+  void import("react-grab");
+}
+
 const RootDocument = ({ children }: { children: React.ReactNode }) => (
   <html lang="en">
     <head>
