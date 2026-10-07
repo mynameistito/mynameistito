@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import { profile } from "@/lib/profile";
 
 const AboutPage = () => (
-  <main className="mx-auto w-[min(100%-48px,644px)] pt-10 pb-24 sm:pt-page-top">
+  <main className="mx-auto w-[min(100%-48px,644px)] pt-20 pb-24 sm:pt-24">
     <SiteHeader backLabel="Portfolio" backTo="/" />
     <section className="mt-7 grid gap-4">
       <p className="mb-0 text-xs leading-5 text-muted">Portfolio</p>

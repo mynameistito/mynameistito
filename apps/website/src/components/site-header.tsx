@@ -12,12 +12,12 @@ interface SiteHeaderProps {
  */
 const siteHeader = ({ backTo, backLabel }: SiteHeaderProps) =>
   backTo && backLabel ? (
-    <header className="flex min-h-8 items-center border-b border-line pb-4">
+    <header className="fixed inset-x-0 top-0 z-20 h-16 border-b border-line bg-page">
       <Link
-        className="inline-flex items-center gap-2 text-sm text-muted transition-colors hover:text-text"
+        className="mx-auto flex h-full w-[min(100%-48px,644px)] items-center gap-1.5 text-xs text-muted transition-colors hover:text-text"
         to={backTo}
       >
-        <span aria-hidden="true" className="text-base leading-none">
+        <span aria-hidden="true" className="text-sm leading-none">
           ←
         </span>
         {backLabel}

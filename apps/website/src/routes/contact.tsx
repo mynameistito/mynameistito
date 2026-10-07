@@ -62,7 +62,7 @@ const ContactPage = () => {
   };
 
   return (
-    <main className="mx-auto w-[min(100%-48px,644px)] pt-10 pb-24 sm:pt-page-top">
+    <main className="mx-auto w-[min(100%-48px,644px)] pt-20 pb-24 sm:pt-24">
       <SiteHeader backLabel="Home" backTo="/" />
       <section className="mt-7">
         <h1 className="m-0 text-page-title font-semibold leading-tight tracking-title text-text">
