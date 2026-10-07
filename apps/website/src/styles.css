@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "@fontsource-variable/syne";
+@import "@fontsource-variable/source-sans-3";
 
 @theme inline {
   --color-page: var(--page);
@@ -15,7 +17,8 @@
   --color-pr-open: #35f58a;
   --color-pr-merged: #b8a0ff;
   --color-pr-closed: #ff6174;
-  --font-sans: Inter, system-ui, sans-serif;
+  --font-sans: "Source Sans 3 Variable", system-ui, sans-serif;
+  --font-display: "Syne Variable", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   --text-page-title: 30px;
   --text-meta: 13px;
@@ -66,6 +69,15 @@
 @layer base {
   body {
     font-size: 15px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
   }
 
   html {
