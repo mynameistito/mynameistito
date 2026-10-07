@@ -52,11 +52,14 @@ const Home = () => (
   <main className="page-shell pt-page-top pb-page-bottom">
     <SiteHeader />
 
-    <section aria-label="About Akshar" className="mt-2 grid gap-3.5">
-      <p className="m-0 text-sm leading-copy tracking-copy text-muted">
+    <section
+      aria-label="About Akshar"
+      className="mt-2 grid max-w-prose gap-3.5"
+    >
+      <p className="m-0 text-base leading-copy tracking-copy text-muted">
         I currently work at Dow Jones.
       </p>
-      <p className="m-0 text-sm leading-copy tracking-copy text-muted">
+      <p className="m-0 text-base leading-copy tracking-copy text-muted">
         Outside work, I enjoy contributing to open source, building things, and
         following whatever has my attention. Browse my{" "}
         <Link

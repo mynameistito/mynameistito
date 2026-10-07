@@ -47,7 +47,7 @@ export const ProjectList = ({
               <span className="text-sm font-semibold tracking-project text-text transition-colors group-hover:text-accent">
                 {project.name}
               </span>
-              <span className="truncate text-micro leading-3 text-subtle">
+              <span className="truncate text-micro leading-4 text-subtle">
                 {project.languages.join(" / ")}
               </span>
             </span>

@@ -36,7 +36,7 @@ const ProjectPage = () => {
           <h1 className="m-0 text-page-title font-semibold leading-tight tracking-title text-text">
             {project.name}
           </h1>
-          <p className="mt-2 mb-0 text-sm leading-6 text-muted">
+          <p className="mt-2 mb-0 max-w-prose text-base leading-copy text-muted">
             {project.description}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted">
@@ -88,7 +88,7 @@ const ProjectPage = () => {
         />
 
         {isRadioAtlas && (
-          <div className="mt-section grid gap-8" id="story">
+          <div className="mt-section grid max-w-prose gap-8" id="story">
             <section aria-labelledby="why-title">
               <h2
                 className="m-0 text-base font-semibold text-text"
@@ -98,7 +98,7 @@ const ProjectPage = () => {
               </h2>
               {radioAtlasStory.why.map((paragraph) => (
                 <p
-                  className="mt-3 mb-0 text-sm leading-6 text-muted"
+                  className="mt-3 mb-0 text-base leading-copy text-muted"
                   key={paragraph}
                 >
                   {paragraph}
@@ -112,7 +112,7 @@ const ProjectPage = () => {
               >
                 What I did
               </h2>
-              <p className="mt-3 mb-0 text-sm leading-6 text-muted">
+              <p className="mt-3 mb-0 text-base leading-copy text-muted">
                 {radioAtlasStory.what}
               </p>
             </section>
@@ -125,7 +125,7 @@ const ProjectPage = () => {
               </h2>
               {radioAtlasStory.next.map((paragraph) => (
                 <p
-                  className="mt-3 mb-0 text-sm leading-6 text-muted"
+                  className="mt-3 mb-0 text-base leading-copy text-muted"
                   key={paragraph}
                 >
                   {paragraph}

@@ -6,7 +6,7 @@ import { profile } from "@/lib/profile";
 const AboutPage = () => (
   <main className="page-shell pt-page-top-header pb-page-bottom">
     <SiteHeader backLabel="Portfolio" backTo="/" />
-    <section className="mt-section grid gap-4">
+    <section className="mt-section grid max-w-prose gap-4">
       <p className="mb-0 text-xs leading-5 text-muted">Portfolio</p>
       <h1 className="m-0 text-page-title font-semibold leading-tight tracking-title text-text">
         About Akshar

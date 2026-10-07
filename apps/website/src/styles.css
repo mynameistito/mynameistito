@@ -20,22 +20,24 @@
   --font-sans: "Source Sans 3 Variable", system-ui, sans-serif;
   --font-display: "Syne Variable", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
-  --text-page-title: 30px;
-  --text-meta: 13px;
-  --text-small: 11px;
-  --text-micro: 10px;
-  --text-profile: 15px;
+  --text-page-title: 32px;
+  --text-meta: 14px;
+  --text-small: 12px;
+  --text-micro: 11px;
+  --text-profile: 16px;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
   --tracking-title: -1.2px;
   --tracking-heading: -0.24px;
   --tracking-copy: -0.08px;
   --tracking-row: -0.14px;
   --tracking-project: -0.28px;
-  --leading-copy: 1.62;
-  --leading-heading: 26px;
+  --leading-copy: 1.7;
+  --leading-heading: 28px;
   --leading-header: 22px;
-  --leading-row: 18px;
-  --leading-meta: 19px;
-  --leading-small: 17px;
+  --leading-row: 20px;
+  --leading-meta: 20px;
+  --leading-small: 18px;
   --spacing-page-gutter: 24px;
   --spacing-page-top: 64px;
   --spacing-page-top-header: 80px;
@@ -63,7 +65,7 @@
   --surface: #151718;
   --text: #f1f2f2;
   --muted: #a1a4a6;
-  --subtle: #74787a;
+  --subtle: #8b9093;
   --line: #292c2e;
   --accent: #7196c8;
   --focus: #91b5e5;
@@ -75,7 +77,7 @@
   --surface: #ffffff;
   --text: #17191a;
   --muted: #5f6568;
-  --subtle: #7e8588;
+  --subtle: #686f72;
   --line: #e0e3e4;
   --accent: #3f6798;
   --focus: #315e96;
@@ -83,7 +85,7 @@
 
 @layer base {
   body {
-    font-size: 15px;
+    font-size: 16px;
   }
 
   h1,
@@ -124,7 +126,7 @@
   background: var(--surface);
   box-shadow: 0 8px 28px rgb(0 0 0 / 24%);
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .project-hover-preview-image {

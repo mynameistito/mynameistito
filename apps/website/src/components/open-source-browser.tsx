@@ -470,7 +470,7 @@ export const OpenSourceBrowser = () => {
                       <span className="truncate text-xs font-semibold leading-4 text-text">
                         {repository.name}
                       </span>
-                      <span className="truncate text-micro leading-3 text-muted">
+                      <span className="truncate text-micro leading-4 text-muted">
                         {repository.repo}
                       </span>
                     </span>
