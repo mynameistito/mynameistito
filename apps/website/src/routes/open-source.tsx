@@ -141,16 +141,11 @@ const contributions = [
   },
 ] as const;
 
-const filters = [
-  { name: "All", count: 46 },
-  { name: "Open", count: 13 },
-  { name: "Merged", count: 22 },
-  { name: "Closed", count: 11 },
-] as const;
+const filters = ["All", "Open", "Merged", "Closed"] as const;
 
 const OpenSourcePage = () => {
   const [query, setQuery] = useState("");
-  const [status, setStatus] = useState<(typeof filters)[number]["name"]>("All");
+  const [status, setStatus] = useState<(typeof filters)[number]>("All");
   const [selectedRepository, setSelectedRepository] =
     useState<string>("HyperFrames");
   const normalizedQuery = query.trim().toLowerCase();
@@ -170,12 +165,15 @@ const OpenSourcePage = () => {
       .includes(normalizedQuery);
     return matchesStatus && matchesQuery;
   });
+  const contributionCount = contributions.filter(
+    (contribution) => status === "All" || contribution.status === status
+  ).length;
   const selected = repositories.find(
     (repository) => repository.name === selectedRepository
   );
 
   return (
-    <main className="mx-auto w-[min(100%-48px,644px)] pt-20 pb-24 sm:pt-24">
+    <main className="mx-auto w-[min(100%-48px,528px)] pt-20 pb-28 sm:pt-24">
       <SiteHeader backLabel="Portfolio" backTo="/" />
       <section className="mt-7">
         <h1 className="m-0 text-page-title font-semibold leading-tight tracking-title text-text">
@@ -194,7 +192,9 @@ const OpenSourcePage = () => {
           >
             Pull requests
           </h2>
-          <span className="text-xs text-muted">46 pull requests</span>
+          <span className="text-xs text-muted">
+            {contributions.length} recent pull requests
+          </span>
         </div>
         <label
           className="grid gap-2 text-sm text-muted"
@@ -215,20 +215,30 @@ const OpenSourcePage = () => {
           <legend className="sr-only">Filter pull requests</legend>
           {filters.map((filter) => (
             <button
-              aria-pressed={status === filter.name}
-              className={`rounded-control border px-3 py-1.5 text-xs transition-colors ${status === filter.name ? "border-line bg-surface-raised text-text" : "border-transparent text-muted hover:text-text"}`}
-              key={filter.name}
-              onClick={() => setStatus(filter.name)}
+              aria-pressed={status === filter}
+              className={`rounded-control border px-3 py-1.5 text-xs transition-colors ${status === filter ? "border-line bg-surface-raised text-text" : "border-transparent text-muted hover:text-text"}`}
+              key={filter}
+              onClick={() => setStatus(filter)}
               type="button"
             >
-              {filter.name}{" "}
-              <span className="ml-1 text-subtle">{filter.count}</span>
+              {filter}{" "}
+              <span className="ml-1 text-subtle">
+                {
+                  contributions.filter(
+                    (contribution) =>
+                      filter === "All" || contribution.status === filter
+                  ).length
+                }
+              </span>
             </button>
           ))}
         </fieldset>
 
         <div className="mt-4 flex items-center justify-between border-b border-line pb-3 text-xs text-muted">
-          <span>46 of 46 pull requests</span>
+          <span>
+            {filteredContributions.length} of {contributionCount} recent pull
+            requests
+          </span>
           <a
             className="transition-colors hover:text-text"
             href={`https://github.com/${selected?.repo ?? ""}`}

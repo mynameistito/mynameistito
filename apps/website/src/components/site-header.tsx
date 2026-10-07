@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
+import { SiteControls } from "@/components/site-controls";
 import { profile } from "@/lib/profile";
 
 interface SiteHeaderProps {
@@ -13,15 +14,18 @@ interface SiteHeaderProps {
 const siteHeader = ({ backTo, backLabel }: SiteHeaderProps) =>
   backTo && backLabel ? (
     <header className="fixed inset-x-0 top-0 z-20 h-16 border-b border-line bg-page">
-      <Link
-        className="mx-auto flex h-full w-[min(100%-48px,644px)] items-center gap-1.5 text-xs text-muted transition-colors hover:text-text"
-        to={backTo}
-      >
-        <span aria-hidden="true" className="text-sm leading-none">
-          ←
-        </span>
-        {backLabel}
-      </Link>
+      <div className="mx-auto flex h-full w-[min(100%-48px,528px)] items-center justify-between">
+        <Link
+          className="flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-text"
+          to={backTo}
+        >
+          <span aria-hidden="true" className="text-sm leading-none">
+            ←
+          </span>
+          {backLabel}
+        </Link>
+        <SiteControls />
+      </div>
     </header>
   ) : (
     <header className="flex min-h-12 items-center justify-between gap-4 border-b border-line pb-4">
@@ -54,26 +58,9 @@ const siteHeader = ({ backTo, backLabel }: SiteHeaderProps) =>
         className="flex shrink-0 items-center gap-1"
       >
         <span className="mr-1 inline-flex h-[30px] items-center gap-1 rounded-control border border-line bg-surface px-2 text-micro text-muted">
-          <span aria-hidden="true">◉</span> 299
+          <span aria-hidden="true">◉</span> 305
         </span>
-        <a
-          aria-label="GitHub"
-          className="grid size-[30px] place-items-center rounded-control border border-line bg-surface text-xs text-muted transition-colors hover:text-text"
-          href={profile.github}
-          rel="noreferrer"
-          target="_blank"
-        >
-          GH
-        </a>
-        <a
-          aria-label="X"
-          className="grid size-[30px] place-items-center rounded-control border border-line bg-surface text-xs text-muted transition-colors hover:text-text"
-          href={profile.x}
-          rel="noreferrer"
-          target="_blank"
-        >
-          𝕏
-        </a>
+        <SiteControls />
       </nav>
     </header>
   );

@@ -1,0 +1,109 @@
+import { Link, createFileRoute } from "@tanstack/react-router";
+
+import { SiteControls } from "@/components/site-controls";
+import { profile } from "@/lib/profile";
+
+const links = [
+  {
+    label: "GitHub",
+    detail: "Projects and open source",
+    href: profile.github,
+    mark: "GH",
+  },
+  { label: "X", detail: "Thoughts and updates", href: profile.x, mark: "𝕏" },
+  {
+    label: "LinkedIn",
+    detail: "Professional profile",
+    href: profile.linkedin,
+    mark: "in",
+  },
+  {
+    label: "YouTube",
+    detail: "Videos and demos",
+    href: profile.youtube,
+    mark: "▶",
+  },
+  { label: "Instagram", detail: "", href: profile.instagram, mark: "◎" },
+  { label: "TikTok", detail: "", href: profile.tiktok, mark: "♪" },
+  { label: "Buy Me a Coffee", detail: "", href: profile.coffee, mark: "☕" },
+  { label: "Resume", detail: "", href: profile.resume, mark: "↗" },
+] as const;
+
+const LinksPage = () => (
+  <main className="mx-auto flex min-h-dvh w-[min(100%-40px,440px)] flex-col items-center px-0 pt-10 pb-28 sm:justify-center sm:pt-12">
+    <nav
+      aria-label="Page controls"
+      className="mb-12 flex w-full items-center justify-between"
+    >
+      <Link
+        className="text-xs text-muted transition-colors hover:text-text"
+        to="/"
+      >
+        ← Back to portfolio
+      </Link>
+      <SiteControls />
+    </nav>
+    <header className="mb-8 text-center">
+      <Link
+        aria-label="Visit Akshar's portfolio"
+        className="grid size-16 place-items-center overflow-hidden rounded-full border border-line"
+        to="/"
+      >
+        <img
+          alt=""
+          className="size-full object-cover"
+          height="64"
+          src={profile.avatar}
+          width="64"
+        />
+      </Link>
+      <h1 className="mt-4 mb-1 text-xl font-semibold tracking-heading text-text">
+        Akshar Patel
+      </h1>
+      <p className="m-0 text-sm text-muted">{profile.subtitle}</p>
+    </header>
+    <nav aria-label="Akshar's links" className="grid w-full gap-2">
+      {links.map((link) => (
+        <a
+          aria-label={`${link.label}, opens in a new tab`}
+          className="grid min-h-[58px] grid-cols-[38px_minmax(0,1fr)_auto] items-center gap-3 rounded-control border border-line bg-surface px-3 transition-colors hover:border-line-strong hover:bg-surface-hover active:scale-[0.99]"
+          href={link.href}
+          key={link.label}
+          rel="noreferrer"
+          target="_blank"
+        >
+          <span
+            aria-hidden="true"
+            className="grid size-8 place-items-center rounded-control border border-line-strong bg-surface-raised text-xs font-medium text-muted"
+          >
+            {link.mark}
+          </span>
+          <span className="min-w-0">
+            <span className="block text-sm font-medium text-text">
+              {link.label}
+            </span>
+            {link.detail && (
+              <span className="block truncate text-xs text-muted">
+                {link.detail}
+              </span>
+            )}
+          </span>
+          <span aria-hidden="true" className="text-xs text-subtle">
+            ↗
+          </span>
+        </a>
+      ))}
+    </nav>
+    <p className="mt-7 mb-0 text-xs text-subtle">apunlisted.com</p>
+  </main>
+);
+
+export const Route = createFileRoute("/links")({
+  component: LinksPage,
+  head: () => ({
+    meta: [
+      { title: "Links | Akshar Patel" },
+      { content: "Find Akshar Patel around the web.", name: "description" },
+    ],
+  }),
+});

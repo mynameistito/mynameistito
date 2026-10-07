@@ -9,6 +9,12 @@ export const profile = {
   verifiedMark: "/paper-assets/429NJ2Y9GH109VMS8WGXF0K80B.svg",
   github: "https://github.com/AksharP5",
   x: "https://x.com/apunlisted",
+  linkedin: "https://www.linkedin.com/in/akshar5/",
+  youtube: "https://www.youtube.com/@apunlisted",
+  instagram: "https://www.instagram.com/ap.unlisted/",
+  tiktok: "https://www.tiktok.com/@ap.unlisted",
+  coffee: "https://buymeacoffee.com/apunlisted",
+  resume: "https://www.apunlisted.com/resume?from=links",
   xDirectMessage: "https://x.com/messages/compose?recipient_id=1869385046",
   introduction: [
     "I currently work at Dow Jones.",

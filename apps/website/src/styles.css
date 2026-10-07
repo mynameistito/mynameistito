@@ -30,7 +30,7 @@
   --leading-row: 18px;
   --leading-meta: 19px;
   --leading-small: 17px;
-  --spacing-page-top: 82px;
+  --spacing-page-top: 64px;
   --spacing-page-bottom: 170px;
   --spacing-section: 38px;
   --radius-control: 7px;
@@ -46,6 +46,18 @@
   --line: #292c2e;
   --accent: #7196c8;
   --focus: #91b5e5;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --page: #f7f8f8;
+  --surface: #ffffff;
+  --text: #17191a;
+  --muted: #5f6568;
+  --subtle: #7e8588;
+  --line: #e0e3e4;
+  --accent: #3f6798;
+  --focus: #315e96;
 }
 
 @layer base {
@@ -97,6 +109,14 @@
   justify-content: space-between;
   gap: 12px;
   padding: 8px 10px;
+}
+
+.social-dock {
+  box-shadow: 0 8px 30px rgb(0 0 0 / 20%);
+}
+
+:root[data-theme="light"] .social-dock {
+  box-shadow: 0 8px 30px rgb(20 30 36 / 12%);
 }
 
 @media (min-width: 1360px) and (hover: hover) {

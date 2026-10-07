@@ -49,14 +49,14 @@ const skillIcons = [
 ] as const;
 
 const Home = () => (
-  <main className="mx-auto w-[min(100%-48px,644px)] pt-10 pb-24 sm:pt-page-top sm:pb-page-bottom">
+  <main className="mx-auto w-[min(100%-48px,528px)] pt-10 pb-28 sm:pt-page-top sm:pb-page-bottom">
     <SiteHeader />
 
-    <section aria-label="About Akshar" className="mt-[22px] grid gap-3.5">
-      <p className="m-0 text-base leading-copy tracking-copy text-muted">
+    <section aria-label="About Akshar" className="mt-2 grid gap-3.5">
+      <p className="m-0 text-sm leading-copy tracking-copy text-muted">
         I currently work at Dow Jones.
       </p>
-      <p className="m-0 text-base leading-copy tracking-copy text-muted">
+      <p className="m-0 text-sm leading-copy tracking-copy text-muted">
         Outside work, I enjoy contributing to open source, building things, and
         following whatever has my attention. Browse my{" "}
         <Link

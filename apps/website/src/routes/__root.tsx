@@ -1,6 +1,7 @@
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
 
 import { NotFoundPage } from "@/components/not-found-page";
+import { SocialDock } from "@/components/social-dock";
 
 import appCss from "@/styles.css?url";
 
@@ -11,6 +12,7 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => (
     </head>
     <body className="min-h-screen bg-page font-sans text-text antialiased">
       {children}
+      <SocialDock />
       <Scripts />
     </body>
   </html>
