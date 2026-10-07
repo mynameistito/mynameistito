@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { FormEvent } from "react";
 
 import { SiteHeader } from "@/components/site-header";
@@ -21,10 +21,15 @@ const buttonLabels: Record<SubmissionStatus, string> = {
 };
 
 const ContactPage = () => {
+  const submissionInProgress = useRef(false);
   const [status, setStatus] = useState<SubmissionStatus>("idle");
 
   const sendMessage = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (submissionInProgress.current) {
+      return;
+    }
+
     const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
     if (!accessKey) {
       setStatus("error");
@@ -36,6 +41,7 @@ const ContactPage = () => {
     formData.set("access_key", accessKey);
     formData.set("subject", "New message from your portfolio");
     formData.set("from_name", "Akshar's Portfolio");
+    submissionInProgress.current = true;
     setStatus("submitting");
 
     try {
@@ -43,15 +49,16 @@ const ContactPage = () => {
         body: formData,
         method: "POST",
       });
-      if (!response.ok) {
+      if (response.ok) {
+        form.reset();
+        setStatus("success");
+      } else {
         setStatus("error");
-        return;
       }
-      form.reset();
-      setStatus("success");
     } catch {
       setStatus("error");
     }
+    submissionInProgress.current = false;
   };
 
   return (

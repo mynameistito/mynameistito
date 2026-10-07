@@ -1,8 +1,7 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 
-import { projectSlug } from "@/components/project-list";
 import { SiteHeader } from "@/components/site-header";
-import { projectSourceUrl, projects } from "@/lib/projects";
+import { projectSlug, projectSourceUrl, projects } from "@/lib/projects";
 
 const radioAtlasStory = {
   why: [
@@ -23,25 +22,7 @@ const ProjectPage = () => {
   const project = projects.find((item) => projectSlug(item.name) === slug);
 
   if (!project) {
-    return (
-      <main className="mx-auto w-[min(100%-48px,644px)] pt-10 pb-24 sm:pt-page-top">
-        <SiteHeader backLabel="Portfolio" backTo="/" />
-        <section className="mt-8 border-y border-line py-8">
-          <h1 className="m-0 text-2xl font-semibold tracking-tight text-text">
-            Project not found
-          </h1>
-          <p className="mt-3 text-sm leading-6 text-muted">
-            That project isn&apos;t in this portfolio.
-          </p>
-          <Link
-            className="mt-4 inline-flex text-sm text-text underline decoration-subtle underline-offset-4 hover:decoration-accent"
-            to="/projects"
-          >
-            Back to projects
-          </Link>
-        </section>
-      </main>
-    );
+    throw notFound();
   }
 
   const isRadioAtlas = project.name === "Radio Atlas";
@@ -198,6 +179,11 @@ const ProjectPage = () => {
 };
 
 export const Route = createFileRoute("/projects/$slug")({
+  beforeLoad: ({ params }) => {
+    if (!projects.some((item) => projectSlug(item.name) === params.slug)) {
+      throw notFound();
+    }
+  },
   component: ProjectPage,
   head: ({ params }) => {
     const project = projects.find(

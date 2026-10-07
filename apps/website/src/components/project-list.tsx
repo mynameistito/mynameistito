@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
-import { projects } from "@/lib/projects";
+import { projectSlug, projects } from "@/lib/projects";
 
 interface ProjectListProps {
   limit?: number;
@@ -9,13 +9,6 @@ interface ProjectListProps {
   showImages?: boolean;
   previewOnHover?: boolean;
 }
-
-/** Converts a project name into a stable route segment.
- * @param name - The display name of the project.
- * @returns A URL-safe route segment.
- */
-export const projectSlug = (name: string) =>
-  name.toLowerCase().replaceAll(" ", "-").replaceAll(".", "-");
 
 /** Renders the typographic project rows used throughout the portfolio.
  * @param props - Options for selecting and displaying projects.
