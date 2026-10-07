@@ -3,7 +3,12 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".output/**", "dist/**"]
+      "outputs": [
+        ".cloudflare/output/**",
+        ".cloudflare/types/**",
+        ".output/**",
+        "dist/**"
+      ]
     },
     "dev": {
       "cache": false,

@@ -7,13 +7,14 @@ import { defineConfig } from "vite";
 
 const config = defineConfig({
   plugins: [
-    cloudflare({ viteEnvironment: { name: "ssr" } }),
+    cloudflare(),
     devtools(),
     tailwindcss(),
     tanstackStart(),
     viteReact(),
   ],
   resolve: { tsconfigPaths: true },
+  server: { port: 3000 },
 });
 
 export default config;
