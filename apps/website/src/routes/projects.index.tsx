@@ -8,7 +8,7 @@ const featuredProjects = projects.filter((project) => project.featured);
 const otherProjects = projects.filter((project) => !project.featured);
 
 const ProjectsPage = () => (
-  <main className="mx-auto w-[min(100%-48px,528px)] pt-20 pb-28 sm:pt-24">
+  <main className="mx-auto w-[min(100%-48px,825px)] pt-20 pb-28 sm:pt-24">
     <SiteHeader backLabel="Portfolio" backTo="/" />
 
     <section className="mt-7">

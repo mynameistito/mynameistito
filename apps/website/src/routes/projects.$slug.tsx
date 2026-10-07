@@ -29,7 +29,7 @@ const ProjectPage = () => {
   const sourceUrl = projectSourceUrl(project.name);
 
   return (
-    <main className="mx-auto w-[min(100%-48px,528px)] pt-20 pb-28 sm:pt-24">
+    <main className="mx-auto w-[min(100%-48px,825px)] pt-20 pb-28 sm:pt-24">
       <SiteHeader backLabel="Projects" backTo="/projects" />
       <article>
         <header className="mt-7">
