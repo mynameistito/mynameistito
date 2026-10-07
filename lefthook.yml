@@ -12,8 +12,13 @@ pre-commit:
         - "*.css"
       stage_fixed: true
 pre-push:
+  parallel: true
   jobs:
     - run: bun run knip
-    - run: bun run build
     - run: bun run test
-    - run: bun run typecheck
+    - name: build-and-typecheck
+      group:
+        piped: true
+        jobs:
+          - run: bun run build
+          - run: bun run typecheck
