@@ -16,7 +16,7 @@ const ProjectPage = () => {
     <main className="page-shell pt-page-top-header pb-page-bottom">
       <article>
         <header className="mt-section">
-          <h1 className="m-0 text-page-title font-semibold leading-tight tracking-title text-text">
+          <h1 className="m-0 text-page-title leading-tight font-semibold tracking-title text-text">
             {project.name}
           </h1>
           <p className="mt-2 mb-0 max-w-prose text-base leading-copy text-muted">
@@ -119,15 +119,15 @@ const ProjectPage = () => {
 };
 
 export const Route = createFileRoute("/projects/$slug")({
-  beforeLoad: async ({ params }) => {
+  loader: async ({ params }) => {
     const projects = await getProjects();
     if (
       !projects.some((project) => projectSlug(project.name) === params.slug)
     ) {
       throw notFound();
     }
+    return projects;
   },
-  loader: () => getProjects(),
   component: ProjectPage,
   head: ({ params }) => ({
     meta: [
