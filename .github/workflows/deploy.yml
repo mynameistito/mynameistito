@@ -36,7 +36,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_ACCOUNT_ID
           CLOUDFLARE_API_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_API_TOKEN
           CONTACT_RECIPIENT: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CONTACT_RECIPIENT
-          MDMFROMX_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/MDMFROMX_API_KEY
+          MDFROMX_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/MDMFROMX_API_KEY
           RESEND_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_API_KEY
           RESEND_FROM: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_FROM
           WORKER_GITHUB_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/WORKER_GITHUB_TOKEN
@@ -61,7 +61,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ steps.onepassword.outputs.CLOUDFLARE_API_TOKEN }}
           CONTACT_RECIPIENT: ${{ steps.onepassword.outputs.CONTACT_RECIPIENT }}
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          MDFROMX_API_KEY: ${{ steps.onepassword.outputs.MDMFROMX_API_KEY }}
+          MDFROMX_API_KEY: ${{ steps.onepassword.outputs.MDFROMX_API_KEY }}
           RESEND_API_KEY: ${{ steps.onepassword.outputs.RESEND_API_KEY }}
           RESEND_FROM: ${{ steps.onepassword.outputs.RESEND_FROM }}
           WORKER_GITHUB_TOKEN: ${{ steps.onepassword.outputs.WORKER_GITHUB_TOKEN }}
@@ -99,7 +99,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_ACCOUNT_ID
           CLOUDFLARE_API_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_API_TOKEN
           CONTACT_RECIPIENT: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CONTACT_RECIPIENT
-          MDMFROMX_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/MDMFROMX_API_KEY
+          MDFROMX_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/MDMFROMX_API_KEY
           RESEND_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_API_KEY
           RESEND_FROM: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_FROM
           WORKER_GITHUB_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/WORKER_GITHUB_TOKEN
@@ -124,7 +124,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ steps.onepassword.outputs.CLOUDFLARE_API_TOKEN }}
           CONTACT_RECIPIENT: ${{ steps.onepassword.outputs.CONTACT_RECIPIENT }}
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          MDFROMX_API_KEY: ${{ steps.onepassword.outputs.MDMFROMX_API_KEY }}
+          MDFROMX_API_KEY: ${{ steps.onepassword.outputs.MDFROMX_API_KEY }}
           RESEND_API_KEY: ${{ steps.onepassword.outputs.RESEND_API_KEY }}
           RESEND_FROM: ${{ steps.onepassword.outputs.RESEND_FROM }}
           WORKER_GITHUB_TOKEN: ${{ steps.onepassword.outputs.WORKER_GITHUB_TOKEN }}
