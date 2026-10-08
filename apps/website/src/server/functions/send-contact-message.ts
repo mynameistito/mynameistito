@@ -53,7 +53,10 @@ export const sendContactMessage = Effect.fn("sendContactMessage")(
       ResendProtocol
     );
     const sent = yield* Effect.match(Effect.provide(email, services), {
-      onFailure: () => false,
+      onFailure: (error) => {
+        console.error("Contact email delivery failed.", error);
+        return false;
+      },
       onSuccess: () => true,
     });
     return sent
