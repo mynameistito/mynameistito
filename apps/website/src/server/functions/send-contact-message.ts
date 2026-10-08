@@ -3,18 +3,12 @@ import {
   fromApiKey,
   ResendProtocol,
 } from "@distilled.cloud/resend";
-import { Effect, Redacted } from "effect";
+import { Effect, Option, Redacted } from "effect";
 import { layer as fetchHttpClientLayer } from "effect/http/FetchHttpClient";
 import { mergeAll } from "effect/Layer";
 
 import { getAppEnv } from "@/env";
 import type { ContactMessage } from "@/lib/contact-message";
-
-/** Result visible to the contact route after attempting delivery. */
-export type ContactMessageResult =
-  | { readonly _tag: "Sent" }
-  | { readonly _tag: "NotConfigured"; readonly missing: readonly string[] }
-  | { readonly _tag: "DeliveryFailed" };
 
 /** Delivers a parsed contact message through the configured email provider.
  * @param message - The validated contact form values.
@@ -26,7 +20,11 @@ export const sendContactMessage = Effect.fn("sendContactMessage")(
       return { _tag: "Sent" } as const;
     }
 
-    const env = yield* getAppEnv();
+    const loadedEnv = yield* getAppEnv().pipe(Effect.option);
+    if (Option.isNone(loadedEnv)) {
+      return { _tag: "NotConfigured", missing: [] } as const;
+    }
+    const env = loadedEnv.value;
     const { RESEND_API_KEY, CONTACT_RECIPIENT, RESEND_FROM } = env;
     const missing = [
       { name: "RESEND_API_KEY", value: RESEND_API_KEY },

@@ -28,11 +28,7 @@ const post = ({ request }: { request: Request }) =>
         return json({ error: "Invalid message." }, 400);
       }
 
-      const result = yield* sendContactMessage(message).pipe(
-        Effect.catchTag("AppEnvError", () =>
-          Effect.succeed({ _tag: "NotConfigured", missing: [] } as const)
-        )
-      );
+      const result = yield* sendContactMessage(message);
       switch (result._tag) {
         case "Sent": {
           return json({ sent: "true" }, 200);

@@ -1,4 +1,4 @@
-import { Effect, Redacted, Schema } from "effect";
+import { Effect, Redacted } from "effect";
 
 /** Runtime bindings supplied by the platform or Alchemy local runtime. */
 export interface AppEnv {
@@ -23,13 +23,6 @@ interface RawAppEnv {
   readonly VISITOR_SERVICE?: AppEnv["VISITOR_SERVICE"];
 }
 
-/** Failure while acquiring runtime bindings for the website. */
-// oxlint-disable-next-line unicorn/throw-new-error -- SAFETY: Effect Schema.TaggedError is a class factory and must be extended without `new`.
-export class AppEnvError extends Schema.TaggedError<AppEnvError>()(
-  "AppEnvError",
-  { cause: Schema.Defect() }
-) {}
-
 const redactSecrets = (bindings: RawAppEnv): AppEnv => ({
   ...bindings,
   GITHUB_TOKEN: bindings.GITHUB_TOKEN
@@ -52,7 +45,8 @@ const redactSecrets = (bindings: RawAppEnv): AppEnv => ({
 export const getAppEnv = Effect.fn("getAppEnv")(function* getAppEnv() {
   const worker = yield* Effect.tryPromise({
     try: () => import("cloudflare:workers"),
-    catch: (cause) => new AppEnvError({ cause }),
+    catch: (cause) =>
+      new Error("Cloudflare Worker bindings are unavailable", { cause }),
   });
   // SAFETY: Alchemy configures bindings in both production and local development.
   const bindings = worker.env as RawAppEnv;

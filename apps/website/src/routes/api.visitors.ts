@@ -45,12 +45,7 @@ const post = ({ request }: { request: Request }) =>
       const existingId = cookie.match(
         /(?:^|;\s*)site_visitor=(?<visitorId>[\da-f-]{36})/iu
       )?.groups?.visitorId;
-      const recorded = yield* recordVisitor(existingId).pipe(
-        Effect.catchTag("VisitorCounterUnavailable", () =>
-          Effect.succeed(null)
-        ),
-        Effect.catchTag("AppEnvError", () => Effect.succeed(null))
-      );
+      const recorded = yield* recordVisitor(existingId);
       if (!recorded) {
         return Response.json(
           { error: visitorUnavailableMessage },

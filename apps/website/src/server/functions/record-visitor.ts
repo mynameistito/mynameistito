@@ -1,50 +1,49 @@
-import { Effect, Schema } from "effect";
+import { Effect, Option, Schema } from "effect";
 
 import { getAppEnv } from "@/env";
 import { VisitorCountsSchema } from "@/lib/visitor-counting";
 import type { VisitorCounts } from "@/lib/visitor-counting";
 
-/** Failure while recording a visitor or decoding the counter response. */
-// oxlint-disable-next-line unicorn/throw-new-error -- SAFETY: Effect Schema.TaggedError is a class factory and must be extended without `new`.
-export class VisitorCounterUnavailable extends Schema.TaggedError<VisitorCounterUnavailable>()(
-  "VisitorCounterUnavailable",
-  {}
-) {}
-
 /** Records a visit through the configured visitor Worker.
  * @param existingVisitorId - Valid visitor identifier from the request cookie, if present.
- * @returns The visitor identifier and parsed counts.
+ * @returns The visitor identifier and parsed counts, or `null` if unavailable.
  */
 export const recordVisitor = Effect.fn("recordVisitor")(function* recordVisitor(
   existingVisitorId?: string
 ) {
   const visitorId =
     existingVisitorId ?? (yield* Effect.sync(() => crypto.randomUUID()));
-  const env = yield* getAppEnv();
-  const visitorService = env.VISITOR_SERVICE;
+  const env = yield* getAppEnv().pipe(Effect.option);
+  if (Option.isNone(env)) {
+    return null;
+  }
+  const visitorService = env.value.VISITOR_SERVICE;
   if (!visitorService) {
-    return yield* new VisitorCounterUnavailable();
+    return null;
   }
-  const response = yield* Effect.tryPromise({
-    try: () =>
-      visitorService.fetch(
-        new Request("https://visitor-service.internal/track", {
-          body: JSON.stringify({ visitorId }),
-          headers: { "content-type": "application/json" },
-          method: "POST",
-        })
-      ),
-    catch: () => new VisitorCounterUnavailable(),
-  });
-  if (!response.ok) {
-    return yield* new VisitorCounterUnavailable();
+  const response = yield* Effect.tryPromise(() =>
+    visitorService.fetch(
+      new Request("https://visitor-service.internal/track", {
+        body: JSON.stringify({ visitorId }),
+        headers: { "content-type": "application/json" },
+        method: "POST",
+      })
+    )
+  ).pipe(Effect.option);
+  if (Option.isNone(response) || !response.value.ok) {
+    return null;
   }
-  const payload = yield* Effect.tryPromise({
-    try: () => response.json(),
-    catch: () => new VisitorCounterUnavailable(),
-  });
+  const payload = yield* Effect.tryPromise(() => response.value.json()).pipe(
+    Effect.option
+  );
+  if (Option.isNone(payload)) {
+    return null;
+  }
   const counts = yield* Schema.decodeUnknownEffect(VisitorCountsSchema)(
-    payload
-  ).pipe(Effect.mapError(() => new VisitorCounterUnavailable()));
-  return { counts: counts satisfies VisitorCounts, visitorId };
+    payload.value
+  ).pipe(Effect.option);
+  if (Option.isNone(counts)) {
+    return null;
+  }
+  return { counts: counts.value satisfies VisitorCounts, visitorId };
 });
