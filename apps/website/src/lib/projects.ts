@@ -68,10 +68,13 @@ const fetchProjects = Effect.gen(function* fetchProjects() {
       source: repository.html_url,
       ...override,
     };
+    const projectWithPreview = override?.image
+      ? { ...project, previewImage: override.image }
+      : project;
     if (repository.homepage && !override?.demo) {
-      return { ...project, demo: repository.homepage };
+      return { ...projectWithPreview, demo: repository.homepage };
     }
-    return project;
+    return projectWithPreview;
   });
 });
 

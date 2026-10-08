@@ -7,7 +7,6 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { SiteHeader } from "@/components/site-header";
 import type {
   ContributionRepository,
   PullRequestState,
@@ -104,7 +103,6 @@ export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
 
   return (
     <main className="page-shell pt-page-top-header pb-page-bottom">
-      <SiteHeader backLabel="Portfolio" backTo="/" />
       <section className="mt-section">
         <h1 className="m-0 text-page-title font-semibold leading-tight tracking-title text-text">
           Open source

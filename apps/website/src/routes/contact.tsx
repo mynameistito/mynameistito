@@ -3,7 +3,6 @@ import { ArrowUpRight } from "lucide-react";
 import { useRef, useState } from "react";
 import type { FormEvent } from "react";
 
-import { SiteHeader } from "@/components/site-header";
 import { profile } from "@/lib/profile";
 
 type SubmissionStatus = "idle" | "submitting" | "success" | "error";
@@ -74,7 +73,6 @@ const ContactPage = () => {
 
   return (
     <main className="page-shell pt-page-top-header pb-page-bottom">
-      <SiteHeader backLabel="Home" backTo="/" />
       <section className="mt-section">
         <h1 className="m-0 text-page-title font-semibold leading-tight tracking-title text-text">
           Want to chat?

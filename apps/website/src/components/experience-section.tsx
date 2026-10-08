@@ -32,21 +32,44 @@ export const ExperienceSection = () => {
             className="grid grid-cols-[36px_minmax(0,1fr)] gap-x-3 border-b border-line py-3.5"
             key={`${role.company}-${role.title}`}
           >
-            <div className="grid size-9 place-items-center rounded-lg border border-line-strong bg-surface-raised">
-              <img
-                alt=""
-                className="size-[26px] rounded-md object-cover"
-                height="26"
-                loading="lazy"
-                src={role.logo}
-                width="26"
-              />
+            <div
+              className={`experience-logo-container experience-logo-container--${role.logoBackground} relative grid size-9 place-items-center rounded-lg border border-line-strong`}
+            >
+              {"logoLight" in role ? (
+                <>
+                  <img
+                    alt=""
+                    className="experience-logo-dark absolute left-1/2 top-1/2 size-6 -translate-x-1/2 -translate-y-1/2 object-contain"
+                    height="26"
+                    loading="lazy"
+                    src={role.logo}
+                    width="26"
+                  />
+                  <img
+                    alt=""
+                    className="experience-logo-light absolute left-1/2 top-1/2 size-6 -translate-x-1/2 -translate-y-1/2 object-contain"
+                    height="26"
+                    loading="lazy"
+                    src={role.logoLight}
+                    width="26"
+                  />
+                </>
+              ) : (
+                <img
+                  alt=""
+                  className="size-[26px] rounded-md object-cover"
+                  height="26"
+                  loading="lazy"
+                  src={role.logo}
+                  width="26"
+                />
+              )}
             </div>
             <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-5">
               <div className="min-w-0">
                 <h3 className="m-0 text-sm font-semibold leading-5 tracking-row text-text">
                   <a
-                    className="text-text underline decoration-subtle underline-offset-4"
+                    className="text-text underline"
                     href={role.href}
                     rel="noreferrer"
                     target="_blank"

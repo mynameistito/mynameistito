@@ -35,7 +35,7 @@ const links = [
     href: `https://signal.me/#eu/${profile.signal}`,
     mark: "S",
   },
-  { label: "KZG", detail: "Game servers", href: "https://kzg.com", mark: "K" },
+  { label: "KZG", detail: "Game servers", href: "https://kzg.gg", mark: "K" },
   {
     label: "gamehostbros",
     detail: "Game server hosting",

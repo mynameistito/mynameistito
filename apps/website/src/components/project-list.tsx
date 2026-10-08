@@ -26,7 +26,7 @@ export const ProjectList = ({
   <ul className="m-0 list-none border-t border-line p-0">
     {items.slice(offset, offset + (limit ?? items.length)).map((project) => (
       <li
-        className={`border-b border-line ${previewOnHover ? "project-preview-row" : ""}`}
+        className={`border-b border-line ${previewOnHover && project.previewImage ? "project-preview-row" : ""}`}
         key={project.name}
       >
         <Link
@@ -62,14 +62,14 @@ export const ProjectList = ({
             className="text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-accent"
             size={14}
           />
-          {previewOnHover && (
+          {previewOnHover && project.previewImage && (
             <span aria-hidden="true" className="project-hover-preview">
               <img
                 alt=""
                 className="project-hover-preview-image"
                 height="207"
                 loading="lazy"
-                src={project.image}
+                src={project.previewImage}
                 width="320"
               />
               <span className="project-hover-preview-caption">

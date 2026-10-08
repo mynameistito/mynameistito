@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { ProjectList } from "@/components/project-list";
-import { SiteHeader } from "@/components/site-header";
 import { getProjects } from "@/server/functions/projects";
 
 const ProjectsPage = () => {
@@ -10,8 +9,6 @@ const ProjectsPage = () => {
   const otherProjects = projects.filter((project) => !project.featured);
   return (
     <main className="page-shell pt-page-top-header pb-page-bottom">
-      <SiteHeader backLabel="Portfolio" backTo="/" />
-
       <section className="mt-section">
         <h1 className="m-0 text-page-title font-semibold leading-tight tracking-title text-text">
           Projects

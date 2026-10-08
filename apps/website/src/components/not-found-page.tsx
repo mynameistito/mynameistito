@@ -38,10 +38,7 @@ export const NotFoundPage = () => (
         Search
       </button>
     </form>
-    <Link
-      className="mt-2 w-fit text-sm text-text underline decoration-subtle underline-offset-4"
-      to="/"
-    >
+    <Link className="mt-2 w-fit text-sm text-text underline" to="/">
       Back to home
     </Link>
   </main>

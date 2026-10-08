@@ -2,7 +2,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 
 import { ExperienceSection } from "@/components/experience-section";
 import { ProjectList } from "@/components/project-list";
-import { SiteHeader } from "@/components/site-header";
+import { HomeProfile, SiteHeader } from "@/components/site-header";
 import { profile } from "@/lib/profile";
 import { getProjects } from "@/server/functions/projects";
 
@@ -16,11 +16,9 @@ const HomeContent = () => {
   return (
     <main className="page-shell pt-page-top pb-page-bottom">
       <SiteHeader />
+      <HomeProfile />
 
-      <section
-        aria-label="About Tito"
-        className="mt-2 grid max-w-prose gap-3.5"
-      >
+      <section aria-label="About Tito" className="mt-2 grid gap-3.5">
         <h1 className="sr-only">Tito</h1>
         <p className="m-0 text-base leading-copy tracking-copy text-muted">
           I like messing with things and seeing where they go.
@@ -28,17 +26,11 @@ const HomeContent = () => {
         <p className="m-0 text-base leading-copy tracking-copy text-muted">
           I&apos;m a developer from New Zealand. I build tools, services, and
           experiments around whatever has my attention. Have a look at my{" "}
-          <Link
-            className="text-text underline decoration-subtle underline-offset-4"
-            to="/projects"
-          >
+          <Link className="text-text underline" to="/projects">
             projects
           </Link>{" "}
           or see what I&apos;ve been contributing to in{" "}
-          <Link
-            className="text-text underline decoration-subtle underline-offset-4"
-            to="/open-source"
-          >
+          <Link className="text-text underline" to="/open-source">
             open source
           </Link>
           .

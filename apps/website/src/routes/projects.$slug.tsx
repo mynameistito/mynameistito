@@ -1,7 +1,6 @@
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 
-import { SiteHeader } from "@/components/site-header";
 import { projectSlug } from "@/lib/project";
 import { getProjects } from "@/server/functions/projects";
 
@@ -15,7 +14,6 @@ const ProjectPage = () => {
 
   return (
     <main className="page-shell pt-page-top-header pb-page-bottom">
-      <SiteHeader backLabel="Projects" backTo="/projects" />
       <article>
         <header className="mt-section">
           <h1 className="m-0 text-page-title font-semibold leading-tight tracking-title text-text">

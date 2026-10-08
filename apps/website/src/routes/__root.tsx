@@ -1,6 +1,12 @@
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
+import {
+  HeadContent,
+  Scripts,
+  createRootRoute,
+  useRouterState,
+} from "@tanstack/react-router";
 
 import { NotFoundPage } from "@/components/not-found-page";
+import { SiteHeader } from "@/components/site-header";
 import { SocialDock } from "@/components/social-dock";
 import { VisitorTracker } from "@/components/visitor-tracker";
 
@@ -10,19 +16,36 @@ if (import.meta.env.DEV && typeof window !== "undefined") {
   void import("react-grab");
 }
 
-const RootDocument = ({ children }: { children: React.ReactNode }) => (
-  <html lang="en">
-    <head>
-      <HeadContent />
-    </head>
-    <body className="min-h-screen bg-page font-sans text-text antialiased">
-      {children}
-      <SocialDock />
-      <VisitorTracker />
-      <Scripts />
-    </body>
-  </html>
-);
+const RootDocument = ({ children }: { children: React.ReactNode }) => {
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  });
+  const isHome = pathname === "/" || pathname === "/links";
+  const isProjectIndex = pathname === "/projects" || pathname === "/projects/";
+  const isProjectDetail = pathname.startsWith("/projects/") && !isProjectIndex;
+  const backLabel = isProjectDetail ? "Projects" : "Home";
+  const headerLabel = isProjectIndex ? "Portfolio" : backLabel;
+
+  return (
+    <html lang="en">
+      <head>
+        <HeadContent />
+      </head>
+      <body className="min-h-screen bg-page font-sans text-text antialiased">
+        {!isHome && (
+          <SiteHeader
+            backLabel={headerLabel}
+            backTo={isProjectDetail ? "/projects" : "/"}
+          />
+        )}
+        {children}
+        <SocialDock />
+        <VisitorTracker />
+        <Scripts />
+      </body>
+    </html>
+  );
+};
 
 export const Route = createRootRoute({
   head: () => ({

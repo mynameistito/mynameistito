@@ -4,6 +4,7 @@ export interface Project {
   readonly description: string;
   readonly languages: readonly string[];
   readonly image: string;
+  readonly previewImage?: string;
   readonly featured: boolean;
   readonly source: string;
   readonly demo?: string;
