@@ -55,6 +55,92 @@ const RepositoryAvatar = ({
   );
 };
 
+const RepositoryList = ({
+  normalizedQuery,
+  repositories,
+}: {
+  readonly normalizedQuery: string;
+  readonly repositories: readonly ContributionRepository[];
+}) => (
+  <ul className="m-0 list-none border-t border-line p-0">
+    {repositories.map((repository) => (
+      <li className="border-b border-line" key={repository.repo}>
+        <details className="group" open={normalizedQuery.length > 0}>
+          <summary className="flex min-h-[58px] cursor-pointer list-none items-center gap-3 py-2.5 [&::-webkit-details-marker]:hidden">
+            <RepositoryAvatar
+              avatarUrl={repository.avatarUrl}
+              name={repository.name}
+            />
+            <span className="grid min-w-0 flex-1 gap-0.5">
+              <span className="truncate text-xs leading-4 font-semibold text-text">
+                {repository.name}
+              </span>
+              <span className="truncate text-micro leading-4 text-muted">
+                {repository.repo}
+              </span>
+            </span>
+            <span className="hidden shrink-0 text-micro text-muted sm:inline">
+              ★ {repository.stars.toLocaleString()}
+            </span>
+            <span className="shrink-0 text-micro text-muted">
+              {repository.pullRequests.length} PR
+              {repository.pullRequests.length === 1 ? "" : "s"}
+            </span>
+            <ChevronDown
+              aria-hidden="true"
+              className="shrink-0 text-subtle transition-transform group-open:rotate-180"
+              size={14}
+            />
+          </summary>
+          <div className="pl-10">
+            <div className="-ml-10 border-b border-line pl-4">
+              <a
+                className="inline-flex min-h-10 items-center text-micro text-muted transition-colors hover:text-text"
+                href={repository.url}
+                rel="noreferrer"
+                target="_blank"
+              >
+                Open repository
+                <ExternalLink aria-hidden="true" className="ml-1" size={12} />
+              </a>
+            </div>
+            {repository.pullRequests.map((pullRequest) => {
+              const { Icon, color } = pullRequestStatus[pullRequest.state];
+              return (
+                <article
+                  className="-ml-10 grid min-h-10 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 border-b border-line py-2 last:border-0"
+                  key={pullRequest.number}
+                >
+                  <a
+                    className="inline-flex min-w-0 items-center gap-1.5 text-small leading-4 text-text transition-colors hover:text-accent"
+                    href={pullRequest.url}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    <Icon
+                      aria-hidden="true"
+                      className={`shrink-0 ${color}`}
+                      size={14}
+                      strokeWidth={1.75}
+                    />
+                    {pullRequest.title}
+                  </a>
+                  <span className={`text-micro ${color}`}>
+                    {pullRequest.state}
+                  </span>
+                  <span className="text-micro text-subtle">
+                    #{pullRequest.number}
+                  </span>
+                </article>
+              );
+            })}
+          </div>
+        </details>
+      </li>
+    ))}
+  </ul>
+);
+
 /** Displays searchable external repositories and Tito's pull requests.
  * @param repositories - GitHub contribution repositories to display.
  * @returns The interactive contribution browser.
@@ -110,7 +196,7 @@ export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
   return (
     <main className="page-shell pt-page-top-header pb-page-bottom">
       <section className="mt-section">
-        <h1 className="m-0 text-page-title font-semibold leading-tight tracking-title text-text">
+        <h1 className="m-0 text-page-title leading-tight font-semibold tracking-title text-text">
           Open source
         </h1>
         <p className="mt-2 mb-0 text-base leading-6 text-muted">
@@ -141,7 +227,7 @@ export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
             Search contributions
             <input
               autoComplete="off"
-              className="h-[34px] min-w-0 rounded-control border border-line bg-surface px-2.5 text-xs text-text outline-none transition-colors placeholder:text-subtle focus:border-focus"
+              className="h-[34px] min-w-0 rounded-control border border-line bg-surface px-2.5 text-xs text-text transition-colors outline-none placeholder:text-subtle focus:border-focus"
               id="contribution-search"
               onChange={(event) => setQuery(event.currentTarget.value)}
               placeholder="Title, repository, or pull request"
@@ -154,7 +240,7 @@ export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
             {pullRequestStates.map((state) => (
               <button
                 aria-pressed={stateFilter === state}
-                className={`flex min-w-0 items-center gap-1 border border-line px-1.5 text-micro transition-colors first-of-type:rounded-l-control last:rounded-r-control ${stateFilter === state ? "bg-surface-raised text-text" : "bg-surface text-muted hover:text-text"}`}
+                className={`flex min-w-0 items-center gap-1 border border-line px-1.5 text-micro transition-colors last:rounded-r-control first-of-type:rounded-l-control ${stateFilter === state ? "bg-surface-raised text-text" : "bg-surface text-muted hover:text-text"}`}
                 key={state}
                 onClick={() => setStateFilter(state)}
                 type="button"
@@ -166,202 +252,40 @@ export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
         </div>
         <output
           aria-live="polite"
-          className="mb-3 mt-2 block text-micro leading-4 text-muted"
+          className="mt-2 mb-3 block text-micro leading-4 text-muted"
         >
           {visiblePullRequestCount} of {pullRequestCount} pull requests
         </output>
 
         {filteredRepositories.length > 0 ? (
           <>
-            <h3 className="mb-2 mt-5 text-xs font-semibold text-text">
+            <h3 className="mt-5 mb-2 text-xs font-semibold text-text">
               Featured repositories
               <span className="ml-2 font-normal text-muted">
                 {featuredRepositories.length}
               </span>
             </h3>
             {featuredRepositories.length > 0 ? (
-              <ul className="m-0 list-none border-t border-line p-0">
-                {featuredRepositories.map((repository) => (
-                  <li className="border-b border-line" key={repository.repo}>
-                    <details
-                      className="group"
-                      open={normalizedQuery.length > 0}
-                    >
-                      <summary className="flex min-h-[58px] cursor-pointer list-none items-center gap-3 py-2.5 [&::-webkit-details-marker]:hidden">
-                        <RepositoryAvatar
-                          avatarUrl={repository.avatarUrl}
-                          name={repository.name}
-                        />
-                        <span className="grid min-w-0 flex-1 gap-0.5">
-                          <span className="truncate text-xs font-semibold leading-4 text-text">
-                            {repository.name}
-                          </span>
-                          <span className="truncate text-micro leading-4 text-muted">
-                            {repository.repo}
-                          </span>
-                        </span>
-                        <span className="hidden shrink-0 text-micro text-muted sm:inline">
-                          ★ {repository.stars.toLocaleString()}
-                        </span>
-                        <span className="shrink-0 text-micro text-muted">
-                          {repository.pullRequests.length} PR
-                          {repository.pullRequests.length === 1 ? "" : "s"}
-                        </span>
-                        <ChevronDown
-                          aria-hidden="true"
-                          className="shrink-0 text-subtle transition-transform group-open:rotate-180"
-                          size={14}
-                        />
-                      </summary>
-                      <div className="pl-10">
-                        <div className="-ml-10 border-b border-line pl-4">
-                          <a
-                            className="inline-flex min-h-10 items-center text-micro text-muted transition-colors hover:text-text"
-                            href={repository.url}
-                            rel="noreferrer"
-                            target="_blank"
-                          >
-                            Open repository
-                            <ExternalLink
-                              aria-hidden="true"
-                              className="ml-1"
-                              size={12}
-                            />
-                          </a>
-                        </div>
-                        {repository.pullRequests.map((pullRequest) => {
-                          const { Icon, color } =
-                            pullRequestStatus[pullRequest.state];
-                          return (
-                            <article
-                              className="-ml-10 grid min-h-10 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 border-b border-line py-2 last:border-0"
-                              key={pullRequest.number}
-                            >
-                              <a
-                                className="inline-flex min-w-0 items-center gap-1.5 text-small leading-4 text-text transition-colors hover:text-accent"
-                                href={pullRequest.url}
-                                rel="noreferrer"
-                                target="_blank"
-                              >
-                                <Icon
-                                  aria-hidden="true"
-                                  className={`shrink-0 ${color}`}
-                                  size={14}
-                                  strokeWidth={1.75}
-                                />
-                                {pullRequest.title}
-                              </a>
-                              <span className={`text-micro ${color}`}>
-                                {pullRequest.state}
-                              </span>
-                              <span className="text-micro text-subtle">
-                                #{pullRequest.number}
-                              </span>
-                            </article>
-                          );
-                        })}
-                      </div>
-                    </details>
-                  </li>
-                ))}
-              </ul>
+              <RepositoryList
+                normalizedQuery={normalizedQuery}
+                repositories={featuredRepositories}
+              />
             ) : (
               <p className="m-0 border-t border-line py-3 text-xs text-muted">
                 No featured repositories yet.
               </p>
             )}
-            <h3 className="mb-2 mt-6 text-xs font-semibold text-text">
+            <h3 className="mt-6 mb-2 text-xs font-semibold text-text">
               Other repositories
               <span className="ml-2 font-normal text-muted">
                 {otherRepositories.length}
               </span>
             </h3>
             {otherRepositories.length > 0 ? (
-              <ul className="m-0 list-none border-t border-line p-0">
-                {otherRepositories.map((repository) => (
-                  <li className="border-b border-line" key={repository.repo}>
-                    <details
-                      className="group"
-                      open={normalizedQuery.length > 0}
-                    >
-                      <summary className="flex min-h-[58px] cursor-pointer list-none items-center gap-3 py-2.5 [&::-webkit-details-marker]:hidden">
-                        <RepositoryAvatar
-                          avatarUrl={repository.avatarUrl}
-                          name={repository.name}
-                        />
-                        <span className="grid min-w-0 flex-1 gap-0.5">
-                          <span className="truncate text-xs font-semibold leading-4 text-text">
-                            {repository.name}
-                          </span>
-                          <span className="truncate text-micro leading-4 text-muted">
-                            {repository.repo}
-                          </span>
-                        </span>
-                        <span className="hidden shrink-0 text-micro text-muted sm:inline">
-                          ★ {repository.stars.toLocaleString()}
-                        </span>
-                        <span className="shrink-0 text-micro text-muted">
-                          {repository.pullRequests.length} PR
-                          {repository.pullRequests.length === 1 ? "" : "s"}
-                        </span>
-                        <ChevronDown
-                          aria-hidden="true"
-                          className="shrink-0 text-subtle transition-transform group-open:rotate-180"
-                          size={14}
-                        />
-                      </summary>
-                      <div className="pl-10">
-                        <div className="-ml-10 border-b border-line pl-4">
-                          <a
-                            className="inline-flex min-h-10 items-center text-micro text-muted transition-colors hover:text-text"
-                            href={repository.url}
-                            rel="noreferrer"
-                            target="_blank"
-                          >
-                            Open repository
-                            <ExternalLink
-                              aria-hidden="true"
-                              className="ml-1"
-                              size={12}
-                            />
-                          </a>
-                        </div>
-                        {repository.pullRequests.map((pullRequest) => {
-                          const { Icon, color } =
-                            pullRequestStatus[pullRequest.state];
-                          return (
-                            <article
-                              className="-ml-10 grid min-h-10 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 border-b border-line py-2 last:border-0"
-                              key={pullRequest.number}
-                            >
-                              <a
-                                className="inline-flex min-w-0 items-center gap-1.5 text-small leading-4 text-text transition-colors hover:text-accent"
-                                href={pullRequest.url}
-                                rel="noreferrer"
-                                target="_blank"
-                              >
-                                <Icon
-                                  aria-hidden="true"
-                                  className={`shrink-0 ${color}`}
-                                  size={14}
-                                  strokeWidth={1.75}
-                                />
-                                {pullRequest.title}
-                              </a>
-                              <span className={`text-micro ${color}`}>
-                                {pullRequest.state}
-                              </span>
-                              <span className="text-micro text-subtle">
-                                #{pullRequest.number}
-                              </span>
-                            </article>
-                          );
-                        })}
-                      </div>
-                    </details>
-                  </li>
-                ))}
-              </ul>
+              <RepositoryList
+                normalizedQuery={normalizedQuery}
+                repositories={otherRepositories}
+              />
             ) : (
               <p className="m-0 border-t border-line py-3 text-xs text-muted">
                 No other repositories match the current filters.
