@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://www.schemastore.org/github-workflow.json
 name: CI
 
 on:
@@ -51,9 +52,19 @@ jobs:
       - name: Run task
         run: bun run ${{ matrix.task }}
 
+      - name: Upload Alchemy Worker preview bundle
+        if: matrix.task == 'build'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: alchemy-worker
+          path: |
+            apps/website/dist/server/**
+            apps/website/dist/client/**
+          if-no-files-found: error
+
       - name: Upload test results to Codecov
         if: ${{ !cancelled() && matrix.task == 'test' && env.CODECOV_TOKEN_AVAILABLE == 'true' }}
-        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           disable_search: true
           files: test-report.junit.xml
@@ -63,7 +74,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: always() && matrix.task == 'test' && env.CODECOV_TOKEN_AVAILABLE == 'true'
-        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           disable_search: true
           files: coverage/lcov.info
