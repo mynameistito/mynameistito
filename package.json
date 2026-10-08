@@ -9,8 +9,10 @@
   "type": "module",
   "scripts": {
     "build": "turbo run build",
+    "dev": "bun run dev:website",
     "dev:all": "turbo run dev --ui=tui",
     "dev:cli": "bun run --cwd packages/mynameistito dev",
+    "dev:secure": "2password env run apps/website/.dev.vars.tpl -- bun dev",
     "dev:website": "bun run --cwd apps/website dev",
     "changeset": "changeset",
     "changeset-add": "bun run scripts/changeset-add.ts",

@@ -15,6 +15,8 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as LinksRouteImport } from './routes/links'
 import { Route as OpenSourceRouteImport } from './routes/open-source'
 import { Route as ProjectsRouteImport } from './routes/projects'
+import { Route as ApiContactRouteImport } from './routes/api.contact'
+import { Route as ApiVisitorsRouteImport } from './routes/api.visitors'
 import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
 import { Route as ProjectsSlugRouteImport } from './routes/projects.$slug'
 
@@ -48,6 +50,16 @@ const ProjectsRoute = ProjectsRouteImport.update({
   path: '/projects',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiContactRoute = ApiContactRouteImport.update({
+  id: '/api/contact',
+  path: '/api/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiVisitorsRoute = ApiVisitorsRouteImport.update({
+  id: '/api/visitors',
+  path: '/api/visitors',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -66,6 +78,8 @@ export interface FileRoutesByFullPath {
   '/links': typeof LinksRoute
   '/open-source': typeof OpenSourceRoute
   '/projects': typeof ProjectsRouteWithChildren
+  '/api/contact': typeof ApiContactRoute
+  '/api/visitors': typeof ApiVisitorsRoute
   '/projects/$slug': typeof ProjectsSlugRoute
   '/projects/': typeof ProjectsIndexRoute
 }
@@ -75,6 +89,8 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/links': typeof LinksRoute
   '/open-source': typeof OpenSourceRoute
+  '/api/contact': typeof ApiContactRoute
+  '/api/visitors': typeof ApiVisitorsRoute
   '/projects/$slug': typeof ProjectsSlugRoute
   '/projects': typeof ProjectsIndexRoute
 }
@@ -86,6 +102,8 @@ export interface FileRoutesById {
   '/links': typeof LinksRoute
   '/open-source': typeof OpenSourceRoute
   '/projects': typeof ProjectsRouteWithChildren
+  '/api/contact': typeof ApiContactRoute
+  '/api/visitors': typeof ApiVisitorsRoute
   '/projects/$slug': typeof ProjectsSlugRoute
   '/projects/': typeof ProjectsIndexRoute
 }
@@ -98,6 +116,8 @@ export interface FileRouteTypes {
     | '/links'
     | '/open-source'
     | '/projects'
+    | '/api/contact'
+    | '/api/visitors'
     | '/projects/$slug'
     | '/projects/'
   fileRoutesByTo: FileRoutesByTo
@@ -107,6 +127,8 @@ export interface FileRouteTypes {
     | '/contact'
     | '/links'
     | '/open-source'
+    | '/api/contact'
+    | '/api/visitors'
     | '/projects/$slug'
     | '/projects'
   id:
@@ -117,6 +139,8 @@ export interface FileRouteTypes {
     | '/links'
     | '/open-source'
     | '/projects'
+    | '/api/contact'
+    | '/api/visitors'
     | '/projects/$slug'
     | '/projects/'
   fileRoutesById: FileRoutesById
@@ -128,6 +152,8 @@ export interface RootRouteChildren {
   LinksRoute: typeof LinksRoute
   OpenSourceRoute: typeof OpenSourceRoute
   ProjectsRoute: typeof ProjectsRouteWithChildren
+  ApiContactRoute: typeof ApiContactRoute
+  ApiVisitorsRoute: typeof ApiVisitorsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -174,6 +200,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/contact': {
+      id: '/api/contact'
+      path: '/api/contact'
+      fullPath: '/api/contact'
+      preLoaderRoute: typeof ApiContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/visitors': {
+      id: '/api/visitors'
+      path: '/api/visitors'
+      fullPath: '/api/visitors'
+      preLoaderRoute: typeof ApiVisitorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/projects/': {
       id: '/projects/'
       path: '/'
@@ -212,6 +252,8 @@ const rootRouteChildren: RootRouteChildren = {
   LinksRoute: LinksRoute,
   OpenSourceRoute: OpenSourceRoute,
   ProjectsRoute: ProjectsRouteWithChildren,
+  ApiContactRoute: ApiContactRoute,
+  ApiVisitorsRoute: ApiVisitorsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

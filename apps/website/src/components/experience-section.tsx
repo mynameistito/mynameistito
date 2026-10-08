@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { profile } from "@/lib/profile";
 
-/** Renders Akshar's work history, with detail revealed on request.
+/** Renders Tito's work history, with detail revealed on request.
  * @returns The expandable work history.
  */
 export const ExperienceSection = () => {
@@ -45,10 +45,20 @@ export const ExperienceSection = () => {
             <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-5">
               <div className="min-w-0">
                 <h3 className="m-0 text-sm font-semibold leading-5 tracking-row text-text">
-                  {role.company}
+                  <a
+                    className="text-text underline decoration-subtle underline-offset-4"
+                    href={role.href}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    {role.company}
+                  </a>
                 </h3>
                 <p className="m-0 text-xs leading-row text-muted">
                   {role.title}
+                  {"aside" in role && (
+                    <span className="ml-1 text-subtle">{role.aside}</span>
+                  )}
                 </p>
               </div>
               <p className="m-0 text-right text-xs leading-row text-muted">

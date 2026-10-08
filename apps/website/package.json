@@ -9,7 +9,7 @@
   "scripts": {
     "fix": "ultracite fix",
     "check": "ultracite check",
-    "dev": "vite dev",
+    "dev": "2password env resolve .env.tpl --output .dev.vars && vite dev",
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "bun run --cwd ../.. alchemy deploy --stage prod --yes",
@@ -17,6 +17,8 @@
     "typecheck": "bun run cf-typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@distilled.cloud/github": "1.0.0-rc.13",
+    "@distilled.cloud/resend": "1.0.0-rc.13",
     "@fontsource-variable/source-sans-3": "^5.3.0",
     "@fontsource-variable/syne": "^5.3.0",
     "@tailwindcss/vite": "^4.3.3",

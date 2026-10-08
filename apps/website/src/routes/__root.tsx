@@ -2,6 +2,7 @@ import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
 
 import { NotFoundPage } from "@/components/not-found-page";
 import { SocialDock } from "@/components/social-dock";
+import { VisitorTracker } from "@/components/visitor-tracker";
 
 import appCss from "@/styles.css?url";
 
@@ -17,6 +18,7 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => (
     <body className="min-h-screen bg-page font-sans text-text antialiased">
       {children}
       <SocialDock />
+      <VisitorTracker />
       <Scripts />
     </body>
   </html>
@@ -26,9 +28,9 @@ export const Route = createRootRoute({
   head: () => ({
     links: [
       {
-        href: "/paper-assets/6S9J9JCVBGPWN32S6BFT2JGVX2.jpg",
+        href: "/assets/avatar.png",
         rel: "icon",
-        type: "image/jpeg",
+        type: "image/png",
       },
       {
         href: appCss,
@@ -44,11 +46,11 @@ export const Route = createRootRoute({
         name: "viewport",
       },
       {
-        title: "Akshar Patel | apunlisted.com",
+        title: "Tito | mynameistito.com",
       },
       {
         content:
-          "Akshar Patel is a data analyst, open-source contributor, and builder.",
+          "Tito is a developer from New Zealand who likes messing with things and seeing where they go.",
         name: "description",
       },
     ],

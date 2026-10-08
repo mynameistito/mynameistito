@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, UsersRound } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { SiteControls } from "@/components/site-controls";
 import { profile } from "@/lib/profile";
@@ -56,9 +56,6 @@ const siteHeader = ({ backTo, backLabel }: SiteHeaderProps) =>
         aria-label="Social links"
         className="flex shrink-0 items-center gap-1"
       >
-        <span className="mr-1 inline-flex h-[30px] items-center gap-1 rounded-control border border-line bg-surface px-2 text-micro text-muted">
-          <UsersRound aria-hidden="true" size={12} /> 305
-        </span>
         <SiteControls />
       </nav>
     </header>

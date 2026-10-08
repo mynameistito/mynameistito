@@ -1,14 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { OpenSourceBrowser } from "@/components/open-source-browser";
+import { getContributions } from "@/lib/contributions";
+
+const OpenSourcePage = () => (
+  <OpenSourceBrowser repositories={Route.useLoaderData()} />
+);
 
 export const Route = createFileRoute("/open-source")({
-  component: OpenSourceBrowser,
+  loader: () => getContributions(),
+  component: OpenSourcePage,
   head: () => ({
     meta: [
-      { title: "Open source | Akshar Patel" },
+      { title: "Open source | Tito" },
       {
-        content: "Open-source contributions by Akshar Patel.",
+        content: "Open-source contributions by Tito.",
         name: "description",
       },
     ],

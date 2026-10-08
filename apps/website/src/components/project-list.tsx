@@ -1,12 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 
-import { projectSlug, projects } from "@/lib/projects";
+import { projectSlug } from "@/lib/projects";
+import type { Project } from "@/lib/projects";
 
 interface ProjectListProps {
+  items: readonly Project[];
   limit?: number;
   offset?: number;
-  items?: readonly (typeof projects)[number][];
   showImages?: boolean;
   previewOnHover?: boolean;
 }
@@ -16,7 +17,7 @@ interface ProjectListProps {
  * @returns A list of project links.
  */
 export const ProjectList = ({
-  items = projects,
+  items,
   limit,
   offset = 0,
   showImages = false,

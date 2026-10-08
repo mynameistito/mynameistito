@@ -5,16 +5,29 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-const config = defineConfig({
+const cloudflareWorkersModule = "cloudflare:workers";
+
+const config = defineConfig(({ command }) => ({
   plugins: [
-    cloudflare(),
+    ...(command === "serve"
+      ? [
+          cloudflare({
+            config: { compatibilityDate: "2026-09-28" },
+            types: { generate: false },
+            viteEnvironment: { name: "ssr" },
+          }),
+        ]
+      : []),
     devtools(),
     tailwindcss(),
     tanstackStart(),
     viteReact(),
   ],
-  resolve: { tsconfigPaths: true },
+  resolve: {
+    tsconfigPaths: true,
+  },
+  build: { rolldownOptions: { external: [cloudflareWorkersModule] } },
   server: { port: 3000 },
-});
+}));
 
 export default config;

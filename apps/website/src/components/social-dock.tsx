@@ -1,24 +1,20 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ArrowUpRight, Github, Linkedin, Youtube } from "lucide-react";
+import { ArrowUpRight, Github } from "lucide-react";
 
 import { profile } from "@/lib/profile";
 
 const socialItems = [
   { label: "GitHub", Icon: Github, href: profile.github },
-  { label: "LinkedIn", Icon: Linkedin, href: profile.linkedin },
   { label: "X", href: profile.x, mark: "𝕏" },
-  { label: "YouTube", Icon: Youtube, href: profile.youtube },
-  { label: "Resume", href: profile.resume, mark: "CV" },
 ] as const;
 
-/** Fixed social navigation matching the compact reference-site footer.
- * @returns The social dock.
+/** Renders the compact footer links on every route except the link hub.
+ * @returns The social navigation, or nothing on the link hub.
  */
 export const SocialDock = () => {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
-
   if (pathname === "/links") {
     return null;
   }

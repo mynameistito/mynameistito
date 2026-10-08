@@ -1,15 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import {
-  ArrowLeft,
-  ArrowUpRight,
-  Coffee,
-  FileText,
-  Github,
-  Instagram,
-  Linkedin,
-  Music2,
-  Youtube,
-} from "lucide-react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 
 import { SiteControls } from "@/components/site-controls";
 import { profile } from "@/lib/profile";
@@ -19,30 +9,34 @@ const links = [
     label: "GitHub",
     detail: "Projects and open source",
     href: profile.github,
-    Icon: Github,
+    mark: "GH",
+  },
+  { label: "X", detail: "Thoughts and updates", href: profile.x, mark: "𝕏" },
+  {
+    label: "Writing",
+    detail: "Notes and longer-form writing",
+    href: "https://mynameistito.com/writing",
+    mark: "W",
   },
   {
-    label: "X",
-    detail: "Thoughts and updates",
-    href: profile.x,
-    mark: "𝕏",
+    label: "Discord",
+    detail: "Fastest way to reach me",
+    href: profile.discord,
+    mark: "D",
   },
   {
-    label: "LinkedIn",
-    detail: "Professional profile",
-    href: profile.linkedin,
-    Icon: Linkedin,
+    label: "Signal",
+    detail: "Message me privately",
+    href: profile.signal,
+    mark: "S",
   },
+  { label: "KZG", detail: "Game servers", href: "https://kzg.com", mark: "K" },
   {
-    label: "YouTube",
-    detail: "Videos and demos",
-    href: profile.youtube,
-    Icon: Youtube,
+    label: "gamehostbros",
+    detail: "Game server hosting",
+    href: "https://gamehostbros.com",
+    mark: "G",
   },
-  { label: "Instagram", detail: "", href: profile.instagram, Icon: Instagram },
-  { label: "TikTok", detail: "", href: profile.tiktok, Icon: Music2 },
-  { label: "Buy Me a Coffee", detail: "", href: profile.coffee, Icon: Coffee },
-  { label: "Resume", detail: "", href: profile.resume, Icon: FileText },
 ] as const;
 
 const LinksPage = () => (
@@ -55,14 +49,13 @@ const LinksPage = () => (
         className="inline-flex items-center gap-1 text-xs text-muted transition-colors hover:text-text"
         to="/"
       >
-        <ArrowLeft aria-hidden="true" size={14} />
-        Back to portfolio
+        <ArrowLeft aria-hidden="true" size={14} /> Back to portfolio
       </Link>
       <SiteControls />
     </nav>
     <header className="mb-8 text-center">
       <Link
-        aria-label="Visit Akshar's portfolio"
+        aria-label="Visit Tito's portfolio"
         className="grid size-16 place-items-center overflow-hidden rounded-full border border-line"
         to="/"
       >
@@ -75,11 +68,11 @@ const LinksPage = () => (
         />
       </Link>
       <h1 className="mt-4 mb-1 text-xl font-semibold tracking-heading text-text">
-        Akshar Patel
+        {profile.name}
       </h1>
-      <p className="m-0 text-sm text-muted">{profile.subtitle}</p>
+      <p className="m-0 text-sm text-muted">@{profile.handle}</p>
     </header>
-    <nav aria-label="Akshar's links" className="grid w-full gap-2">
+    <nav aria-label="Tito's links" className="grid w-full gap-2">
       {links.map((link) => (
         <a
           className="grid min-h-[58px] grid-cols-[38px_minmax(0,1fr)_auto] items-center gap-3 rounded-control border border-line bg-surface px-3 transition-colors hover:border-line-strong hover:bg-surface-hover active:scale-[0.99]"
@@ -92,28 +85,22 @@ const LinksPage = () => (
             aria-hidden="true"
             className="grid size-8 place-items-center rounded-control border border-line-strong bg-surface-raised text-xs font-medium text-muted"
           >
-            {"Icon" in link ? (
-              <link.Icon aria-hidden="true" size={16} />
-            ) : (
-              link.mark
-            )}
+            {link.mark}
           </span>
           <span className="min-w-0">
             <span className="block text-sm font-medium text-text">
               {link.label}
             </span>
-            {link.detail && (
-              <span className="block truncate text-xs text-muted">
-                {link.detail}
-              </span>
-            )}
+            <span className="block truncate text-xs text-muted">
+              {link.detail}
+            </span>
           </span>
           <ArrowUpRight aria-hidden="true" className="text-subtle" size={14} />
           <span className="sr-only">Opens in a new tab</span>
         </a>
       ))}
     </nav>
-    <p className="mt-7 mb-0 text-xs text-subtle">apunlisted.com</p>
+    <p className="mt-7 mb-0 text-xs text-subtle">mynameistito.com</p>
   </main>
 );
 
@@ -121,8 +108,8 @@ export const Route = createFileRoute("/links")({
   component: LinksPage,
   head: () => ({
     meta: [
-      { title: "Links | Akshar Patel" },
-      { content: "Find Akshar Patel around the web.", name: "description" },
+      { title: "Links | Tito" },
+      { content: "Find Tito around the web.", name: "description" },
     ],
   }),
 });

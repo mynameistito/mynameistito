@@ -14,12 +14,6 @@ const statusMessages: Record<SubmissionStatus, string> = {
   success: "Thanks. I'll get back to you soon.",
   error: "That didn't send. Try again in a moment.",
 };
-const buttonLabels: Record<SubmissionStatus, string> = {
-  idle: "Send message",
-  submitting: "Sending",
-  success: "Message sent",
-  error: "Try again",
-};
 
 const ContactPage = () => {
   const submissionInProgress = useRef(false);
@@ -31,23 +25,15 @@ const ContactPage = () => {
       return;
     }
 
-    const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
-    if (!accessKey) {
-      setStatus("error");
-      return;
-    }
-
     const form = event.currentTarget;
-    const formData = new FormData(form);
-    formData.set("access_key", accessKey);
-    formData.set("subject", "New message from your portfolio");
-    formData.set("from_name", "Akshar's Portfolio");
+    const values = Object.fromEntries(new FormData(form).entries());
     submissionInProgress.current = true;
     setStatus("submitting");
 
     try {
-      const response = await fetch("https://api.web3forms.com/submit", {
-        body: formData,
+      const response = await fetch("/api/contact", {
+        body: JSON.stringify(values),
+        headers: { "content-type": "application/json" },
         method: "POST",
       });
       if (response.ok) {
@@ -62,29 +48,58 @@ const ContactPage = () => {
     submissionInProgress.current = false;
   };
 
+  const directMessages = [
+    {
+      label: "Discord",
+      href: profile.discord,
+      detail: "Fastest way to reach me",
+    },
+    { label: "X", href: profile.xDirectMessage, detail: "Send me a DM" },
+    { label: "Signal", href: profile.signal, detail: "Send me a message" },
+  ] as const;
+  const submitLabel = {
+    idle: "Send message",
+    submitting: "Sending",
+    success: "Message sent",
+    error: "Try again",
+  }[status];
+
   return (
     <main className="page-shell pt-page-top-header pb-page-bottom">
       <SiteHeader backLabel="Home" backTo="/" />
       <section className="mt-section">
         <h1 className="m-0 text-page-title font-semibold leading-tight tracking-title text-text">
-          Let&apos;s talk.
+          Want to chat?
         </h1>
         <p className="mt-2 mb-0 text-base leading-6 text-muted">
-          Send me a note below. I usually reply faster on X.
+          Send me a DM or leave a note below. Discord is the fastest.
         </p>
-        <a
-          className="mt-4 inline-flex min-h-9 items-center rounded-control border border-line bg-surface px-3 text-sm font-medium text-text transition-colors hover:border-accent"
-          href={profile.xDirectMessage}
-          rel="noreferrer"
-          target="_blank"
+        <nav
+          aria-label="Send me a DM"
+          className="mt-4 grid gap-2 sm:grid-cols-3"
         >
-          DM on X{" "}
-          <ArrowUpRight
-            aria-hidden="true"
-            className="ml-2 text-muted"
-            size={14}
-          />
-        </a>
+          {directMessages.map((item) => (
+            <a
+              className="flex min-h-14 items-center justify-between gap-3 rounded-control border border-line bg-surface px-3 text-sm transition-colors hover:border-accent"
+              href={item.href}
+              key={item.label}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <span>
+                <span className="block font-medium text-text">
+                  {item.label}
+                </span>
+                <span className="block text-xs text-muted">{item.detail}</span>
+              </span>
+              <ArrowUpRight
+                aria-hidden="true"
+                className="text-muted"
+                size={14}
+              />
+            </a>
+          ))}
+        </nav>
       </section>
 
       <form
@@ -97,14 +112,10 @@ const ContactPage = () => {
         }}
         onSubmit={sendMessage}
       >
-        <input
-          aria-hidden="true"
-          autoComplete="off"
-          className="hidden"
-          name="botcheck"
-          tabIndex={-1}
-          type="checkbox"
-        />
+        <label aria-hidden="true" className="hidden" htmlFor="company">
+          Leave this field empty
+          <input autoComplete="off" id="company" name="company" tabIndex={-1} />
+        </label>
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="grid gap-2 text-sm text-muted" htmlFor="name">
             Name
@@ -112,6 +123,7 @@ const ContactPage = () => {
               autoComplete="name"
               className="h-11 rounded-control border border-line bg-surface px-3 text-sm text-text outline-none transition-colors focus:border-focus"
               id="name"
+              maxLength={120}
               name="name"
               required
             />
@@ -122,6 +134,7 @@ const ContactPage = () => {
               autoComplete="email"
               className="h-11 rounded-control border border-line bg-surface px-3 text-sm text-text outline-none transition-colors focus:border-focus"
               id="email"
+              maxLength={254}
               name="email"
               required
               type="email"
@@ -133,6 +146,7 @@ const ContactPage = () => {
           <textarea
             className="min-h-36 resize-y rounded-control border border-line bg-surface px-3 py-2.5 text-sm leading-6 text-text outline-none transition-colors focus:border-focus"
             id="message"
+            maxLength={5000}
             name="message"
             required
             rows={6}
@@ -144,16 +158,14 @@ const ContactPage = () => {
             className="m-0 max-w-[32ch] text-xs leading-5 text-muted"
             role={status === "error" ? "alert" : "status"}
           >
-            {status === "error" && !import.meta.env.VITE_WEB3FORMS_ACCESS_KEY
-              ? "Contact form is not configured yet."
-              : statusMessages[status]}
+            {statusMessages[status]}
           </p>
           <button
             className="min-h-11 rounded-control bg-text px-4 text-sm font-semibold text-page transition-transform active:scale-[0.98] disabled:opacity-60"
             disabled={status === "submitting" || status === "success"}
             type="submit"
           >
-            {buttonLabels[status]}
+            {submitLabel}
           </button>
         </div>
       </form>
@@ -165,8 +177,8 @@ export const Route = createFileRoute("/contact")({
   component: ContactPage,
   head: () => ({
     meta: [
-      { title: "Contact | Akshar Patel" },
-      { content: "Get in touch with Akshar Patel.", name: "description" },
+      { title: "Contact | Tito" },
+      { content: "Get in touch with Tito.", name: "description" },
     ],
   }),
 });
