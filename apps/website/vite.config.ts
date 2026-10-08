@@ -12,6 +12,7 @@ const config = defineConfig({
     tsconfigPaths: true,
   },
   build: { rolldownOptions: { external: [cloudflareWorkersModule] } },
+  ssr: { noExternal: true },
   server: { port: 3000 },
 });
 
