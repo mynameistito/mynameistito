@@ -1,8 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/evilmartians/lefthook/master/schema.json
-no_tty: true
+no_tty: false
 output:
   - failure
-  - execution_out
 
 pre-commit:
   jobs:

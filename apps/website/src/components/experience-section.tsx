@@ -35,7 +35,16 @@ export const ExperienceSection = () => {
             <div
               className={`experience-logo-container experience-logo-container--${role.logoBackground} relative grid size-9 place-items-center rounded-lg border border-line-strong`}
             >
-              {"logoLight" in role ? (
+              {role.logoLight === role.logo ? (
+                <img
+                  alt=""
+                  className="size-[26px] rounded-md object-cover"
+                  height="26"
+                  loading="lazy"
+                  src={role.logo}
+                  width="26"
+                />
+              ) : (
                 <>
                   <img
                     alt=""
@@ -54,15 +63,6 @@ export const ExperienceSection = () => {
                     width="26"
                   />
                 </>
-              ) : (
-                <img
-                  alt=""
-                  className="size-[26px] rounded-md object-cover"
-                  height="26"
-                  loading="lazy"
-                  src={role.logo}
-                  width="26"
-                />
               )}
             </div>
             <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-5">
