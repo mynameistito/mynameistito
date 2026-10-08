@@ -40,9 +40,6 @@
 
 <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=mynameistito&theme=apprentice" />
 
-<br><br>
-
-![GitHub Contribution Graph](https://ghchart.rshah.org/mynameistito)
 
 </div>
 
