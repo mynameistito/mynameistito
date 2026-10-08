@@ -36,11 +36,11 @@ jobs:
           RESEND_FROM: ${{ secrets.RESEND_FROM }}
           WORKER_GITHUB_TOKEN: ${{ secrets.WORKER_GITHUB_TOKEN }}
         with:
-          worker-name: mynameistito-prod
+          worker-name: mynameistito
           deploy-command: bunx --no-install alchemy deploy --stage "$STAGE" --yes
           destroy-command: bunx --no-install alchemy destroy --stage "$STAGE" --yes
           production-stage: prod
-          production-url: https://mynameistito-prod.mynameistito.workers.dev
+          production-url: https://mynameistito.mynameistito.workers.dev
           preview-artifact: alchemy-worker
           preview-entrypoint: bundle/index.js
           preview-assets-directory: assets
@@ -69,11 +69,11 @@ jobs:
           RESEND_FROM: ${{ secrets.RESEND_FROM }}
           WORKER_GITHUB_TOKEN: ${{ secrets.WORKER_GITHUB_TOKEN }}
         with:
-          worker-name: mynameistito-prod
+          worker-name: mynameistito
           deploy-command: bunx --no-install alchemy deploy --stage "$STAGE" --yes
           destroy-command: bunx --no-install alchemy destroy --stage "$STAGE" --yes
           production-stage: prod
-          production-url: https://mynameistito-prod.mynameistito.workers.dev
+          production-url: https://mynameistito.mynameistito.workers.dev
           preview-compatibility-date: "2026-10-07"
           preview-compatibility-flags: '["nodejs_compat"]'
           reconcile: true

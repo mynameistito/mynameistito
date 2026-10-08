@@ -24,7 +24,7 @@ export const WebsiteResource = Website.Vite("Website", {
     RESEND_FROM: ConfigString("RESEND_FROM"),
     VISITOR_SERVICE: VisitorService,
   },
-  name: "mynameistito-prod",
+  name: "mynameistito",
   rootDir: "apps/website",
 });
 
