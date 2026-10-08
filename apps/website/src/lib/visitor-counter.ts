@@ -11,6 +11,7 @@ import {
   expiredLiveVisitorKeys,
   heartbeatMs,
   keysForVisitor,
+  liveCountAfterVisit,
 } from "./visitor-counting";
 
 /** Daily unique and currently active visitor counts. */
@@ -49,17 +50,29 @@ export default VisitorCounter.make(
 
       const counts = yield* state.storage.transaction(
         gen(function* countVisitors() {
-          const dailyKeys = yield* state.storage.list({ prefix: "daily:" });
-          const seenKeys = yield* state.storage.list({ prefix: "seen:" });
+          const storedToday = yield* state.storage.get<string>("today");
+          if (storedToday !== keys.today) {
+            const dailyKeys = yield* state.storage.list({ prefix: "daily:" });
+            const seenKeys = yield* state.storage.list({ prefix: "seen:" });
+            const expired = expiredVisitorKeys({
+              today: keys.today,
+              now,
+              dailyKeys: dailyKeys.keys(),
+              seenKeys: seenKeys.keys(),
+              liveEntries: [],
+            });
+            for (const key of expired) {
+              yield* state.storage.delete(key);
+            }
+            yield* state.storage.put("today", keys.today);
+          }
+
           const active = yield* state.storage.list<number>({ prefix: "live:" });
-          const expired = expiredVisitorKeys({
-            today: keys.today,
-            now,
-            dailyKeys: dailyKeys.keys(),
-            seenKeys: seenKeys.keys(),
-            liveEntries: active,
-          });
-          for (const key of expired) {
+          const expiredLive = expiredLiveVisitorKeys(active, now);
+          const expiredLiveSet = new Set(expiredLive);
+          const visitorWasActive =
+            active.has(keys.live) && !expiredLiveSet.has(keys.live);
+          for (const key of expiredLive) {
             yield* state.storage.delete(key);
           }
 
@@ -73,12 +86,13 @@ export default VisitorCounter.make(
             dailyCountAfterVisit(current, seen ?? false)
           );
           yield* state.storage.put(keys.live, now);
-          const activeVisitors = yield* state.storage.list<number>({
-            prefix: "live:",
-          });
           return {
             daily: (yield* state.storage.get<number>(keys.daily)) ?? 0,
-            live: activeVisitors.size,
+            live: liveCountAfterVisit(
+              active.size,
+              expiredLive.length,
+              visitorWasActive
+            ),
           } satisfies VisitorCounts;
         })
       );

@@ -6,6 +6,7 @@ import {
   expiredVisitorKeys,
   heartbeatMs,
   keysForVisitor,
+  liveCountAfterVisit,
   liveWindowMs,
 } from "@/lib/visitor-counting";
 
@@ -57,5 +58,11 @@ describe("visitor counting rules", () => {
         1 + liveWindowMs + 1
       )
     ).toStrictEqual(["live:expired"]);
+  });
+
+  it("keeps the exact live count when renewing or adding a visitor", () => {
+    expect(liveCountAfterVisit(3, 1, true)).toBe(2);
+    expect(liveCountAfterVisit(3, 1, false)).toBe(3);
+    expect(liveCountAfterVisit(3, 0, true)).toBe(3);
   });
 });

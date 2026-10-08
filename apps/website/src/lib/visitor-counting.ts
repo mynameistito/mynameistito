@@ -41,6 +41,18 @@ export const expiredLiveVisitorKeys = (
     .filter(([, lastSeen]) => now - lastSeen > liveWindowMs)
     .map(([key]) => key);
 
+/** Counts active visitors after expiring leases and recording this heartbeat.
+ * @param activeCount - Number of stored live visitor leases before cleanup.
+ * @param expiredCount - Number of expired leases deleted during cleanup.
+ * @param visitorWasActive - Whether this visitor already had a valid lease.
+ * @returns The active count after the current visitor is recorded.
+ */
+export const liveCountAfterVisit = (
+  activeCount: number,
+  expiredCount: number,
+  visitorWasActive: boolean
+): number => activeCount - expiredCount + (visitorWasActive ? 0 : 1);
+
 /** Storage keys that have expired under the visitor counter contract.
  * @param input - Current day, timestamp, and stored visitor keys.
  * @returns Keys to delete before calculating counts.
