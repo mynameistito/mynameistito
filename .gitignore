@@ -1,5 +1,11 @@
 node_modules/
+.turbo/
+.cloudflare/
 dist/
 packages/*/dist/
 coverage/
 test-report.junit.xml
+.unlighthouse/
+.unlighthouse-*/
+.env
+.alchemy/

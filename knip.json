@@ -1,0 +1,13 @@
+{
+  "$schema": "https://unpkg.com/knip@6.40.0/schema.json",
+  "ignoreBinaries": ["2password"],
+  "ignoreDependencies": ["cloudflare"],
+  "workspaces": {
+    ".": {
+      "entry": ["alchemy.run.ts"]
+    },
+    "apps/website": {
+      "entry": ["src/lib/utils.ts"]
+    }
+  }
+}

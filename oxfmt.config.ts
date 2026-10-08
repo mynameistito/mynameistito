@@ -3,5 +3,8 @@ import ultracite from "ultracite/oxfmt";
 
 export default defineConfig({
   ...ultracite,
-  ignorePatterns: [...(ultracite.ignorePatterns ?? []), "README.md"],
+  sortTailwindcss: {
+    functions: ["clsx", "cva", "tw", "twMerge", "cn", "twJoin", "tv"],
+    stylesheet: "./app/styles.css",
+  },
 });

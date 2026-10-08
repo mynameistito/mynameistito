@@ -1,8 +1,10 @@
+/** A labeled external link on the portfolio. */
 export interface PortfolioLink {
   readonly label: string;
   readonly url: string;
 }
 
+/** The portfolio owner's public profile metadata. */
 export interface PortfolioProfile {
   readonly name: string;
   readonly description: string;
