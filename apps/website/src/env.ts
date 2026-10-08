@@ -60,7 +60,7 @@ export const getAppEnv = Effect.fn("getAppEnv")(function* getAppEnv() {
     process.env.WORKER_GITHUB_TOKEN,
     bindings.GITHUB_TOKEN,
     bindings.WORKER_GITHUB_TOKEN,
-  ].find((token) => token !== undefined);
+  ].find((token) => token !== undefined && token !== "");
   const merged = {
     ...bindings,
     CONTACT_RECIPIENT:
