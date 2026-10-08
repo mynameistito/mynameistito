@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 
-import { projectSlug } from "@/lib/projects";
-import type { Project } from "@/lib/projects";
+import { projectSlug } from "@/lib/project";
+import type { Project } from "@/lib/project";
 
 interface ProjectListProps {
   items: readonly Project[];

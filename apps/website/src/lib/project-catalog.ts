@@ -11,27 +11,6 @@ export interface OrderedProjectRepository<T extends RepositoryVisibility> {
   readonly repository: T;
 }
 
-const repositoriesPerPage = 100;
-
-/** Fetch every repository page until GitHub returns a partial page.
- * @typeParam T - The repository record type returned by GitHub.
- * @param fetchPage - Fetches one page using the supplied page and page size.
- * @returns All repository records in API page order.
- */
-export const collectRepositoryPages = <T>(
-  fetchPage: (page: number, perPage: number) => Promise<readonly T[]>
-): Promise<readonly T[]> => {
-  const collectPage = async (page: number): Promise<readonly T[]> => {
-    const results = await fetchPage(page, repositoriesPerPage);
-    if (results.length < repositoriesPerPage) {
-      return results;
-    }
-    return [...results, ...(await collectPage(page + 1))];
-  };
-
-  return collectPage(1);
-};
-
 /** Put pinned public repositories first, then include remaining owned repos.
  * @typeParam T - The repository metadata type.
  * @param repositories - Repositories returned by GitHub.

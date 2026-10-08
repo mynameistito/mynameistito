@@ -8,10 +8,15 @@ const links = [
   {
     label: "GitHub",
     detail: "Projects and open source",
-    href: profile.github,
+    href: `https://github.com/${profile.github}`,
     mark: "GH",
   },
-  { label: "X", detail: "Thoughts and updates", href: profile.x, mark: "𝕏" },
+  {
+    label: "X",
+    detail: "Thoughts and updates",
+    href: `https://x.com/${profile.x}`,
+    mark: "𝕏",
+  },
   {
     label: "Writing",
     detail: "Notes and longer-form writing",
@@ -21,13 +26,13 @@ const links = [
   {
     label: "Discord",
     detail: "Fastest way to reach me",
-    href: profile.discord,
+    href: `https://discord.com/users/${profile.discord}`,
     mark: "D",
   },
   {
     label: "Signal",
     detail: "Message me privately",
-    href: profile.signal,
+    href: `https://signal.me/#eu/${profile.signal}`,
     mark: "S",
   },
   { label: "KZG", detail: "Game servers", href: "https://kzg.com", mark: "K" },
@@ -70,7 +75,7 @@ const LinksPage = () => (
       <h1 className="mt-4 mb-1 text-xl font-semibold tracking-heading text-text">
         {profile.name}
       </h1>
-      <p className="m-0 text-sm text-muted">@{profile.handle}</p>
+      <p className="m-0 text-sm text-muted">@{profile.x}</p>
     </header>
     <nav aria-label="Tito's links" className="grid w-full gap-2">
       {links.map((link) => (

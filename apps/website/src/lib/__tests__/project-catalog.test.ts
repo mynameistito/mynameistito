@@ -1,19 +1,20 @@
+import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
 
-import {
-  collectRepositoryPages,
-  orderProjectRepositories,
-} from "@/lib/project-catalog";
+import { orderProjectRepositories } from "@/lib/project-catalog";
+import { collectRepositoryPages } from "@/lib/provider/github/repository-pages";
 
 describe("project catalog", () => {
   it("collects all repository pages, including a final partial page", async () => {
     const firstPage = Array.from({ length: 100 }, (_, index) => index);
     const calls: { page: number; perPage: number }[] = [];
 
-    const repositories = await collectRepositoryPages((page, perPage) => {
-      calls.push({ page, perPage });
-      return Promise.resolve(page === 1 ? firstPage : [100]);
-    });
+    const repositories = await Effect.runPromise(
+      collectRepositoryPages((page, perPage) => {
+        calls.push({ page, perPage });
+        return Effect.succeed(page === 1 ? firstPage : [100]);
+      })
+    );
 
     expect(repositories).toHaveLength(101);
     expect(calls).toStrictEqual([

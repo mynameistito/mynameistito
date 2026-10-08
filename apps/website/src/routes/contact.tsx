@@ -51,11 +51,19 @@ const ContactPage = () => {
   const directMessages = [
     {
       label: "Discord",
-      href: profile.discord,
+      href: `https://discord.com/users/${profile.discord}`,
       detail: "Fastest way to reach me",
     },
-    { label: "X", href: profile.xDirectMessage, detail: "Send me a DM" },
-    { label: "Signal", href: profile.signal, detail: "Send me a message" },
+    {
+      label: "X",
+      href: `https://x.com/messages/compose?recipient_id=${profile["x-dm"]}`,
+      detail: "Send me a DM",
+    },
+    {
+      label: "Signal",
+      href: `https://signal.me/#eu/${profile.signal}`,
+      detail: "Send me a message",
+    },
   ] as const;
   const submitLabel = {
     idle: "Send message",

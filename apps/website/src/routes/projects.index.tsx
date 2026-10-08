@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { ProjectList } from "@/components/project-list";
 import { SiteHeader } from "@/components/site-header";
-import { getProjects } from "@/lib/projects";
+import { getProjects } from "@/server/functions/projects";
 
 const ProjectsPage = () => {
   const projects = Route.useLoaderData();

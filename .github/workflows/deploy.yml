@@ -29,7 +29,12 @@ jobs:
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CONTACT_RECIPIENT: ${{ secrets.CONTACT_RECIPIENT }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MDFROMX_API_KEY: ${{ secrets.MDFROMX_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM: ${{ secrets.RESEND_FROM }}
+          WORKER_GITHUB_TOKEN: ${{ secrets.WORKER_GITHUB_TOKEN }}
         with:
           worker-name: mynameistito-prod
           deploy-command: bunx --no-install alchemy deploy --stage "$STAGE" --yes
@@ -57,7 +62,12 @@ jobs:
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CONTACT_RECIPIENT: ${{ secrets.CONTACT_RECIPIENT }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MDFROMX_API_KEY: ${{ secrets.MDFROMX_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM: ${{ secrets.RESEND_FROM }}
+          WORKER_GITHUB_TOKEN: ${{ secrets.WORKER_GITHUB_TOKEN }}
         with:
           worker-name: mynameistito-prod
           deploy-command: bunx --no-install alchemy deploy --stage "$STAGE" --yes

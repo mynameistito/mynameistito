@@ -67,7 +67,17 @@ const post = async ({ request }: { request: Request }) => {
   }
   const env = await getAppEnv();
   if (!env.RESEND_API_KEY || !env.CONTACT_RECIPIENT || !env.RESEND_FROM) {
-    return json({ error: "Contact form is not configured." }, 503);
+    const missingConfiguration = [
+      { name: "RESEND_API_KEY", value: env.RESEND_API_KEY },
+      { name: "CONTACT_RECIPIENT", value: env.CONTACT_RECIPIENT },
+      { name: "RESEND_FROM", value: env.RESEND_FROM },
+    ]
+      .filter(({ value }) => !value)
+      .map(({ name }) => name);
+    const detail = import.meta.env.DEV
+      ? ` Missing: ${missingConfiguration.join(", ")}.`
+      : "";
+    return json({ error: `Contact form is not configured.${detail}` }, 503);
   }
 
   const program = createEmail({

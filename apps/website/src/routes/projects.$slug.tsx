@@ -2,7 +2,8 @@ import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 import { SiteHeader } from "@/components/site-header";
-import { getProjects, projectSlug } from "@/lib/projects";
+import { projectSlug } from "@/lib/project";
+import { getProjects } from "@/server/functions/projects";
 
 const ProjectPage = () => {
   const { slug } = Route.useParams();

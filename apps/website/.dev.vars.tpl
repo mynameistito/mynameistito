@@ -1,4 +1,5 @@
-GITHUB_TOKEN="op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/GITHUB_TOKEN"
+WORKER_GITHUB_TOKEN="op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/GITHUB_TOKEN"
 RESEND_API_KEY="op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_API_KEY"
 CONTACT_RECIPIENT="op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CONTACT_RECIPIENT"
 RESEND_FROM="op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_FROM"
+MDFROMX_API_KEY="op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/MDFROMX_API_KEY"

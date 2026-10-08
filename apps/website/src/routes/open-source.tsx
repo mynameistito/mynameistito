@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { OpenSourceBrowser } from "@/components/open-source-browser";
-import { getContributions } from "@/lib/contributions";
+import { getContributions } from "@/server/functions/contributions";
 
 const OpenSourcePage = () => (
   <OpenSourceBrowser repositories={Route.useLoaderData()} />

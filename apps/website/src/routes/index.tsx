@@ -4,7 +4,7 @@ import { ExperienceSection } from "@/components/experience-section";
 import { ProjectList } from "@/components/project-list";
 import { SiteHeader } from "@/components/site-header";
 import { profile } from "@/lib/profile";
-import { getProjects } from "@/lib/projects";
+import { getProjects } from "@/server/functions/projects";
 
 const Home = () => (
   // Keep the landing page's featured rows in sync with the GitHub pins.

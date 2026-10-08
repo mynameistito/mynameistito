@@ -12,8 +12,7 @@ const config = defineConfig(({ command }) => ({
     ...(command === "serve"
       ? [
           cloudflare({
-            config: { compatibilityDate: "2026-09-28" },
-            types: { generate: false },
+            configPath: "./wrangler.jsonc",
             viteEnvironment: { name: "ssr" },
           }),
         ]

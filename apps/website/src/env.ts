@@ -3,6 +3,8 @@ interface AppEnv {
   readonly RESEND_API_KEY?: string;
   readonly RESEND_FROM?: string;
   readonly GITHUB_TOKEN?: string;
+  readonly WORKER_GITHUB_TOKEN?: string;
+  readonly MDFROMX_API_KEY?: string;
   readonly VISITOR_SERVICE?: {
     readonly fetch: (request: Request) => Promise<Response>;
   };
@@ -18,13 +20,20 @@ export const getAppEnv = async (): Promise<AppEnv> => {
   if (!import.meta.env.DEV) {
     return bindings;
   }
+  const githubToken = [
+    process.env.GITHUB_TOKEN,
+    process.env.GH_TOKEN,
+    process.env.WORKER_GITHUB_TOKEN,
+    bindings.GITHUB_TOKEN,
+    bindings.WORKER_GITHUB_TOKEN,
+  ].find((token) => token !== undefined);
   return {
     ...bindings,
     CONTACT_RECIPIENT:
       process.env.CONTACT_RECIPIENT ?? bindings.CONTACT_RECIPIENT,
-    GITHUB_TOKEN:
-      process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN ?? bindings.GITHUB_TOKEN,
+    GITHUB_TOKEN: githubToken,
     RESEND_API_KEY: process.env.RESEND_API_KEY ?? bindings.RESEND_API_KEY,
     RESEND_FROM: process.env.RESEND_FROM ?? bindings.RESEND_FROM,
+    MDFROMX_API_KEY: process.env.MDFROMX_API_KEY ?? bindings.MDFROMX_API_KEY,
   };
 };
