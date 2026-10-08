@@ -46,7 +46,7 @@ export const HomeProfile = () => (
         width="46"
       />
       <div className="min-w-0">
-        <p className="m-0 text-base font-semibold leading-header tracking-heading text-text">
+        <p className="m-0 text-base leading-header font-semibold tracking-heading text-text">
           {profile.name}
         </p>
         <p className="m-0 truncate text-profile leading-header text-muted">
@@ -54,8 +54,8 @@ export const HomeProfile = () => (
         </p>
       </div>
     </div>
-    <nav aria-label="Social links" className="flex shrink-0 items-center gap-1">
+    <div className="flex shrink-0 items-center gap-1">
       <SiteControls />
-    </nav>
+    </div>
   </div>
 );
