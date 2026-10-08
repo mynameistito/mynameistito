@@ -58,8 +58,8 @@ jobs:
         with:
           name: alchemy-worker
           path: |
-            apps/website/.cloudflare/output/v0/workers/default/bundle/**
-            apps/website/.cloudflare/output/v0/workers/default/assets/**
+            apps/website/dist/server/**
+            apps/website/dist/client/**
           if-no-files-found: error
 
       - name: Upload test results to Codecov

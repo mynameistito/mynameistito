@@ -42,8 +42,8 @@ jobs:
           production-stage: prod
           production-url: https://mynameistito.mynameistito.workers.dev
           preview-artifact: alchemy-worker
-          preview-entrypoint: bundle/index.js
-          preview-assets-directory: assets
+          preview-entrypoint: server/server.js
+          preview-assets-directory: client
           preview-compatibility-date: "2026-10-07"
           preview-compatibility-flags: '["nodejs_compat"]'
           use-adopt: false

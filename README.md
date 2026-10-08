@@ -18,7 +18,7 @@
 
 🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐22 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
 
-🔷 **[oc-usage-limits-plugin](https://github.com/mynameistito/oc-usage-limits-plugin)** ⭐9 — OpenCode TUI plugin for usage limits of AI Providers
+🔷 **[oc-usage-limits-plugin](https://github.com/mynameistito/oc-usage-limits-plugin)** ⭐10 — OpenCode TUI plugin for usage limits of AI Providers
 
 🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐6 — A CLI tool that updates dependencies across multiple repositories, then creates commits and pull requests automatically.
 
@@ -30,7 +30,7 @@
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
 
-🔷 **[hcc-bin-day](https://github.com/mynameistito/hcc-bin-day)** ⭐1 — TypeScript client for Hamilton City Council Fight the Landfill bin-day lookup API.
+🔷 **[hamilton-bin-day](https://github.com/mynameistito/hamilton-bin-day)** ⭐1 — TypeScript client for Hamilton City Council Fight the Landfill bin-day lookup API.
 <!-- AUTO-PROJECTS:END -->
 
 ---
@@ -40,10 +40,6 @@
 <div align="center">
 
 <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=mynameistito&theme=apprentice" />
-
-<br><br>
-
-![GitHub Contribution Graph](https://ghchart.rshah.org/mynameistito)
 
 </div>
 
