@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { Effect } from "effect";
+
 import { links, profile } from "./data.js";
 
 const output = [
@@ -9,4 +11,4 @@ const output = [
   ...links.map((link) => link.url),
 ].join("\n");
 
-console.log(output);
+Effect.runSync(Effect.sync(() => console.log(output)));

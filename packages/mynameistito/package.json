@@ -35,13 +35,18 @@
   "scripts": {
     "build": "tsdown && tsc --project tsconfig.json",
     "dev": "bun src/cli.ts",
+    "fix": "ultracite fix",
+    "check": "ultracite check",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "bun run build"
+  },
+  "dependencies": {
+    "effect": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",
     "@typescript/native": "catalog:",
-    "tsdown": "catalog:",
+    "tsdown": "^0.23.0",
     "typescript": "catalog:"
   },
   "engines": {
