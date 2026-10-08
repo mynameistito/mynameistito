@@ -9,7 +9,7 @@ const liveWindowMs = 2 * 60 * 1000;
 const heartbeatMs = 60 * 1000;
 
 /** Daily unique and currently active visitor counts. */
-export interface VisitorCounts {
+interface VisitorCounts {
   readonly daily: number;
   readonly live: number;
 }

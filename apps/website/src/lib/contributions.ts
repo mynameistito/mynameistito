@@ -11,7 +11,7 @@ import {
 export type PullRequestState = "Open" | "Merged" | "Closed";
 
 /** A pull request Tito authored in an external repository. */
-export interface ContributionPullRequest {
+interface ContributionPullRequest {
   readonly title: string;
   readonly state: PullRequestState;
   readonly number: number;
