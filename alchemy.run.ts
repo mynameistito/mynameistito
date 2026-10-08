@@ -1,15 +1,16 @@
 import { Stack } from "alchemy";
 import type { InferEnv } from "alchemy/Cloudflare";
-import { providers, state, Website } from "alchemy/Cloudflare";
+import {
+  DurableObject as DurableObjectResource,
+  providers,
+  state,
+  Website,
+} from "alchemy/Cloudflare";
 import {
   Redacted as ConfigRedacted,
   String as ConfigString,
 } from "effect/Config";
-import { gen, provide } from "effect/Effect";
-
-import VisitorServiceResource, {
-  VisitorService,
-} from "./apps/website/src/visitor-worker.ts";
+import { gen } from "effect/Effect";
 
 export const WebsiteResource = Website.Vite("Website", {
   compatibility: {
@@ -22,8 +23,12 @@ export const WebsiteResource = Website.Vite("Website", {
     MDFROMX_API_KEY: ConfigRedacted("MDFROMX_API_KEY"),
     RESEND_API_KEY: ConfigRedacted("RESEND_API_KEY"),
     RESEND_FROM: ConfigString("RESEND_FROM"),
-    VISITOR_SERVICE: VisitorService,
+    VISITOR_COUNTER: DurableObjectResource("VisitorCounter", {
+      className: "VisitorCounter",
+      transferredFrom: "VisitorService",
+    }),
   },
+  main: "worker.ts",
   name: "mynameistito",
   rootDir: "apps/website",
 });
@@ -40,5 +45,5 @@ export default Stack(
   gen(function* deployWebsite() {
     const website = yield* WebsiteResource;
     return { url: website.url };
-  }).pipe(provide(VisitorServiceResource))
+  })
 );
