@@ -36,7 +36,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_ACCOUNT_ID
           CLOUDFLARE_API_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_API_TOKEN
           CONTACT_RECIPIENT: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CONTACT_RECIPIENT
-          MDFROMX_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/MDMFROMX_API_KEY
+          MDFROMX_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/MDFROMX_API_KEY
           RESEND_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_API_KEY
           RESEND_FROM: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_FROM
           WORKER_GITHUB_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/WORKER_GITHUB_TOKEN
