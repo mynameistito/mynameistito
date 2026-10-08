@@ -31,8 +31,6 @@ jobs:
           version: 2.39.0
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          GH_APP_ID: op://uhub4xx3iwwsaxj3robdosm2hu/spbjca2lethbsiz6menimq7afm/ID
-          GH_APP_PRIVATE_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/spbjca2lethbsiz6menimq7afm/github-app.pem
           CLOUDFLARE_ACCOUNT_ID: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_ACCOUNT_ID
           CLOUDFLARE_API_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_API_TOKEN
           CONTACT_RECIPIENT: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CONTACT_RECIPIENT
@@ -41,26 +39,13 @@ jobs:
           RESEND_FROM: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_FROM
           WORKER_GITHUB_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/WORKER_GITHUB_TOKEN
 
-      - name: Create repository-scoped App token
-        id: app-token
-        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
-        with:
-          app-id: ${{ steps.onepassword.outputs.GH_APP_ID }}
-          private-key: ${{ steps.onepassword.outputs.GH_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: mynameistito
-          permission-actions: read
-          permission-contents: read
-          permission-deployments: write
-          permission-pull-requests: write
-
       - name: Run Alchemy deployment
         uses: mynameistito/alchemy-deploy@b20fd626080d4db521884f96d70b15471de493ab # v3.1.4
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ steps.onepassword.outputs.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ steps.onepassword.outputs.CLOUDFLARE_API_TOKEN }}
           CONTACT_RECIPIENT: ${{ steps.onepassword.outputs.CONTACT_RECIPIENT }}
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_TOKEN: ${{ github.token }}
           MDFROMX_API_KEY: ${{ steps.onepassword.outputs.MDFROMX_API_KEY }}
           RESEND_API_KEY: ${{ steps.onepassword.outputs.RESEND_API_KEY }}
           RESEND_FROM: ${{ steps.onepassword.outputs.RESEND_FROM }}
@@ -94,8 +79,6 @@ jobs:
           version: 2.39.0
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          GH_APP_ID: op://uhub4xx3iwwsaxj3robdosm2hu/spbjca2lethbsiz6menimq7afm/ID
-          GH_APP_PRIVATE_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/spbjca2lethbsiz6menimq7afm/github-app.pem
           CLOUDFLARE_ACCOUNT_ID: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_ACCOUNT_ID
           CLOUDFLARE_API_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_API_TOKEN
           CONTACT_RECIPIENT: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CONTACT_RECIPIENT
@@ -104,26 +87,13 @@ jobs:
           RESEND_FROM: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_FROM
           WORKER_GITHUB_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/WORKER_GITHUB_TOKEN
 
-      - name: Create repository-scoped App token
-        id: app-token
-        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
-        with:
-          app-id: ${{ steps.onepassword.outputs.GH_APP_ID }}
-          private-key: ${{ steps.onepassword.outputs.GH_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: mynameistito
-          permission-actions: read
-          permission-contents: read
-          permission-deployments: write
-          permission-pull-requests: read
-
       - name: Reconcile preview deployments
         uses: mynameistito/alchemy-deploy@b20fd626080d4db521884f96d70b15471de493ab # v3.1.4
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ steps.onepassword.outputs.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ steps.onepassword.outputs.CLOUDFLARE_API_TOKEN }}
           CONTACT_RECIPIENT: ${{ steps.onepassword.outputs.CONTACT_RECIPIENT }}
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_TOKEN: ${{ github.token }}
           MDFROMX_API_KEY: ${{ steps.onepassword.outputs.MDFROMX_API_KEY }}
           RESEND_API_KEY: ${{ steps.onepassword.outputs.RESEND_API_KEY }}
           RESEND_FROM: ${{ steps.onepassword.outputs.RESEND_FROM }}
