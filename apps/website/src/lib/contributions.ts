@@ -1,4 +1,5 @@
 import { DateTime, Effect, Redacted } from "effect";
+import { HttpClientError } from "effect/http";
 
 import { getAppEnv } from "@/env";
 import { profile } from "@/lib/profile";
@@ -21,6 +22,7 @@ export interface ContributionRepository {
   readonly repo: string;
   readonly stars: number;
   readonly url: string;
+  readonly avatarUrl: string;
   readonly pullRequests: readonly ContributionPullRequest[];
 }
 
@@ -28,6 +30,20 @@ const cacheDuration = 24 * 60 * 60 * 1000;
 const minimumStars = 1000;
 let cachedAt = 0;
 let cachedContributions: readonly ContributionRepository[] | undefined;
+
+const summarizeGitHubFailure = (cause: unknown): string => {
+  if (HttpClientError.isHttpClientError(cause)) {
+    const responseStatus =
+      "response" in cause.reason
+        ? `HTTP ${cause.reason.response.status}: `
+        : "";
+    return `${responseStatus}${cause.message}`;
+  }
+  if (cause instanceof Error) {
+    return `${cause.name}: ${cause.message}`;
+  }
+  return String(cause);
+};
 
 const fetchContributionRepositories = Effect.gen(
   function* fetchContributionRepositories() {
@@ -39,7 +55,7 @@ const fetchContributionRepositories = Effect.gen(
       groups.set(item.repository_url, [...group, item]);
     }
 
-    const results = [...groups.entries()].slice(0, 40);
+    const results = [...groups.entries()];
     const contributionData = yield* Effect.all(
       results.map(([repositoryUrl, items]) =>
         Effect.gen(function* loadContributionRepository() {
@@ -78,11 +94,12 @@ const fetchContributionRepositories = Effect.gen(
             repo: repository.full_name,
             stars: repository.stargazers_count,
             url: `https://github.com/${repository.full_name}`,
+            avatarUrl: repository.owner_avatar_url,
             pullRequests,
           } satisfies ContributionRepository;
         })
       ),
-      { concurrency: "unbounded" }
+      { concurrency: 10 }
     );
     const repositories = contributionData.flatMap((repository) =>
       repository === null ? [] : [repository]
@@ -116,7 +133,9 @@ export const loadContributions = Effect.fn("loadContributions")(
         })
       ),
       Effect.catchTag("GitHubRequestError", (error) => {
-        console.error("Failed to load GitHub contributions.", error._tag);
+        console.error(
+          `[open-source] GitHub ${error.operation} failed: ${summarizeGitHubFailure(error.cause)}. Returning ${cachedContributions ? "cached contributions" : "no contributions (cache empty)"}.`
+        );
         return Effect.succeed(cachedContributions ?? []);
       })
     );

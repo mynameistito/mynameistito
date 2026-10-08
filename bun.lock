@@ -74,6 +74,9 @@
       },
     },
   },
+  "patchedDependencies": {
+    "react-grab@0.2.0": "patches/react-grab@0.2.0.patch",
+  },
   "catalog": {
     "@types/node": "^26.6.4",
     "@typescript/native": "npm:typescript@^7.0.2",

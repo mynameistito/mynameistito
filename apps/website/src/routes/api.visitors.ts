@@ -49,7 +49,7 @@ const post = async ({ request }: { request: Request }) => {
   const { VISITOR_SERVICE } = await getAppEnv();
   if (!VISITOR_SERVICE) {
     return Response.json(
-      { error: "Visitor counts are unavailable in local development." },
+      { error: "Visitor counts are unavailable." },
       { status: 503 }
     );
   }
@@ -64,7 +64,7 @@ const post = async ({ request }: { request: Request }) => {
   return Response.json(counts, {
     headers: {
       "cache-control": "no-store",
-      "set-cookie": `site_visitor=${visitorId}; Path=/; Max-Age=31536000; HttpOnly; Secure; SameSite=Lax`,
+      "set-cookie": `site_visitor=${visitorId}; Path=/; Max-Age=31536000; HttpOnly${new URL(request.url).protocol === "https:" ? "; Secure" : ""}; SameSite=Lax`,
     },
     status: response.status,
   });

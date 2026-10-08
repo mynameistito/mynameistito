@@ -63,8 +63,8 @@ const ProjectPage = () => {
         </header>
 
         <img
-          alt={`${project.name} project preview`}
-          className="mt-6 aspect-[59/38] w-full rounded-lg border border-line-strong bg-surface-raised object-cover"
+          alt={`${project.name} owner avatar`}
+          className="mt-6 aspect-[59/38] w-full rounded-lg border border-line-strong bg-surface-raised object-contain p-12"
           height="416"
           src={project.image}
           width="646"

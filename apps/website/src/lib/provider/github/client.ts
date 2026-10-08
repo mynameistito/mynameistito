@@ -1,9 +1,4 @@
-import {
-  GithubProtocol,
-  credentials,
-  repos,
-  search,
-} from "@distilled.cloud/github";
+import { GithubProtocol, credentials, repos } from "@distilled.cloud/github";
 import type { GithubOpContext } from "@distilled.cloud/github";
 import { Context, Effect, Layer, Redacted, Schema } from "effect";
 import {
@@ -51,6 +46,7 @@ export interface Repository {
   readonly homepage?: string | null;
   readonly fork: boolean;
   readonly private: boolean;
+  readonly owner_avatar_url: string;
 }
 
 /** Pull-request search result fields used by the contribution browser. */
@@ -87,6 +83,7 @@ const RepositorySchema = Schema.Struct({
   homepage: Schema.optional(Schema.NullOr(Schema.String)),
   fork: Schema.Boolean,
   private: Schema.Boolean,
+  owner: Schema.Struct({ avatar_url: Schema.String }),
 });
 
 const SearchItemSchema = Schema.Struct({
@@ -107,6 +104,7 @@ const SearchResponseSchema = Schema.Struct({
 const RepositoryDetailSchema = Schema.Struct({
   full_name: Schema.String,
   stargazers_count: Schema.Int,
+  owner: Schema.Struct({ avatar_url: Schema.String }),
 });
 
 const ContributionLevelSchema = Schema.Literals([
@@ -197,7 +195,11 @@ export class GitHub extends Context.Service<
       owner: string,
       name: string
     ) => Effect.Effect<
-      { readonly full_name: string; readonly stargazers_count: number },
+      {
+        readonly full_name: string;
+        readonly stargazers_count: number;
+        readonly owner_avatar_url: string;
+      },
       GitHubRequestError
     >;
     readonly profile: (
@@ -281,15 +283,20 @@ export class GitHub extends Context.Service<
                 homepage: repository.homepage,
                 fork: repository.fork,
                 private: repository.private,
+                owner_avatar_url: repository.owner.avatar_url,
               }));
             }
-            return yield* readJson(
+            const repositories = yield* readJson(
               "listRepositories",
               Schema.Array(RepositorySchema),
               HttpClientRequest.get(
                 `https://api.github.com/users/${encodeURIComponent(username)}/repos?per_page=${perPage}&page=${page}&type=owner`
               )
             );
+            return repositories.map(({ owner, ...repository }) => ({
+              ...repository,
+              owner_avatar_url: owner.avatar_url,
+            }));
           }
         );
         const profilePage = profilePageClient
@@ -303,36 +310,25 @@ export class GitHub extends Context.Service<
           );
         const searchPullRequests = Effect.fn("GitHub.searchPullRequests")(
           function* searchPullRequests() {
-            if (token) {
-              const response = yield* runGitHubSdk(
-                Redacted.value(token),
-                search.issuesAndPullRequests({
-                  q: `author:${username} type:pr`,
-                  per_page: 100,
-                  sort: "updated",
-                })
+            const items: PullRequestSearchItem[] = [];
+            // GitHub Search exposes at most 1,000 results per query.
+            for (let page = 1; page <= 10; page += 1) {
+              const searchUrl = new URL("https://api.github.com/search/issues");
+              searchUrl.searchParams.set("q", `author:${username} type:pr`);
+              searchUrl.searchParams.set("per_page", "100");
+              searchUrl.searchParams.set("page", String(page));
+              searchUrl.searchParams.set("sort", "updated");
+              const result = yield* readJson(
+                "searchPullRequests",
+                SearchResponseSchema,
+                HttpClientRequest.get(searchUrl.toString())
               );
-              return response.items.map((item) => ({
-                title: item.title,
-                number: item.number,
-                state: item.state,
-                html_url: item.html_url,
-                repository_url: item.repository_url,
-                pull_request: item.pull_request
-                  ? { merged_at: item.pull_request.merged_at }
-                  : undefined,
-              }));
+              items.push(...result.items);
+              if (result.items.length < 100) {
+                break;
+              }
             }
-            const searchUrl = new URL("https://api.github.com/search/issues");
-            searchUrl.searchParams.set("q", `author:${username} type:pr`);
-            searchUrl.searchParams.set("per_page", "100");
-            searchUrl.searchParams.set("sort", "updated");
-            const result = yield* readJson(
-              "searchPullRequests",
-              SearchResponseSchema,
-              HttpClientRequest.get(searchUrl.toString())
-            );
-            return result.items;
+            return items;
           }
         )();
         const repository = Effect.fn("GitHub.repository")(function* repository(
@@ -347,15 +343,21 @@ export class GitHub extends Context.Service<
             return {
               full_name: response.full_name,
               stargazers_count: response.stargazers_count,
+              owner_avatar_url: response.owner.avatar_url,
             };
           }
-          return yield* readJson(
+          const response = yield* readJson(
             "repository",
             RepositoryDetailSchema,
             HttpClientRequest.get(
               `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(name)}`
             )
           );
+          return {
+            full_name: response.full_name,
+            stargazers_count: response.stargazers_count,
+            owner_avatar_url: response.owner.avatar_url,
+          };
         });
         const profile = Effect.fn("GitHub.profile")(function* profile(
           login: string,

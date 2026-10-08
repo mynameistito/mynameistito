@@ -27,6 +27,35 @@ const pullRequestStatus = {
   { readonly Icon: typeof GitPullRequest; readonly color: string }
 >;
 
+const RepositoryAvatar = ({
+  avatarUrl,
+  name,
+}: {
+  readonly avatarUrl: string;
+  readonly name: string;
+}) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError) {
+    return (
+      <span className="grid size-[30px] shrink-0 place-items-center rounded-control border border-line-strong bg-surface-raised text-xs text-muted">
+        {name.slice(0, 1).toUpperCase()}
+      </span>
+    );
+  }
+
+  return (
+    <img
+      alt={`${name} owner avatar`}
+      className="size-[30px] shrink-0 rounded-control border border-line-strong bg-surface-raised object-cover"
+      height="30"
+      onError={() => setHasError(true)}
+      src={avatarUrl}
+      width="30"
+    />
+  );
+};
+
 /** Displays searchable external repositories and Tito's pull requests.
  * @param repositories - GitHub contribution repositories to display.
  * @returns The interactive contribution browser.
@@ -144,9 +173,10 @@ export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
               <li className="border-b border-line" key={repository.repo}>
                 <details className="group" open={normalizedQuery.length > 0}>
                   <summary className="flex min-h-[58px] cursor-pointer list-none items-center gap-3 py-2.5 [&::-webkit-details-marker]:hidden">
-                    <span className="grid size-[30px] shrink-0 place-items-center rounded-control border border-line-strong bg-surface-raised text-xs text-muted">
-                      {repository.name.slice(0, 1).toUpperCase()}
-                    </span>
+                    <RepositoryAvatar
+                      avatarUrl={repository.avatarUrl}
+                      name={repository.name}
+                    />
                     <span className="grid min-w-0 flex-1 gap-0.5">
                       <span className="truncate text-xs font-semibold leading-4 text-text">
                         {repository.name}

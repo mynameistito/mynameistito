@@ -138,7 +138,9 @@
   display: block;
   width: 100%;
   aspect-ratio: 59 / 38;
-  object-fit: cover;
+  background: var(--surface-raised);
+  object-fit: contain;
+  padding: 20px;
 }
 
 .project-hover-preview-caption {

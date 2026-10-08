@@ -9,7 +9,7 @@
   "scripts": {
     "fix": "ultracite fix",
     "check": "ultracite check",
-    "dev": "vite dev",
+    "dev": "2password env resolve .env.tpl --output .dev.vars && vite dev",
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "2password env run .dev.vars.tpl -- bun run --cwd ../.. alchemy deploy --stage prod --yes",

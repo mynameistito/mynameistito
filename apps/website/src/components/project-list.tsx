@@ -36,7 +36,7 @@ export const ProjectList = ({
         >
           {showImages && (
             <img
-              alt=""
+              alt={`${project.name} owner avatar`}
               className="size-[42px] rounded-lg border border-line-strong bg-surface-raised object-cover"
               height="42"
               loading="lazy"

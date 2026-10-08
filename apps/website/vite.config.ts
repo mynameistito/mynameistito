@@ -13,6 +13,15 @@ const config = defineConfig(({ command }) => ({
       ? [
           cloudflare({
             configPath: "./wrangler.jsonc",
+            config: (workerConfig) => {
+              workerConfig.services = [
+                {
+                  binding: "VISITOR_SERVICE",
+                  service: "mynameistito-visitors-local",
+                },
+              ];
+            },
+            auxiliaryWorkers: [{ configPath: "./wrangler.visitors.jsonc" }],
             viteEnvironment: { name: "ssr" },
           }),
         ]

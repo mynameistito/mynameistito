@@ -63,7 +63,7 @@ const fetchProjects = Effect.gen(function* fetchProjects() {
       name: repository.name,
       description: repository.description ?? `${repository.name} on GitHub.`,
       languages: repository.language ? [repository.language] : [],
-      image: `https://opengraph.githubassets.com/1/${repository.full_name}`,
+      image: repository.owner_avatar_url,
       featured,
       source: repository.html_url,
       ...override,
