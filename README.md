@@ -17,7 +17,7 @@
 
 🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐22 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
 
-🔷 **[oc-usage-limits-plugin](https://github.com/mynameistito/oc-usage-limits-plugin)** ⭐9 — OpenCode TUI plugin for usage limits of AI Providers
+🔷 **[oc-usage-limits-plugin](https://github.com/mynameistito/oc-usage-limits-plugin)** ⭐10 — OpenCode TUI plugin for usage limits of AI Providers
 
 🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐6 — A CLI tool that update deps across multiple repos with auto commits and pull requests.
 
