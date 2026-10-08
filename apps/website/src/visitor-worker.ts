@@ -37,7 +37,7 @@ export class VisitorService extends Worker<
 export default VisitorService.make(
   { main: import.meta.url, workersDev: { enabled: false } },
   gen(function* makeVisitorService() {
-    const counters = yield* VisitorCounter.from(VisitorService);
+    const counters = yield* VisitorCounter;
 
     return {
       fetch: gen(function* fetch() {

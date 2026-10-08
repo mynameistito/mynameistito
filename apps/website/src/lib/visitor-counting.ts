@@ -1,6 +1,17 @@
+import { Schema } from "effect";
+
 /** Visitor counter timing and key rules shared by both Worker runtimes. */
 export const liveWindowMs = 2 * 60 * 1000;
 export const heartbeatMs = 60 * 1000;
+
+/** Daily unique and currently active visitor counts returned by the Worker. */
+export const VisitorCountsSchema = Schema.Struct({
+  daily: Schema.Number,
+  live: Schema.Number,
+});
+
+/** Parsed visitor count response. */
+export type VisitorCounts = Schema.Schema.Type<typeof VisitorCountsSchema>;
 
 /** Storage keys used for one visitor at a particular UTC day.
  * @param timestamp - The current Unix timestamp in milliseconds.

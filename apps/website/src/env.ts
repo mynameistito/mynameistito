@@ -1,6 +1,6 @@
 import { Effect, Redacted, Schema } from "effect";
 
-/** Runtime bindings supplied by the platform or Vite development process. */
+/** Runtime bindings supplied by the platform or Alchemy local runtime. */
 export interface AppEnv {
   readonly CONTACT_RECIPIENT?: string;
   readonly RESEND_API_KEY?: Redacted.Redacted<string>;
@@ -54,7 +54,7 @@ export const getAppEnv = Effect.fn("getAppEnv")(function* getAppEnv() {
     try: () => import("cloudflare:workers"),
     catch: (cause) => new AppEnvError({ cause }),
   });
-  // SAFETY: Alchemy configures production bindings; Cloudflare Vite loads local Worker bindings.
+  // SAFETY: Alchemy configures bindings in both production and local development.
   const bindings = worker.env as RawAppEnv;
   if (!import.meta.env.DEV) {
     return redactSecrets(bindings);

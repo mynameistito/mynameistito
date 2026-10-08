@@ -11,7 +11,7 @@ import {
   expiredLiveVisitorKeys,
   heartbeatMs,
   keysForVisitor,
-} from "@/lib/visitor-counting";
+} from "./visitor-counting";
 
 /** Daily unique and currently active visitor counts. */
 interface VisitorCounts {

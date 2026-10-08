@@ -1,36 +1,10 @@
-import {
-  createEmail,
-  fromApiKey,
-  ResendProtocol,
-} from "@distilled.cloud/resend";
 import { createFileRoute } from "@tanstack/react-router";
-import { Effect, Redacted } from "effect";
+import { Effect } from "effect";
 import { catch as catchEffect } from "effect/Effect";
-import { layer as fetchHttpClientLayer } from "effect/http/FetchHttpClient";
-import { mergeAll } from "effect/Layer";
-import {
-  check,
-  decodeUnknownEffect,
-  isMaxLength,
-  isMinLength,
-  isPattern,
-  String as SchemaString,
-  Struct,
-} from "effect/Schema";
+import { decodeUnknownEffect } from "effect/Schema";
 
-import { getAppEnv } from "@/env";
-
-const ContactMessage = Struct({
-  name: SchemaString.pipe(check(isMinLength(1), isMaxLength(120))),
-  email: SchemaString.pipe(
-    check(
-      isMaxLength(254),
-      isPattern(/^[^@\s]{1,64}@[^@\s]{1,190}\.[^@\s]{2,63}$/u)
-    )
-  ),
-  message: SchemaString.pipe(check(isMinLength(1), isMaxLength(5000))),
-  company: SchemaString,
-});
+import { ContactMessageSchema } from "@/lib/contact-message";
+import { sendContactMessage } from "@/server/functions/send-contact-message";
 
 const json = (body: Record<string, string>, status: number) =>
   Response.json(body, {
@@ -47,52 +21,39 @@ const post = ({ request }: { request: Request }) =>
       }
 
       const message = yield* Effect.tryPromise(() => request.json()).pipe(
-        Effect.flatMap(decodeUnknownEffect(ContactMessage)),
+        Effect.flatMap(decodeUnknownEffect(ContactMessageSchema)),
         catchEffect(() => Effect.succeed(null))
       );
       if (!message) {
         return json({ error: "Invalid message." }, 400);
       }
-      if (message.company) {
-        return json({ sent: "true" }, 200);
-      }
 
-      const env = yield* getAppEnv().pipe(
-        catchEffect(() => Effect.succeed(null))
+      const result = yield* sendContactMessage(message).pipe(
+        Effect.catchTag("AppEnvError", () =>
+          Effect.succeed({ _tag: "NotConfigured", missing: [] } as const)
+        )
       );
-      if (!env?.RESEND_API_KEY || !env.CONTACT_RECIPIENT || !env.RESEND_FROM) {
-        const missingConfiguration = [
-          { name: "RESEND_API_KEY", value: env?.RESEND_API_KEY },
-          { name: "CONTACT_RECIPIENT", value: env?.CONTACT_RECIPIENT },
-          { name: "RESEND_FROM", value: env?.RESEND_FROM },
-        ]
-          .filter(({ value }) => !value)
-          .map(({ name }) => name);
-        const detail = import.meta.env.DEV
-          ? ` Missing: ${missingConfiguration.join(", ")}.`
-          : "";
-        return json({ error: `Contact form is not configured.${detail}` }, 503);
+      switch (result._tag) {
+        case "Sent": {
+          return json({ sent: "true" }, 200);
+        }
+        case "NotConfigured": {
+          const detail =
+            import.meta.env.DEV && result.missing.length > 0
+              ? ` Missing: ${result.missing.join(", ")}.`
+              : "";
+          return json(
+            { error: `Contact form is not configured.${detail}` },
+            503
+          );
+        }
+        case "DeliveryFailed": {
+          return json({ error: "Unable to send this message." }, 502);
+        }
+        default: {
+          return json({ error: "Unable to send this message." }, 502);
+        }
       }
-
-      const email = createEmail({
-        from: env.RESEND_FROM,
-        reply_to: message.email,
-        subject: `Website message from ${message.name}`,
-        text: `${message.message}\n\n— ${message.name} <${message.email}>`,
-        to: env.CONTACT_RECIPIENT,
-      });
-      const services = mergeAll(
-        fetchHttpClientLayer,
-        fromApiKey({ apiKey: Redacted.value(env.RESEND_API_KEY) }),
-        ResendProtocol
-      );
-      const sent = yield* Effect.match(Effect.provide(email, services), {
-        onFailure: () => false,
-        onSuccess: () => true,
-      });
-      return sent
-        ? json({ sent: "true" }, 200)
-        : json({ error: "Unable to send this message." }, 502);
     })
   );
 

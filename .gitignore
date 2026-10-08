@@ -7,3 +7,5 @@ coverage/
 test-report.junit.xml
 .unlighthouse/
 .unlighthouse-*/
+.env
+.alchemy/

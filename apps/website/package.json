@@ -9,10 +9,10 @@
   "scripts": {
     "fix": "ultracite fix",
     "check": "ultracite check",
-    "dev": "2password env resolve .env.tpl --output .dev.vars && vite dev",
+    "dev": "2password env run .env.tpl -- bun run --cwd ../.. alchemy dev",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "2password env run .dev.vars.tpl -- bun run --cwd ../.. alchemy deploy --stage prod --yes",
+    "deploy": "2password env run .env.tpl -- bun run --cwd ../.. alchemy deploy --stage prod --yes",
     "cf-typegen": "cf workers types --quiet",
     "typecheck": "bun run cf-typegen && tsc --noEmit"
   },
@@ -34,7 +34,6 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "1.63.0",
     "@tanstack/devtools-vite": "0.8.5",
     "@types/node": "catalog:",
     "@types/react": "^19.3.0",

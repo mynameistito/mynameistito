@@ -9,7 +9,7 @@ import {
   Struct,
 } from "effect/Schema";
 
-import { getAppEnv } from "@/env";
+import { recordVisitor } from "@/server/functions/record-visitor";
 
 const VisitorRequest = Struct({
   path: SchemaString.pipe(
@@ -20,7 +20,6 @@ const VisitorRequest = Struct({
     )
   ),
 });
-const contentTypeHeader = "content-type";
 const visitorUnavailableMessage = "Visitor counts are unavailable.";
 
 const post = ({ request }: { request: Request }) =>
@@ -46,48 +45,24 @@ const post = ({ request }: { request: Request }) =>
       const existingId = cookie.match(
         /(?:^|;\s*)site_visitor=(?<visitorId>[\da-f-]{36})/iu
       )?.groups?.visitorId;
-      const visitorId =
-        existingId ?? (yield* Effect.sync(() => crypto.randomUUID()));
-      const env = yield* getAppEnv().pipe(
-        catchEffect(() => Effect.succeed(null))
+      const recorded = yield* recordVisitor(existingId).pipe(
+        Effect.catchTag("VisitorCounterUnavailable", () =>
+          Effect.succeed(null)
+        ),
+        Effect.catchTag("AppEnvError", () => Effect.succeed(null))
       );
-      const visitorService = env?.VISITOR_SERVICE;
-      if (!visitorService) {
+      if (!recorded) {
         return Response.json(
           { error: visitorUnavailableMessage },
           { status: 503 }
         );
       }
-      const response = yield* Effect.tryPromise(() =>
-        visitorService.fetch(
-          new Request("https://visitor-service.internal/track", {
-            body: JSON.stringify({ visitorId }),
-            headers: { [contentTypeHeader]: "application/json" },
-            method: "POST",
-          })
-        )
-      ).pipe(catchEffect(() => Effect.succeed(null)));
-      if (response === null) {
-        return Response.json(
-          { error: visitorUnavailableMessage },
-          { status: 503 }
-        );
-      }
-      const counts = yield* Effect.tryPromise(() => response.json()).pipe(
-        catchEffect(() => Effect.succeed(null))
-      );
-      if (counts === null) {
-        return Response.json(
-          { error: visitorUnavailableMessage },
-          { status: 503 }
-        );
-      }
-      return Response.json(counts, {
+      return Response.json(recorded.counts, {
         headers: {
           "cache-control": "no-store",
-          "set-cookie": `site_visitor=${visitorId}; Path=/; Max-Age=31536000; HttpOnly${new URL(request.url).protocol === "https:" ? "; Secure" : ""}; SameSite=Lax`,
+          "set-cookie": `site_visitor=${recorded.visitorId}; Path=/; Max-Age=31536000; HttpOnly${new URL(request.url).protocol === "https:" ? "; Secure" : ""}; SameSite=Lax`,
         },
-        status: response.status,
+        status: 200,
       });
     })
   );
