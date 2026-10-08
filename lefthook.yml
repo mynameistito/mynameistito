@@ -1,4 +1,9 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/evilmartians/lefthook/master/schema.json
+no_tty: true
+output:
+  - failure
+  - execution_out
+
 pre-commit:
   jobs:
     - run: bun run fix
