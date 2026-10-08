@@ -10,7 +10,7 @@ const ProjectsPage = () => {
   return (
     <main className="page-shell pt-page-top-header pb-page-bottom">
       <section className="mt-section">
-        <h1 className="m-0 text-page-title font-semibold leading-tight tracking-title text-text">
+        <h1 className="m-0 text-page-title leading-tight font-semibold tracking-title text-text">
           Projects
         </h1>
         <p className="mt-2 mb-0 text-base leading-6 text-muted">

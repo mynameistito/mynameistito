@@ -46,7 +46,7 @@ const HomeContent = () => {
       >
         <div className="mb-3 flex min-h-7 items-center justify-between gap-6">
           <h2
-            className="m-0 text-base font-semibold leading-heading tracking-heading text-text"
+            className="m-0 text-base leading-heading font-semibold tracking-heading text-text"
             id="projects-title"
           >
             Projects

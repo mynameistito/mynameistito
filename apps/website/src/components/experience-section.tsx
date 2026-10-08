@@ -12,7 +12,7 @@ export const ExperienceSection = () => {
     <section aria-labelledby="experience-title" className="mt-section">
       <div className="mb-3 flex min-h-7 items-center justify-between gap-6">
         <h2
-          className="m-0 text-base font-semibold leading-heading tracking-heading text-text"
+          className="m-0 text-base leading-heading font-semibold tracking-heading text-text"
           id="experience-title"
         >
           Experience
@@ -48,7 +48,7 @@ export const ExperienceSection = () => {
                 <>
                   <img
                     alt=""
-                    className="experience-logo-dark absolute left-1/2 top-1/2 size-6 -translate-x-1/2 -translate-y-1/2 object-contain"
+                    className="experience-logo-dark absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2 object-contain"
                     height="26"
                     loading="lazy"
                     src={role.logo}
@@ -56,7 +56,7 @@ export const ExperienceSection = () => {
                   />
                   <img
                     alt=""
-                    className="experience-logo-light absolute left-1/2 top-1/2 size-6 -translate-x-1/2 -translate-y-1/2 object-contain"
+                    className="experience-logo-light absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2 object-contain"
                     height="26"
                     loading="lazy"
                     src={role.logoLight}
@@ -67,7 +67,7 @@ export const ExperienceSection = () => {
             </div>
             <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-5">
               <div className="min-w-0">
-                <h3 className="m-0 text-sm font-semibold leading-5 tracking-row text-text">
+                <h3 className="m-0 text-sm leading-5 font-semibold tracking-row text-text">
                   <a
                     className="text-text underline"
                     href={role.href}

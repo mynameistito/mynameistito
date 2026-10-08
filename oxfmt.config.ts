@@ -5,6 +5,6 @@ export default defineConfig({
   ...ultracite,
   sortTailwindcss: {
     functions: ["clsx", "cva", "tw", "twMerge", "cn", "twJoin", "tv"],
-    stylesheet: "./app/styles.css",
+    stylesheet: "./apps/website/src/styles.css",
   },
 });

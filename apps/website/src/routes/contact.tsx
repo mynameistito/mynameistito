@@ -83,7 +83,7 @@ const ContactPage = () => {
   return (
     <main className="page-shell pt-page-top-header pb-page-bottom">
       <section className="mt-section">
-        <h1 className="m-0 text-page-title font-semibold leading-tight tracking-title text-text">
+        <h1 className="m-0 text-page-title leading-tight font-semibold tracking-title text-text">
           Want to chat?
         </h1>
         <p className="mt-2 mb-0 text-base leading-6 text-muted">
@@ -136,7 +136,7 @@ const ContactPage = () => {
             Name
             <input
               autoComplete="name"
-              className="h-11 rounded-control border border-line bg-surface px-3 text-sm text-text outline-none transition-colors focus:border-focus"
+              className="h-11 rounded-control border border-line bg-surface px-3 text-sm text-text transition-colors outline-none focus:border-focus"
               id="name"
               maxLength={120}
               name="name"
@@ -147,7 +147,7 @@ const ContactPage = () => {
             Email
             <input
               autoComplete="email"
-              className="h-11 rounded-control border border-line bg-surface px-3 text-sm text-text outline-none transition-colors focus:border-focus"
+              className="h-11 rounded-control border border-line bg-surface px-3 text-sm text-text transition-colors outline-none focus:border-focus"
               id="email"
               maxLength={254}
               name="email"
@@ -159,7 +159,7 @@ const ContactPage = () => {
         <label className="grid gap-2 text-sm text-muted" htmlFor="message">
           Message
           <textarea
-            className="min-h-36 resize-y rounded-control border border-line bg-surface px-3 py-2.5 text-sm leading-6 text-text outline-none transition-colors focus:border-focus"
+            className="min-h-36 resize-y rounded-control border border-line bg-surface px-3 py-2.5 text-sm leading-6 text-text transition-colors outline-none focus:border-focus"
             id="message"
             maxLength={5000}
             name="message"

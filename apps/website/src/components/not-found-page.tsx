@@ -6,7 +6,7 @@ import { Link } from "@tanstack/react-router";
  */
 export const NotFoundPage = () => (
   <main className="page-shell grid min-h-screen content-center gap-3">
-    <p className="m-0 text-xs font-medium uppercase tracking-wider text-muted">
+    <p className="m-0 text-xs font-medium tracking-wider text-muted uppercase">
       404
     </p>
     <h1 className="m-0 text-2xl font-semibold tracking-tight text-text">
