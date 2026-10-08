@@ -17,8 +17,12 @@ pre-commit:
         - "*.md"
       stage_fixed: true
 pre-push:
-  parallel: true
+  parallel: false
   jobs:
+    - name: fix-formatting
+      run: bun run fix
+    - name: check-formatting
+      run: bun run check
     - run: bun run knip
     - run: bun run test -- --ui=stream --output-logs=errors-only
     - name: build-and-typecheck
