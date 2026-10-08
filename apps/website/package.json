@@ -13,8 +13,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "2password env run .env.tpl -- bun run --cwd ../.. alchemy deploy --stage prod --yes",
-    "cf-typegen": "cf workers types --quiet",
-    "typecheck": "bun run cf-typegen && tsc --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@distilled.cloud/github": "1.0.0-rc.13",
@@ -39,7 +38,6 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
-    "cf": "^1.0.0-beta.12",
     "typescript": "catalog:",
     "vite": "^8.3.3"
   },

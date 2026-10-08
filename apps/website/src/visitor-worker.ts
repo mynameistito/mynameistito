@@ -1,4 +1,3 @@
-import type { RuntimeContext } from "alchemy";
 import { Worker } from "alchemy/Cloudflare";
 // eslint-disable-next-line anti-slop/no-shape-in-symbol-names -- Alchemy's exported WorkerShape type is the platform contract.
 import type { WorkerShape as WorkerContract } from "alchemy/Cloudflare";
@@ -25,7 +24,7 @@ const VisitRequest = Struct({
   visitorId: SchemaString.pipe(check(isPattern(/^[\da-f-]{36}$/iu))),
 });
 
-type VisitorWorkerContract = WorkerContract<RuntimeContext>;
+type VisitorWorkerContract = WorkerContract;
 
 /** Effect-native Worker host for the persistent visitor Durable Object. */
 export class VisitorService extends Worker<
