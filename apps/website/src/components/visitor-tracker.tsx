@@ -1,6 +1,8 @@
 import { useRouterState } from "@tanstack/react-router";
+import { Effect } from "effect";
+import { catch as catchEffect } from "effect/Effect";
 import {
-  decodeUnknownSync,
+  decodeUnknownEffect,
   Number as SchemaNumber,
   Struct,
 } from "effect/Schema";
@@ -17,6 +19,22 @@ const VisitorCountsSchema = Struct({
   live: SchemaNumber,
 });
 
+const loadVisitorCounts = (pathname: string) =>
+  Effect.gen(function* loadVisitorCountsProgram() {
+    const response = yield* Effect.tryPromise(() =>
+      fetch("/api/visitors", {
+        body: JSON.stringify({ path: pathname }),
+        headers: { "content-type": "application/json" },
+        method: "POST",
+      })
+    );
+    if (!response.ok) {
+      return null;
+    }
+    const payload = yield* Effect.tryPromise(() => response.json());
+    return yield* decodeUnknownEffect(VisitorCountsSchema)(payload);
+  }).pipe(catchEffect(() => Effect.succeed(null)));
+
 /** Tracks live sessions site-wide; renders the badge only on the home route.
  * @returns The visitor counter status badge on the home route.
  */
@@ -28,34 +46,17 @@ export const VisitorTracker = () => {
 
   useEffect(() => {
     let cancelled = false;
-    const heartbeat = async () => {
-      try {
-        const response = await fetch("/api/visitors", {
-          body: JSON.stringify({ path: pathname }),
-          headers: { "content-type": "application/json" },
-          method: "POST",
-        });
-        if (!response.ok) {
-          return;
-        }
-        let value: VisitorCounts;
-        try {
-          value = decodeUnknownSync(VisitorCountsSchema)(await response.json());
-        } catch {
-          return;
-        }
-        if (!cancelled) {
-          setCounts(value);
-        }
-      } catch {
-        // The portfolio remains usable if the optional visitor count is down.
+    const trackHeartbeat = async () => {
+      const value = await Effect.runPromise(loadVisitorCounts(pathname));
+      if (!cancelled && value) {
+        setCounts(value satisfies VisitorCounts);
       }
     };
 
-    void heartbeat();
+    void trackHeartbeat();
     const interval = window.setInterval(() => {
       if (document.visibilityState === "visible") {
-        void heartbeat();
+        void trackHeartbeat();
       }
     }, heartbeatIntervalMs);
     return () => {

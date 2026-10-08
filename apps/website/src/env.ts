@@ -1,25 +1,65 @@
-interface AppEnv {
+import { Effect, Redacted, Schema } from "effect";
+
+/** Runtime bindings supplied by the platform or Vite development process. */
+export interface AppEnv {
+  readonly CONTACT_RECIPIENT?: string;
+  readonly RESEND_API_KEY?: Redacted.Redacted<string>;
+  readonly RESEND_FROM?: string;
+  readonly GITHUB_TOKEN?: Redacted.Redacted<string>;
+  readonly WORKER_GITHUB_TOKEN?: Redacted.Redacted<string>;
+  readonly MDFROMX_API_KEY?: Redacted.Redacted<string>;
+  readonly VISITOR_SERVICE?: {
+    readonly fetch: (request: Request) => Promise<Response>;
+  };
+}
+
+interface RawAppEnv {
   readonly CONTACT_RECIPIENT?: string;
   readonly RESEND_API_KEY?: string;
   readonly RESEND_FROM?: string;
   readonly GITHUB_TOKEN?: string;
   readonly WORKER_GITHUB_TOKEN?: string;
   readonly MDFROMX_API_KEY?: string;
-  readonly VISITOR_SERVICE?: {
-    readonly fetch: (request: Request) => Promise<Response>;
-  };
+  readonly VISITOR_SERVICE?: AppEnv["VISITOR_SERVICE"];
 }
 
-/** Loads Cloudflare bindings in production and environment variables in Vite dev.
- * @returns The values available to the website server routes.
+/** Failure while acquiring runtime bindings for the website. */
+// oxlint-disable-next-line unicorn/throw-new-error -- SAFETY: Effect Schema.TaggedError is a class factory and must be extended without `new`.
+export class AppEnvError extends Schema.TaggedError<AppEnvError>()(
+  "AppEnvError",
+  { cause: Schema.Defect() }
+) {}
+
+const redactSecrets = (bindings: RawAppEnv): AppEnv => ({
+  ...bindings,
+  GITHUB_TOKEN: bindings.GITHUB_TOKEN
+    ? Redacted.make(bindings.GITHUB_TOKEN)
+    : undefined,
+  WORKER_GITHUB_TOKEN: bindings.WORKER_GITHUB_TOKEN
+    ? Redacted.make(bindings.WORKER_GITHUB_TOKEN)
+    : undefined,
+  RESEND_API_KEY: bindings.RESEND_API_KEY
+    ? Redacted.make(bindings.RESEND_API_KEY)
+    : undefined,
+  MDFROMX_API_KEY: bindings.MDFROMX_API_KEY
+    ? Redacted.make(bindings.MDFROMX_API_KEY)
+    : undefined,
+});
+
+/** Loads and redacts bindings at the Worker/Vite runtime seam.
+ * @returns The Effect yielding bindings available to server operations.
  */
-export const getAppEnv = async (): Promise<AppEnv> => {
-  const { env } = await import("cloudflare:workers");
+export const getAppEnv = Effect.fn("getAppEnv")(function* getAppEnv() {
+  const worker = yield* Effect.tryPromise({
+    try: () => import("cloudflare:workers"),
+    catch: (cause) => new AppEnvError({ cause }),
+  });
   // SAFETY: Alchemy configures production bindings; Cloudflare Vite loads local Worker bindings.
-  const bindings = env as AppEnv;
+  const bindings = worker.env as RawAppEnv;
   if (!import.meta.env.DEV) {
-    return bindings;
+    return redactSecrets(bindings);
   }
+
   const githubToken = [
     process.env.GITHUB_TOKEN,
     process.env.GH_TOKEN,
@@ -27,7 +67,7 @@ export const getAppEnv = async (): Promise<AppEnv> => {
     bindings.GITHUB_TOKEN,
     bindings.WORKER_GITHUB_TOKEN,
   ].find((token) => token !== undefined);
-  return {
+  const merged = {
     ...bindings,
     CONTACT_RECIPIENT:
       process.env.CONTACT_RECIPIENT ?? bindings.CONTACT_RECIPIENT,
@@ -35,5 +75,6 @@ export const getAppEnv = async (): Promise<AppEnv> => {
     RESEND_API_KEY: process.env.RESEND_API_KEY ?? bindings.RESEND_API_KEY,
     RESEND_FROM: process.env.RESEND_FROM ?? bindings.RESEND_FROM,
     MDFROMX_API_KEY: process.env.MDFROMX_API_KEY ?? bindings.MDFROMX_API_KEY,
-  };
-};
+  } satisfies RawAppEnv;
+  return redactSecrets(merged);
+});

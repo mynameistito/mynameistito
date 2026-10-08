@@ -5,8 +5,13 @@ import { currentTimeMillis } from "effect/Clock";
 import { fn, gen, succeed } from "effect/Effect";
 import type { Effect as EffectType } from "effect/Effect";
 
-const liveWindowMs = 2 * 60 * 1000;
-const heartbeatMs = 60 * 1000;
+import {
+  dailyCountAfterVisit,
+  expiredVisitorKeys,
+  expiredLiveVisitorKeys,
+  heartbeatMs,
+  keysForVisitor,
+} from "@/lib/visitor-counting";
 
 /** Daily unique and currently active visitor counts. */
 interface VisitorCounts {
@@ -40,44 +45,39 @@ export default VisitorCounter.make(
       visitorId: string
     ) {
       const now = yield* currentTimeMillis;
-      const today = new Date(now).toISOString().slice(0, 10);
-      const dailyKey = `daily:${today}`;
-      const seenKey = `seen:${today}:${visitorId}`;
-      const liveKey = `live:${visitorId}`;
+      const keys = keysForVisitor(now, visitorId);
 
       const counts = yield* state.storage.transaction(
         gen(function* countVisitors() {
           const dailyKeys = yield* state.storage.list({ prefix: "daily:" });
-          for (const key of dailyKeys.keys()) {
-            if (!key.endsWith(today)) {
-              yield* state.storage.delete(key);
-            }
-          }
           const seenKeys = yield* state.storage.list({ prefix: "seen:" });
-          for (const key of seenKeys.keys()) {
-            if (!key.includes(today)) {
-              yield* state.storage.delete(key);
-            }
-          }
           const active = yield* state.storage.list<number>({ prefix: "live:" });
-          for (const [key, lastSeen] of active) {
-            if (now - lastSeen > liveWindowMs) {
-              yield* state.storage.delete(key);
-            }
+          const expired = expiredVisitorKeys({
+            today: keys.today,
+            now,
+            dailyKeys: dailyKeys.keys(),
+            seenKeys: seenKeys.keys(),
+            liveEntries: active,
+          });
+          for (const key of expired) {
+            yield* state.storage.delete(key);
           }
 
-          const seen = yield* state.storage.get<boolean>(seenKey);
+          const seen = yield* state.storage.get<boolean>(keys.seen);
+          const current = (yield* state.storage.get<number>(keys.daily)) ?? 0;
           if (!seen) {
-            const current = (yield* state.storage.get<number>(dailyKey)) ?? 0;
-            yield* state.storage.put(seenKey, true);
-            yield* state.storage.put(dailyKey, current + 1);
+            yield* state.storage.put(keys.seen, true);
           }
-          yield* state.storage.put(liveKey, now);
+          yield* state.storage.put(
+            keys.daily,
+            dailyCountAfterVisit(current, seen ?? false)
+          );
+          yield* state.storage.put(keys.live, now);
           const activeVisitors = yield* state.storage.list<number>({
             prefix: "live:",
           });
           return {
-            daily: (yield* state.storage.get<number>(dailyKey)) ?? 0,
+            daily: (yield* state.storage.get<number>(keys.daily)) ?? 0,
             live: activeVisitors.size,
           } satisfies VisitorCounts;
         })
@@ -90,10 +90,9 @@ export default VisitorCounter.make(
     const alarm = fn("VisitorCounter.alarm")(function* cleanLiveVisitors() {
       const now = yield* currentTimeMillis;
       const active = yield* state.storage.list<number>({ prefix: "live:" });
-      for (const [key, lastSeen] of active) {
-        if (now - lastSeen > liveWindowMs) {
-          yield* state.storage.delete(key);
-        }
+      const expired = expiredLiveVisitorKeys(active, now);
+      for (const key of expired) {
+        yield* state.storage.delete(key);
       }
       if ((yield* state.storage.list({ prefix: "live:" })).size > 0) {
         yield* state.storage.setAlarm(now + heartbeatMs);

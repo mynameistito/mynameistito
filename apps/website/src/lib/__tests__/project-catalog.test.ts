@@ -1,7 +1,10 @@
 import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
 
-import { orderProjectRepositories } from "@/lib/project-catalog";
+import {
+  orderProjectRepositories,
+  readPinnedRepositoryNames,
+} from "@/lib/project-catalog";
 import { collectRepositoryPages } from "@/lib/provider/github/repository-pages";
 
 describe("project catalog", () => {
@@ -54,5 +57,22 @@ describe("project catalog", () => {
       ["unpinned-first", false],
       ["unpinned-last", false],
     ]);
+  });
+
+  it("reads unique pins in markup order and ignores links outside pin items", () => {
+    const html = `
+      <li class="pinned-item-list-item"><a href="/mynameistito/first">first</a></li>
+      <li class="pinned-item-list-item"><a href="/mynameistito/second">second</a></li>
+      <li class="pinned-item-list-item"><a href="/mynameistito/first">duplicate</a></li>
+      <a href="/mynameistito/not-a-pin">other</a>
+    `;
+
+    expect(readPinnedRepositoryNames(html)).toStrictEqual(["first", "second"]);
+  });
+
+  it("returns null when GitHub pin markup is missing", () => {
+    expect(
+      readPinnedRepositoryNames('<a href="/mynameistito/project">')
+    ).toBeNull();
   });
 });

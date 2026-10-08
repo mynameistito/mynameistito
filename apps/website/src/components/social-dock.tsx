@@ -1,4 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { Effect } from "effect";
+import { catch as catchEffect } from "effect/Effect";
 import { ArrowUpRight, Github } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, FocusEvent, KeyboardEvent } from "react";
@@ -192,14 +194,13 @@ export const SocialDock = () => {
 
   useEffect(() => {
     let isMounted = true;
+    const profiles = Effect.tryPromise(() => getSocialProfiles()).pipe(
+      catchEffect(() => Effect.succeed(null))
+    );
     const loadProfiles = async () => {
-      try {
-        const data = await getSocialProfiles();
-        if (isMounted) {
-          setProfileData(data);
-        }
-      } catch {
-        // Keep the dated public snapshot visible if the server request fails.
+      const data = await Effect.runPromise(profiles);
+      if (isMounted && data) {
+        setProfileData(data);
       }
     };
     void loadProfiles();

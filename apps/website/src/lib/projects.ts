@@ -1,9 +1,12 @@
-import { DateTime, Effect, Redacted } from "effect";
+import { DateTime, Effect } from "effect";
 
 import { getAppEnv } from "@/env";
 import { profile } from "@/lib/profile";
 import type { Project } from "@/lib/project";
-import { orderProjectRepositories } from "@/lib/project-catalog";
+import {
+  orderProjectRepositories,
+  readPinnedRepositoryNames,
+} from "@/lib/project-catalog";
 import { GitHub, GitHubRequestError } from "@/lib/provider/github/client";
 import type { Repository } from "@/lib/provider/github/client";
 import { collectRepositoryPages } from "@/lib/provider/github/repository-pages";
@@ -13,29 +16,6 @@ let cachedAt = 0;
 let cachedProjects: readonly Project[] | undefined;
 
 const overrides: Readonly<Record<string, Partial<Project>>> = {};
-
-const readPinnedRepositoryNames = (html: string) => {
-  const pinnedStart = html.indexOf("pinned-item-list-item");
-  if (pinnedStart === -1) {
-    return null;
-  }
-  const pinnedMarkup = html.slice(pinnedStart);
-  const pinnedNames: string[] = [];
-  const pinnedNameSet = new Set<string>();
-  for (const match of pinnedMarkup.matchAll(
-    /href="\/mynameistito\/(?<name>[^"/]+)"/gu
-  )) {
-    const { name } = match.groups ?? {};
-    if (name && !pinnedNameSet.has(name)) {
-      pinnedNames.push(name);
-      pinnedNameSet.add(name);
-    }
-    if (pinnedNames.length === 6) {
-      break;
-    }
-  }
-  return pinnedNames;
-};
 
 const fetchProjects = Effect.gen(function* fetchProjects() {
   const github = yield* GitHub;
@@ -84,12 +64,12 @@ export const loadProjects = Effect.fn("loadProjects")(function* loadProjects() {
   if (cachedProjects && now.epochMilliseconds - cachedAt < cacheDuration) {
     return cachedProjects;
   }
-  const env = yield* Effect.promise(() => getAppEnv());
+  const env = yield* getAppEnv();
   return yield* fetchProjects.pipe(
     Effect.provide(
       GitHub.layer({
         username: profile.github,
-        token: env.GITHUB_TOKEN ? Redacted.make(env.GITHUB_TOKEN) : undefined,
+        token: env.GITHUB_TOKEN,
       })
     ),
     Effect.tap((projects) =>

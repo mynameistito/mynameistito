@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Effect } from "effect";
+import { catch as catchEffect } from "effect/Effect";
 import { ArrowUpRight } from "lucide-react";
 import { useRef, useState } from "react";
 import type { FormEvent } from "react";
@@ -18,7 +20,7 @@ const ContactPage = () => {
   const submissionInProgress = useRef(false);
   const [status, setStatus] = useState<SubmissionStatus>("idle");
 
-  const sendMessage = async (event: FormEvent<HTMLFormElement>) => {
+  const sendMessage = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (submissionInProgress.current) {
       return;
@@ -29,22 +31,29 @@ const ContactPage = () => {
     submissionInProgress.current = true;
     setStatus("submitting");
 
-    try {
-      const response = await fetch("/api/contact", {
-        body: JSON.stringify(values),
-        headers: { "content-type": "application/json" },
-        method: "POST",
-      });
-      if (response.ok) {
+    const submission = Effect.tryPromise({
+      try: () =>
+        fetch("/api/contact", {
+          body: JSON.stringify(values),
+          headers: { "content-type": "application/json" },
+          method: "POST",
+        }),
+      catch: (cause) => cause,
+    }).pipe(
+      Effect.map((response) => response.ok),
+      catchEffect(() => Effect.succeed(false))
+    );
+    const submit = async () => {
+      const sent = await Effect.runPromise(submission);
+      if (sent) {
         form.reset();
         setStatus("success");
       } else {
         setStatus("error");
       }
-    } catch {
-      setStatus("error");
-    }
-    submissionInProgress.current = false;
+      submissionInProgress.current = false;
+    };
+    void submit();
   };
 
   const directMessages = [

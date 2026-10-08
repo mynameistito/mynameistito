@@ -11,6 +11,35 @@ export interface OrderedProjectRepository<T extends RepositoryVisibility> {
   readonly repository: T;
 }
 
+/** Extracts the unique pinned repository names from GitHub profile markup.
+ * @param html - The untrusted GitHub profile page HTML.
+ * @returns Up to six repository names in pin order, or `null` when pin markup is absent.
+ */
+export const readPinnedRepositoryNames = (
+  html: string
+): readonly string[] | null => {
+  const matches = html.matchAll(
+    /<li\b[^>]*\bpinned-item-list-item\b[^>]*>(?<item>[\s\S]*?)<\/li>/gu
+  );
+  const names: string[] = [];
+  const seen = new Set<string>();
+
+  for (const match of matches) {
+    const item = match.groups?.item;
+    const name = item?.match(/href="\/mynameistito\/(?<name>[^"/]+)"/u)?.groups
+      ?.name;
+    if (name && !seen.has(name)) {
+      names.push(name);
+      seen.add(name);
+    }
+    if (names.length === 6) {
+      break;
+    }
+  }
+
+  return names.length > 0 ? names : null;
+};
+
 /** Put pinned public repositories first, then include remaining owned repos.
  * @typeParam T - The repository metadata type.
  * @param repositories - Repositories returned by GitHub.

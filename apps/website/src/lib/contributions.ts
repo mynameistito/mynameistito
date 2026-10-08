@@ -1,4 +1,4 @@
-import { DateTime, Effect, Redacted } from "effect";
+import { DateTime, Effect } from "effect";
 import { HttpClientError } from "effect/http";
 
 import { getAppEnv } from "@/env";
@@ -140,12 +140,12 @@ export const loadContributions = Effect.fn("loadContributions")(
     ) {
       return cachedContributions;
     }
-    const env = yield* Effect.promise(() => getAppEnv());
+    const env = yield* getAppEnv();
     return yield* fetchContributionRepositories.pipe(
       Effect.provide(
         GitHub.layer({
           username: profile.github,
-          token: env.GITHUB_TOKEN ? Redacted.make(env.GITHUB_TOKEN) : undefined,
+          token: env.GITHUB_TOKEN,
         })
       ),
       Effect.tap((contributions) =>

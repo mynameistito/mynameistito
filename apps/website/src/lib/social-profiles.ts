@@ -1,6 +1,7 @@
-import { DateTime, Effect, Layer, Redacted } from "effect";
+import { DateTime, Effect, Layer } from "effect";
 
 import { getAppEnv } from "@/env";
+import type { AppEnv } from "@/env";
 import { profile } from "@/lib/profile";
 import { GitHub } from "@/lib/provider/github/client";
 import type { Profile as GitHubProfile } from "@/lib/provider/github/client";
@@ -18,7 +19,7 @@ export interface SocialProfileData {
 let cachedData: SocialProfileData | undefined;
 let cachedAt = 0;
 
-const loadFromProviders = (env: Awaited<ReturnType<typeof getAppEnv>>) =>
+const loadFromProviders = (env: AppEnv) =>
   Effect.gen(function* loadSocialProfileProgram() {
     const github = yield* GitHub;
     const mdfromx = yield* MDFromX;
@@ -62,11 +63,9 @@ const loadFromProviders = (env: Awaited<ReturnType<typeof getAppEnv>>) =>
       Layer.merge(
         GitHub.layer({
           username: profile.github,
-          token: env.GITHUB_TOKEN ? Redacted.make(env.GITHUB_TOKEN) : undefined,
+          token: env.GITHUB_TOKEN,
         }),
-        MDFromX.layer(
-          env.MDFROMX_API_KEY ? Redacted.make(env.MDFROMX_API_KEY) : undefined
-        )
+        MDFromX.layer(env.MDFROMX_API_KEY)
       )
     )
   );
@@ -78,7 +77,7 @@ export const loadSocialProfiles = Effect.fn("loadSocialProfiles")(
     if (cachedData && now.epochMilliseconds - cachedAt < cacheDuration) {
       return cachedData;
     }
-    const env = yield* Effect.promise(() => getAppEnv());
+    const env = yield* getAppEnv();
     return yield* loadFromProviders(env);
   }
 );

@@ -4,12 +4,8 @@ import {
   ResendProtocol,
 } from "@distilled.cloud/resend";
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  catch as catchEffect,
-  provide,
-  runPromise,
-  succeed,
-} from "effect/Effect";
+import { Effect, Redacted } from "effect";
+import { catch as catchEffect } from "effect/Effect";
 import { layer as fetchHttpClientLayer } from "effect/http/FetchHttpClient";
 import { mergeAll } from "effect/Layer";
 import {
@@ -42,64 +38,63 @@ const json = (body: Record<string, string>, status: number) =>
     status,
   });
 
-const post = async ({ request }: { request: Request }) => {
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) {
-    return json({ error: "Invalid request origin." }, 403);
-  }
+const post = ({ request }: { request: Request }) =>
+  Effect.runPromise(
+    Effect.gen(function* postContactMessage() {
+      const origin = request.headers.get("origin");
+      if (origin && origin !== new URL(request.url).origin) {
+        return json({ error: "Invalid request origin." }, 403);
+      }
 
-  let payload: unknown;
-  try {
-    payload = await request.json();
-  } catch {
-    return json({ error: "Invalid message." }, 400);
-  }
-  const message = await runPromise(
-    decodeUnknownEffect(ContactMessage)(payload).pipe(
-      catchEffect(() => succeed(null))
-    )
+      const message = yield* Effect.tryPromise(() => request.json()).pipe(
+        Effect.flatMap(decodeUnknownEffect(ContactMessage)),
+        catchEffect(() => Effect.succeed(null))
+      );
+      if (!message) {
+        return json({ error: "Invalid message." }, 400);
+      }
+      if (message.company) {
+        return json({ sent: "true" }, 200);
+      }
+
+      const env = yield* getAppEnv().pipe(
+        catchEffect(() => Effect.succeed(null))
+      );
+      if (!env?.RESEND_API_KEY || !env.CONTACT_RECIPIENT || !env.RESEND_FROM) {
+        const missingConfiguration = [
+          { name: "RESEND_API_KEY", value: env?.RESEND_API_KEY },
+          { name: "CONTACT_RECIPIENT", value: env?.CONTACT_RECIPIENT },
+          { name: "RESEND_FROM", value: env?.RESEND_FROM },
+        ]
+          .filter(({ value }) => !value)
+          .map(({ name }) => name);
+        const detail = import.meta.env.DEV
+          ? ` Missing: ${missingConfiguration.join(", ")}.`
+          : "";
+        return json({ error: `Contact form is not configured.${detail}` }, 503);
+      }
+
+      const email = createEmail({
+        from: env.RESEND_FROM,
+        reply_to: message.email,
+        subject: `Website message from ${message.name}`,
+        text: `${message.message}\n\n— ${message.name} <${message.email}>`,
+        to: env.CONTACT_RECIPIENT,
+      });
+      const services = mergeAll(
+        fetchHttpClientLayer,
+        fromApiKey({ apiKey: Redacted.value(env.RESEND_API_KEY) }),
+        ResendProtocol
+      );
+      const sent = yield* Effect.match(Effect.provide(email, services), {
+        onFailure: () => false,
+        onSuccess: () => true,
+      });
+      return sent
+        ? json({ sent: "true" }, 200)
+        : json({ error: "Unable to send this message." }, 502);
+    })
   );
-  if (!message) {
-    return json({ error: "Invalid message." }, 400);
-  }
-  if (message.company) {
-    return json({ sent: "true" }, 200);
-  }
-  const env = await getAppEnv();
-  if (!env.RESEND_API_KEY || !env.CONTACT_RECIPIENT || !env.RESEND_FROM) {
-    const missingConfiguration = [
-      { name: "RESEND_API_KEY", value: env.RESEND_API_KEY },
-      { name: "CONTACT_RECIPIENT", value: env.CONTACT_RECIPIENT },
-      { name: "RESEND_FROM", value: env.RESEND_FROM },
-    ]
-      .filter(({ value }) => !value)
-      .map(({ name }) => name);
-    const detail = import.meta.env.DEV
-      ? ` Missing: ${missingConfiguration.join(", ")}.`
-      : "";
-    return json({ error: `Contact form is not configured.${detail}` }, 503);
-  }
-
-  const program = createEmail({
-    from: env.RESEND_FROM,
-    reply_to: message.email,
-    subject: `Website message from ${message.name}`,
-    text: `${message.message}\n\n— ${message.name} <${message.email}>`,
-    to: env.CONTACT_RECIPIENT,
-  });
-  const services = mergeAll(
-    fetchHttpClientLayer,
-    fromApiKey({ apiKey: env.RESEND_API_KEY }),
-    ResendProtocol
-  );
-
-  try {
-    await runPromise(provide(program, services));
-    return json({ sent: "true" }, 200);
-  } catch {
-    return json({ error: "Unable to send this message." }, 502);
-  }
-};
 
 export const Route = createFileRoute("/api/contact")({
   server: {
