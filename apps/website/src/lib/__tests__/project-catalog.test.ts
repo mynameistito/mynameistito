@@ -67,12 +67,27 @@ describe("project catalog", () => {
       <a href="/mynameistito/not-a-pin">other</a>
     `;
 
-    expect(readPinnedRepositoryNames(html)).toStrictEqual(["first", "second"]);
+    expect(readPinnedRepositoryNames(html, "mynameistito")).toStrictEqual([
+      "first",
+      "second",
+    ]);
   });
 
   it("returns null when GitHub pin markup is missing", () => {
     expect(
-      readPinnedRepositoryNames('<a href="/mynameistito/project">')
+      readPinnedRepositoryNames(
+        '<a href="/mynameistito/project">',
+        "mynameistito"
+      )
     ).toBeNull();
+  });
+
+  it("matches the configured username as a literal path segment", () => {
+    expect(
+      readPinnedRepositoryNames(
+        '<li class="pinned-item-list-item"><a href="/name.with+symbols/project">project</a></li>',
+        "name.with+symbols"
+      )
+    ).toStrictEqual(["project"]);
   });
 });

@@ -25,7 +25,7 @@ const fetchProjects = Effect.gen(function* fetchProjects() {
       (page, perPage) => github.listRepositories(page, perPage)
     ),
   ]);
-  const pinnedNames = readPinnedRepositoryNames(html);
+  const pinnedNames = readPinnedRepositoryNames(html, profile.github);
   if (!pinnedNames) {
     return yield* new GitHubRequestError({
       operation: "readPinnedRepositories",

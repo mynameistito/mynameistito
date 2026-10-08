@@ -13,11 +13,18 @@ export interface OrderedProjectRepository<T extends RepositoryVisibility> {
 
 /** Extracts the unique pinned repository names from GitHub profile markup.
  * @param html - The untrusted GitHub profile page HTML.
+ * @param username - The GitHub account whose pinned repositories to read.
  * @returns Up to six repository names in pin order, or `null` when pin markup is absent.
  */
 export const readPinnedRepositoryNames = (
-  html: string
+  html: string,
+  username: string
 ): readonly string[] | null => {
+  const escapedUsername = username.replaceAll(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const repositoryHref = new RegExp(
+    `href="/${escapedUsername}/(?<name>[^"/]+)"`,
+    "u"
+  );
   const matches = html.matchAll(
     /<li\b[^>]*\bpinned-item-list-item\b[^>]*>(?<item>[\s\S]*?)<\/li>/gu
   );
@@ -26,8 +33,7 @@ export const readPinnedRepositoryNames = (
 
   for (const match of matches) {
     const item = match.groups?.item;
-    const name = item?.match(/href="\/mynameistito\/(?<name>[^"/]+)"/u)?.groups
-      ?.name;
+    const name = item?.match(repositoryHref)?.groups?.name;
     if (name && !seen.has(name)) {
       names.push(name);
       seen.add(name);
