@@ -7,13 +7,14 @@ pre-commit:
   jobs:
     - run: bun run fix
       glob:
-        - "*.js"
+        - "***.js"
         - "*.jsx"
         - "*.ts"
         - "*.tsx"
         - "*.json"
         - "*.jsonc"
         - "*.css"
+        - "*.md"
       stage_fixed: true
 pre-push:
   parallel: true
