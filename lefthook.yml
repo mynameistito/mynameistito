@@ -20,5 +20,5 @@ pre-push:
       group:
         piped: true
         jobs:
-          - run: bun run build
-          - run: bun run typecheck
+          - run: bun run build -- --ui=stream --output-logs=errors-only
+          - run: bun run typecheck -- --ui=stream --output-logs=errors-only

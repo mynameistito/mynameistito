@@ -7,7 +7,11 @@
       "entry": ["alchemy.run.ts"]
     },
     "apps/website": {
-      "entry": ["cloudflare.config.ts", "src/lib/utils.ts"]
+      "entry": [
+        "cloudflare.config.ts",
+        "src/lib/utils.ts",
+        "src/local-visitor-worker.ts"
+      ]
     }
   }
 }
