@@ -18,6 +18,7 @@ interface ContributionPullRequest {
 
 /** Repository and pull requests included in the contribution browser. */
 export interface ContributionRepository {
+  readonly featured: boolean;
   readonly name: string;
   readonly repo: string;
   readonly stars: number;
@@ -26,8 +27,20 @@ export interface ContributionRepository {
   readonly pullRequests: readonly ContributionPullRequest[];
 }
 
-const cacheDuration = 24 * 60 * 60 * 1000;
+const cacheDuration = 60 * 60 * 1000;
 const minimumStars = 1000;
+// Set featured: true for a full GitHub slug, e.g. "owner/repo".
+const repositoryOverrides = new Map<
+  string,
+  { readonly featured?: boolean; readonly ignored?: boolean }
+>([
+  // Featured repositories.
+  ["anomalyco/opencode", { featured: true }],
+  ["cloudflare/cloudflare-docs", { featured: true }],
+  ["haydenbleasel/blume", { featured: true }],
+  ["haydenbleasel/ultracite", { featured: true }],
+  // Add ignored repositories here as ["owner/repo", { ignored: true }].
+]);
 let cachedAt = 0;
 let cachedContributions: readonly ContributionRepository[] | undefined;
 
@@ -89,6 +102,9 @@ const fetchContributionRepositories = Effect.gen(
             };
           });
           return {
+            featured:
+              repositoryOverrides.get(repository.full_name.toLowerCase())
+                ?.featured ?? false,
             name:
               repository.full_name.split("/").at(-1) ?? repository.full_name,
             repo: repository.full_name,
@@ -101,9 +117,15 @@ const fetchContributionRepositories = Effect.gen(
       ),
       { concurrency: 10 }
     );
-    const repositories = contributionData.flatMap((repository) =>
-      repository === null ? [] : [repository]
-    );
+    const repositories = contributionData.flatMap((repository) => {
+      if (
+        repository === null ||
+        repositoryOverrides.get(repository.repo.toLowerCase())?.ignored
+      ) {
+        return [];
+      }
+      return [repository];
+    });
     return repositories.toSorted((first, second) => second.stars - first.stars);
   }
 );
