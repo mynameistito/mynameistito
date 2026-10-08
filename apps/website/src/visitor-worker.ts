@@ -61,9 +61,10 @@ export default VisitorService.make(
             headers: { "cache-control": "no-store" },
           });
         }).pipe(
-          catchTag("DurableObjectStorageError", () =>
-            json({ error: "Visitor count unavailable." }, { status: 503 })
-          )
+          catchTag("DurableObjectStorageError", (error) => {
+            console.error("Visitor counter storage failure.", error);
+            return json({ error: "Visitor count unavailable." }, { status: 503 });
+          })
         );
       }),
     };
