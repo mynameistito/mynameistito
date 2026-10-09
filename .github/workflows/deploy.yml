@@ -13,7 +13,7 @@ on:
 jobs:
   deploy:
     if: >-
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || (github.event_name == 'pull_request' && github.event.action == 'closed')
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && ((github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main') || (github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.pull_requests[0].head.repo.full_name == github.repository))) || (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-24.04
     concurrency:
       group: alchemy-deploy-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.event.workflow_run.event == 'pull_request' && format('pr-{0}', github.event.workflow_run.pull_requests[0].number) || github.event.workflow_run.event == 'push' && 'prod' || 'invalid' }}
@@ -33,21 +33,21 @@ jobs:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_ACCOUNT_ID
           CLOUDFLARE_API_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_API_TOKEN
-          CONTACT_RECIPIENT: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CONTACT_RECIPIENT
-          MDFROMX_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/MDFROMX_API_KEY
-          RESEND_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_API_KEY
-          RESEND_FROM: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_FROM
-          WORKER_GITHUB_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/WORKER_GITHUB_TOKEN
+          CONTACT_RECIPIENT: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && 'op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CONTACT_RECIPIENT' || '' }}
+          MDFROMX_API_KEY: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && 'op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/MDFROMX_API_KEY' || '' }}
+          RESEND_API_KEY: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && 'op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_API_KEY' || '' }}
+          RESEND_FROM: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && 'op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_FROM' || '' }}
+          WORKER_GITHUB_TOKEN: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && 'op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/WORKER_GITHUB_TOKEN' || '' }}
 
       - name: Run Alchemy deployment
         uses: mynameistito/alchemy-deploy@b20fd626080d4db521884f96d70b15471de493ab # v3.1.4
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ steps.onepassword.outputs.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ steps.onepassword.outputs.CLOUDFLARE_API_TOKEN }}
-          CONTACT_RECIPIENT: ${{ steps.onepassword.outputs.CONTACT_RECIPIENT }}
           GITHUB_TOKEN: ${{ github.token }}
           MDFROMX_API_KEY: ${{ steps.onepassword.outputs.MDFROMX_API_KEY }}
           RESEND_API_KEY: ${{ steps.onepassword.outputs.RESEND_API_KEY }}
+          CONTACT_RECIPIENT: ${{ steps.onepassword.outputs.CONTACT_RECIPIENT }}
           RESEND_FROM: ${{ steps.onepassword.outputs.RESEND_FROM }}
           WORKER_GITHUB_TOKEN: ${{ steps.onepassword.outputs.WORKER_GITHUB_TOKEN }}
         with:
@@ -81,23 +81,13 @@ jobs:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_ACCOUNT_ID
           CLOUDFLARE_API_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_API_TOKEN
-          CONTACT_RECIPIENT: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CONTACT_RECIPIENT
-          MDFROMX_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/MDMFROMX_API_KEY
-          RESEND_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_API_KEY
-          RESEND_FROM: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_FROM
-          WORKER_GITHUB_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/WORKER_GITHUB_TOKEN
 
       - name: Reconcile preview deployments
         uses: mynameistito/alchemy-deploy@b20fd626080d4db521884f96d70b15471de493ab # v3.1.4
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ steps.onepassword.outputs.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ steps.onepassword.outputs.CLOUDFLARE_API_TOKEN }}
-          CONTACT_RECIPIENT: ${{ steps.onepassword.outputs.CONTACT_RECIPIENT }}
           GITHUB_TOKEN: ${{ github.token }}
-          MDFROMX_API_KEY: ${{ steps.onepassword.outputs.MDFROMX_API_KEY }}
-          RESEND_API_KEY: ${{ steps.onepassword.outputs.RESEND_API_KEY }}
-          RESEND_FROM: ${{ steps.onepassword.outputs.RESEND_FROM }}
-          WORKER_GITHUB_TOKEN: ${{ steps.onepassword.outputs.WORKER_GITHUB_TOKEN }}
         with:
           worker-name: mynameistito
           deploy-command: bunx --no-install alchemy deploy --stage "$STAGE" --yes

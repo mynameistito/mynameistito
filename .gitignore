@@ -8,4 +8,9 @@ test-report.junit.xml
 .unlighthouse/
 .unlighthouse-*/
 .env
+.env.local
+.env.*.local
+apps/website/.env
+apps/website/.env.local
+apps/website/.env.*.local
 .alchemy/

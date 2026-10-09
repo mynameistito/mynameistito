@@ -1,6 +1,5 @@
 {
   "$schema": "https://unpkg.com/knip@6.40.0/schema.json",
-  "ignoreBinaries": ["2password"],
   "ignoreDependencies": ["cloudflare"],
   "workspaces": {
     ".": {
