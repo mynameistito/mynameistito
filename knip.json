@@ -4,7 +4,7 @@
   "ignoreDependencies": ["cloudflare"],
   "workspaces": {
     ".": {
-      "entry": ["alchemy.run.ts"]
+      "entry": ["alchemy.run.ts", "alchemy-e2e.run.ts"]
     },
     "apps/website": {
       "entry": ["src/lib/utils.ts", "worker.ts"]
