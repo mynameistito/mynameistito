@@ -13,8 +13,16 @@ import {
 import { gen } from "effect/Effect";
 
 const WebsiteResource = gen(function* deployWebsiteResource() {
+  const stack = yield* Stack;
+  const isProduction = stack.stage === "prod";
+  const turnstileDomains = ["localhost", "127.0.0.1", "mynameistito.com"];
+
+  if (!isProduction) {
+    turnstileDomains.push("mynameistito.mynameistito.workers.dev");
+  }
+
   const contactTurnstile = yield* Turnstile.Widget("ContactTurnstile", {
-    domains: ["localhost", "127.0.0.1", "mynameistito.com"],
+    domains: turnstileDomains,
     mode: "managed",
   });
 
@@ -23,6 +31,7 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
       date: "2026-09-25",
       flags: ["nodejs_compat"],
     },
+    domain: isProduction ? "mynameistito.com" : undefined,
     env: {
       CONTACT_RECIPIENT: ConfigString("CONTACT_RECIPIENT"),
       GITHUB_TOKEN: ConfigRedacted("WORKER_GITHUB_TOKEN"),
@@ -39,6 +48,7 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
     main: "worker.ts",
     name: "mynameistito",
     rootDir: "apps/website",
+    workersDev: isProduction ? false : undefined,
   });
 });
 

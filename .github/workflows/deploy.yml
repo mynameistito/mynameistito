@@ -97,7 +97,7 @@ jobs:
           deploy-command: bunx --no-install alchemy deploy --stage "$STAGE" --yes
           destroy-command: bunx --no-install alchemy destroy --stage "$STAGE" --yes
           production-stage: prod
-          production-url: https://mynameistito.mynameistito.com
+          production-url: https://mynameistito.com
           preview-compatibility-date: "2026-10-07"
           preview-compatibility-flags: '["nodejs_compat"]'
           reconcile: true
