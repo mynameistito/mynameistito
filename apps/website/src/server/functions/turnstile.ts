@@ -1,29 +1,32 @@
 import { Effect, Option, Redacted, Schema } from "effect";
 import { decodeUnknownEffect } from "effect/Schema";
 
+import { getAppEnv } from "@/env";
+
 const SiteverifyResponseSchema = Schema.Struct({
   success: Schema.Boolean,
   action: Schema.optional(Schema.String),
   hostname: Schema.optional(Schema.String),
 });
 
-/** Inputs needed to verify a contact-form Turnstile response. */
-export interface VerifyContactTurnstileInput {
+/** Inputs needed to verify a Turnstile response. */
+export interface VerifyTurnstileInput {
   readonly token: string;
   readonly secret: Redacted.Redacted<string>;
   readonly expectedHostname: string;
+  readonly expectedAction: string;
   readonly remoteIp?: string;
 }
 
 /**
- * Verify a one-use contact token with Cloudflare and fail closed on any
+ * Verify a one-use token with Cloudflare and fail closed on any
  * transport, response-decoding, action, or hostname mismatch.
  *
  * @param input - The token, redacted widget secret, and request host context.
  * @returns An Effect that succeeds with whether Cloudflare accepted the token.
  */
-export const verifyContactTurnstile = Effect.fn("Turnstile.verifyContact")(
-  function* verifyContactTurnstile(input: VerifyContactTurnstileInput) {
+export const verifyTurnstile = Effect.fn("Turnstile.verify")(
+  function* verifyTurnstile(input: VerifyTurnstileInput) {
     if (
       input.token.length === 0 ||
       input.token.length > 2048 ||
@@ -71,8 +74,28 @@ export const verifyContactTurnstile = Effect.fn("Turnstile.verifyContact")(
 
     return (
       result.value.success &&
-      result.value.action === "contact" &&
+      result.value.action === input.expectedAction &&
       result.value.hostname === input.expectedHostname
     );
   }
 );
+
+/** Inputs needed to verify a Turnstile response with configured credentials. */
+export type VerifyConfiguredTurnstileInput = Omit<
+  VerifyTurnstileInput,
+  "secret"
+>;
+
+/** Loads the configured secret and verifies a Turnstile response. */
+export const verifyConfiguredTurnstile = Effect.fn(
+  "Turnstile.verifyConfigured"
+)(function* verifyConfiguredTurnstile(input: VerifyConfiguredTurnstileInput) {
+  const loadedEnv = yield* getAppEnv().pipe(Effect.option);
+  if (Option.isNone(loadedEnv) || !loadedEnv.value.TURNSTILE_SECRET) {
+    return false;
+  }
+  return yield* verifyTurnstile({
+    ...input,
+    secret: loadedEnv.value.TURNSTILE_SECRET,
+  });
+});

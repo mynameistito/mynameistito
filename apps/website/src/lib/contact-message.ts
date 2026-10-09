@@ -4,7 +4,6 @@ import {
   isMaxLength,
   isMinLength,
   isPattern,
-  optional as SchemaOptional,
   String as SchemaString,
   Struct,
 } from "effect/Schema";
@@ -22,10 +21,10 @@ const ContactMessageSchema = Struct({
   company: SchemaString,
 });
 
-/** Parsed contact submission, including the optional anti-bot token. */
+/** Parsed contact submission, including its Turnstile token. */
 export const ContactSubmissionSchema = Struct({
   message: ContactMessageSchema,
-  turnstileToken: SchemaOptional(SchemaString),
+  turnstileToken: SchemaString,
 });
 
 /** The contact-form values after boundary decoding. */
