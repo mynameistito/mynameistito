@@ -1,3 +1,3 @@
-// @ts-expect-error -- TanStack Start generates this server entry during Vite build.
-export { default } from "./dist/server/server.js";
+// Vite resolves this virtual entry to TanStack Start's current dev/build server.
+export { default } from "virtual:tanstack-start-server-entry";
 export { VisitorCounter } from "./src/lib/visitor-counter";
