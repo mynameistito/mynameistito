@@ -43,23 +43,25 @@ const loadTurnstileApi = (): Promise<TurnstileApi> => {
     return Promise.reject(new Error("Turnstile script is not configured."));
   }
 
-  const deferred = Promise.withResolvers<TurnstileApi>();
-  const onLoad = () => {
-    if (window.turnstile) {
-      deferred.resolve(window.turnstile);
-    } else {
+  // eslint-disable-next-line promise/avoid-new -- Bridge the script's load events.
+  const pending = new Promise<TurnstileApi>((resolve, reject) => {
+    const onLoad = () => {
+      if (window.turnstile) {
+        resolve(window.turnstile);
+      } else {
+        apiPromise = null;
+        reject(new Error("Turnstile did not initialize."));
+      }
+    };
+    const onError = () => {
       apiPromise = null;
-      deferred.reject(new Error("Turnstile did not initialize."));
-    }
-  };
-  const onError = () => {
-    apiPromise = null;
-    deferred.reject(new Error("Turnstile failed to load."));
-  };
-  script.addEventListener("load", onLoad, { once: true });
-  script.addEventListener("error", onError, { once: true });
-  apiPromise = deferred.promise;
-  return deferred.promise;
+      reject(new Error("Turnstile failed to load."));
+    };
+    script.addEventListener("load", onLoad, { once: true });
+    script.addEventListener("error", onError, { once: true });
+  });
+  apiPromise = pending;
+  return pending;
 };
 
 /** Requests a one-use token without displaying the widget unless challenged.
@@ -76,55 +78,56 @@ export const getTurnstileToken = async (
   container.setAttribute("aria-hidden", "true");
   document.body.append(container);
 
-  const deferred = Promise.withResolvers<string>();
-  const widget: ActiveWidget = {};
-  const timeout = { id: 0 };
-  let settled = false;
+  // eslint-disable-next-line promise/avoid-new -- Bridge Turnstile's callback API.
+  return new Promise<string>((resolve, reject) => {
+    const widget: ActiveWidget = {};
+    const timeout = { id: 0 };
+    let settled = false;
 
-  const cleanup = () => {
-    window.clearTimeout(timeout.id);
-    if (widget.id) {
-      turnstile.remove(widget.id);
-    }
-    container.remove();
-  };
-  const settle = (result: string | Error) => {
-    if (settled) {
-      return;
-    }
-    settled = true;
-    cleanup();
-    if (result instanceof Error) {
-      deferred.reject(result);
-    } else {
-      deferred.resolve(result);
-    }
-  };
+    const cleanup = () => {
+      window.clearTimeout(timeout.id);
+      if (widget.id) {
+        turnstile.remove(widget.id);
+      }
+      container.remove();
+    };
+    const settle = (result: string | Error) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      cleanup();
+      if (result instanceof Error) {
+        reject(result);
+      } else {
+        resolve(result);
+      }
+    };
 
-  timeout.id = window.setTimeout(
-    () => settle(new Error("Turnstile token request timed out.")),
-    120_000
-  );
-
-  try {
-    widget.id = turnstile.render(container, {
-      sitekey,
-      action,
-      appearance: "interaction-only",
-      execution: "execute",
-      size: "invisible",
-      callback: (token) => settle(token),
-      "error-callback": () =>
-        settle(new Error("Turnstile token request failed.")),
-      "expired-callback": () => settle(new Error("Turnstile token expired.")),
-    });
-    turnstile.execute(widget.id);
-  } catch (error) {
-    settle(
-      error instanceof Error
-        ? error
-        : new Error("Turnstile token request failed.")
+    timeout.id = window.setTimeout(
+      () => settle(new Error("Turnstile token request timed out.")),
+      120_000
     );
-  }
-  return deferred.promise;
+
+    try {
+      widget.id = turnstile.render(container, {
+        sitekey,
+        action,
+        appearance: "interaction-only",
+        execution: "execute",
+        size: "invisible",
+        callback: (token) => settle(token),
+        "error-callback": () =>
+          settle(new Error("Turnstile token request failed.")),
+        "expired-callback": () => settle(new Error("Turnstile token expired.")),
+      });
+      turnstile.execute(widget.id);
+    } catch (error) {
+      settle(
+        error instanceof Error
+          ? error
+          : new Error("Turnstile token request failed.")
+      );
+    }
+  });
 };
