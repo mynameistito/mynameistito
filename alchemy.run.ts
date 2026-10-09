@@ -1,9 +1,9 @@
 import { Stack } from "alchemy";
-import type { InferEnv } from "alchemy/Cloudflare";
 import {
   DurableObject as DurableObjectResource,
   providers,
   state,
+  Turnstile,
   Website,
 } from "alchemy/Cloudflare";
 import {
@@ -12,29 +12,35 @@ import {
 } from "effect/Config";
 import { gen } from "effect/Effect";
 
-export const WebsiteResource = Website.Vite("Website", {
-  compatibility: {
-    date: "2026-09-25",
-    flags: ["nodejs_compat"],
-  },
-  env: {
-    CONTACT_RECIPIENT: ConfigString("CONTACT_RECIPIENT"),
-    GITHUB_TOKEN: ConfigRedacted("WORKER_GITHUB_TOKEN"),
-    MDFROMX_API_KEY: ConfigRedacted("MDFROMX_API_KEY"),
-    RESEND_API_KEY: ConfigRedacted("RESEND_API_KEY"),
-    RESEND_FROM: ConfigString("RESEND_FROM"),
-    VISITOR_COUNTER: DurableObjectResource("VisitorCounter", {
-      className: "VisitorCounter",
-      transferredFrom: "VisitorService",
-    }),
-  },
-  main: "worker.ts",
-  name: "mynameistito",
-  rootDir: "apps/website",
-});
+const WebsiteResource = gen(function* deployWebsiteResource() {
+  const contactTurnstile = yield* Turnstile.Widget("ContactTurnstile", {
+    domains: ["localhost", "127.0.0.1", "mynameistito.workers.dev"],
+    mode: "managed",
+  });
 
-/** Bindings available to the deployed website Worker. */
-export type WebsiteEnv = InferEnv<typeof WebsiteResource>;
+  return yield* Website.Vite("Website", {
+    compatibility: {
+      date: "2026-09-25",
+      flags: ["nodejs_compat"],
+    },
+    env: {
+      CONTACT_RECIPIENT: ConfigString("CONTACT_RECIPIENT"),
+      GITHUB_TOKEN: ConfigRedacted("WORKER_GITHUB_TOKEN"),
+      MDFROMX_API_KEY: ConfigRedacted("MDFROMX_API_KEY"),
+      RESEND_API_KEY: ConfigRedacted("RESEND_API_KEY"),
+      RESEND_FROM: ConfigString("RESEND_FROM"),
+      TURNSTILE_SECRET: contactTurnstile.secret,
+      TURNSTILE_SITEKEY: contactTurnstile.sitekey,
+      VISITOR_COUNTER: DurableObjectResource("VisitorCounter", {
+        className: "VisitorCounter",
+        transferredFrom: "VisitorService",
+      }),
+    },
+    main: "worker.ts",
+    name: "mynameistito",
+    rootDir: "apps/website",
+  });
+});
 
 export default Stack(
   "mynameistito",

@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Effect } from "effect";
+import { Effect, Option } from "effect";
 import { catch as catchEffect } from "effect/Effect";
 import { decodeUnknownEffect } from "effect/Schema";
 
-import { ContactMessageSchema } from "@/lib/contact-message";
+import { getAppEnv } from "@/env";
+import { ContactSubmissionSchema } from "@/lib/contact-message";
 import { sendContactMessage } from "@/server/functions/send-contact-message";
+import { verifyContactTurnstile } from "@/server/functions/turnstile";
 
 const json = (body: Record<string, string>, status: number) =>
   Response.json(body, {
@@ -20,15 +22,36 @@ const post = ({ request }: { request: Request }) =>
         return json({ error: "Invalid request origin." }, 403);
       }
 
-      const message = yield* Effect.tryPromise(() => request.json()).pipe(
-        Effect.flatMap(decodeUnknownEffect(ContactMessageSchema)),
+      const submission = yield* Effect.tryPromise(() => request.json()).pipe(
+        Effect.flatMap(decodeUnknownEffect(ContactSubmissionSchema)),
         catchEffect(() => Effect.succeed(null))
       );
-      if (!message) {
+      if (!submission) {
         return json({ error: "Invalid message." }, 400);
       }
 
-      const result = yield* sendContactMessage(message);
+      const token = submission.turnstileToken;
+      const loadedEnv = yield* getAppEnv().pipe(Effect.option);
+      if (
+        !token ||
+        token.length > 2048 ||
+        Option.isNone(loadedEnv) ||
+        !loadedEnv.value.TURNSTILE_SECRET
+      ) {
+        return json({ error: "Forbidden." }, 403);
+      }
+
+      const verified = yield* verifyContactTurnstile({
+        token,
+        secret: loadedEnv.value.TURNSTILE_SECRET,
+        expectedHostname: new URL(request.url).hostname,
+        remoteIp: request.headers.get("cf-connecting-ip") ?? "",
+      });
+      if (!verified) {
+        return json({ error: "Forbidden." }, 403);
+      }
+
+      const result = yield* sendContactMessage(submission.message);
       switch (result._tag) {
         case "Sent": {
           return json({ sent: "true" }, 200);
