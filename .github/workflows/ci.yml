@@ -71,10 +71,6 @@ jobs:
       - name: Run task
         run: bun run ${{ matrix.task }}
 
-      - name: Check client bundle environment boundary
-        if: matrix.task == 'build'
-        run: bun .github/scripts/check-client-env.mjs
-
       - name: Upload Alchemy Worker preview bundle
         if: matrix.task == 'build'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

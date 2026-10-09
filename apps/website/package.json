@@ -12,10 +12,10 @@
     "dev": "varlock run --inject vars -- bun run --cwd ../.. alchemy dev",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "bun run scripts/run-varlock.ts production run --inject vars -- bun run --cwd ../.. alchemy deploy --stage prod --yes",
+    "deploy": "bun --env-file=.env.production run varlock run --inject vars -- bun run --cwd ../.. alchemy deploy --stage prod --yes",
     "env:check": "varlock load --agent",
-    "env:check:prod": "bun run scripts/run-varlock.ts production load --agent",
-    "env:scan": "bun run scripts/run-varlock.ts production scan src dist",
+    "env:check:prod": "bun --env-file=.env.production run varlock load --agent",
+    "env:scan": "bun --env-file=.env.production run varlock load --agent && bun --env-file=.env.production run varlock scan src dist",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

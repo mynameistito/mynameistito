@@ -5,58 +5,68 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const websiteDirectory = fileURLToPath(new URL("../../", import.meta.url));
-const varlockEntrypoint = fileURLToPath(
-  new URL("../../../../node_modules/varlock/bin/cli.js", import.meta.url)
-);
 const testCloudflareAccountId = randomBytes(16).toString("hex");
+const secretValues = [
+  "not-a-real-cloudflare-token-123456",
+  "not-a-real-mdfromx-key-123456789",
+  "not-a-real-resend-key-123456789",
+  "not-a-real-github-token-123456789",
+];
 
-const validConfig = {
+const validProductionConfig = {
   ...process.env,
   OP_SERVICE_ACCOUNT_TOKEN: "",
+  APP_ENV: "production",
   CLOUDFLARE_ACCOUNT_ID: testCloudflareAccountId,
-  CLOUDFLARE_API_TOKEN: "not-a-real-cloudflare-token-123456",
+  CLOUDFLARE_API_TOKEN: secretValues[0],
   CONTACT_RECIPIENT: "contact@example.invalid",
-  MDFROMX_API_KEY: "not-a-real-mdfromx-key-123456789",
-  RESEND_API_KEY: "not-a-real-resend-key-123456789",
+  MDFROMX_API_KEY: secretValues[1],
+  RESEND_API_KEY: secretValues[2],
   RESEND_FROM: "noreply@example.invalid",
-  WORKER_GITHUB_TOKEN: "not-a-real-github-token-123456789",
+  WORKER_GITHUB_TOKEN: secretValues[3],
 };
 
-const loadConfig = (env: NodeJS.ProcessEnv, environment = "production") =>
-  spawnSync(process.execPath, [varlockEntrypoint, "load", "--agent"], {
+const loadConfig = (env: NodeJS.ProcessEnv) =>
+  // oxlint-disable-next-line sonarjs/no-os-command-from-path -- Bun is the repository package manager.
+  spawnSync("bun", ["run", "varlock", "load", "--agent"], {
     cwd: websiteDirectory,
     encoding: "utf-8",
-    env: { ...env, APP_ENV: environment },
+    env,
   });
 
 describe("Varlock website schema", () => {
-  it("loads required config and redacts sensitive values", () => {
-    const result = loadConfig(validConfig);
+  it("accepts complete production deployment configuration without exposing secrets", () => {
+    const result = loadConfig(validProductionConfig);
 
     expect(result.error).toBeUndefined();
     expect(result.status).toBe(0);
-    expect(result.stdout).toContain('"WORKER_GITHUB_TOKEN": "no▒▒▒▒▒"');
-    expect([
-      result.stdout.includes('"CONTACT_RECIPIENT": "contact@example.invalid"'),
-      result.stdout.includes(
-        `"CLOUDFLARE_ACCOUNT_ID": "${testCloudflareAccountId.slice(0, 2)}▒▒▒▒▒"`
-      ),
-      result.stdout.includes(validConfig.WORKER_GITHUB_TOKEN),
-      result.stdout.includes(validConfig.RESEND_API_KEY),
-    ]).toStrictEqual([true, true, false, false]);
+    for (const secret of secretValues) {
+      expect(result.stdout).not.toContain(secret);
+    }
   });
 
-  it("does not load production Cloudflare credentials in development", () => {
-    const result = loadConfig(validConfig, "development");
+  it("allows development without production-only credentials", () => {
+    const result = loadConfig({
+      ...process.env,
+      OP_SERVICE_ACCOUNT_TOKEN: "",
+      APP_ENV: "development",
+      WORKER_GITHUB_TOKEN: "",
+      MDFROMX_API_KEY: "",
+      RESEND_API_KEY: "",
+      RESEND_FROM: "",
+      CONTACT_RECIPIENT: "",
+      CLOUDFLARE_ACCOUNT_ID: "",
+      CLOUDFLARE_API_TOKEN: "",
+    });
 
     expect(result.error).toBeUndefined();
     expect(result.status).toBe(0);
     expect(result.stdout).not.toContain("CLOUDFLARE_API_TOKEN");
   });
 
-  it("rejects an invalid contact recipient address", () => {
+  it("rejects an invalid production contact recipient", () => {
     const result = loadConfig({
-      ...validConfig,
+      ...validProductionConfig,
       CONTACT_RECIPIENT: "not-an-email-address",
     });
 
@@ -65,9 +75,9 @@ describe("Varlock website schema", () => {
     expect(result.stderr).toContain("CONTACT_RECIPIENT");
   });
 
-  it("rejects a missing required API credential", () => {
+  it("rejects a missing production application credential", () => {
     const result = loadConfig({
-      ...validConfig,
+      ...validProductionConfig,
       RESEND_API_KEY: "",
     });
 

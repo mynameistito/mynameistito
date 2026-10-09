@@ -33,11 +33,20 @@ jobs:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_ACCOUNT_ID
           CLOUDFLARE_API_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_API_TOKEN
-          CONTACT_RECIPIENT: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && 'op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CONTACT_RECIPIENT' || '' }}
-          MDFROMX_API_KEY: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && 'op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/MDFROMX_API_KEY' || '' }}
-          RESEND_API_KEY: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && 'op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_API_KEY' || '' }}
-          RESEND_FROM: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && 'op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_FROM' || '' }}
-          WORKER_GITHUB_TOKEN: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && 'op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/WORKER_GITHUB_TOKEN' || '' }}
+
+      - name: Load production application secrets
+        if: github.event_name == 'workflow_run' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main'
+        id: app-secrets
+        uses: 1Password/load-secrets-action@70062d7a876d3eb6334754fa26efd2fbd90c32f2 # v5
+        with:
+          version: 2.39.0
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          CONTACT_RECIPIENT: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CONTACT_RECIPIENT
+          MDFROMX_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/MDFROMX_API_KEY
+          RESEND_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_API_KEY
+          RESEND_FROM: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_FROM
+          WORKER_GITHUB_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/WORKER_GITHUB_TOKEN
 
       - name: Run Alchemy deployment
         uses: mynameistito/alchemy-deploy@b20fd626080d4db521884f96d70b15471de493ab # v3.1.4
@@ -45,11 +54,11 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ steps.onepassword.outputs.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ steps.onepassword.outputs.CLOUDFLARE_API_TOKEN }}
           GITHUB_TOKEN: ${{ github.token }}
-          MDFROMX_API_KEY: ${{ steps.onepassword.outputs.MDFROMX_API_KEY }}
-          RESEND_API_KEY: ${{ steps.onepassword.outputs.RESEND_API_KEY }}
-          CONTACT_RECIPIENT: ${{ steps.onepassword.outputs.CONTACT_RECIPIENT }}
-          RESEND_FROM: ${{ steps.onepassword.outputs.RESEND_FROM }}
-          WORKER_GITHUB_TOKEN: ${{ steps.onepassword.outputs.WORKER_GITHUB_TOKEN }}
+          MDFROMX_API_KEY: ${{ steps.app-secrets.outputs.MDFROMX_API_KEY }}
+          RESEND_API_KEY: ${{ steps.app-secrets.outputs.RESEND_API_KEY }}
+          CONTACT_RECIPIENT: ${{ steps.app-secrets.outputs.CONTACT_RECIPIENT }}
+          RESEND_FROM: ${{ steps.app-secrets.outputs.RESEND_FROM }}
+          WORKER_GITHUB_TOKEN: ${{ steps.app-secrets.outputs.WORKER_GITHUB_TOKEN }}
         with:
           worker-name: mynameistito
           deploy-command: bun run --cwd apps/website build && bunx --no-install alchemy deploy --stage "$STAGE" --yes
