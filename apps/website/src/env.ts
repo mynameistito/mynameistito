@@ -1,5 +1,7 @@
 import { Effect, Redacted } from "effect";
 
+import type { VisitorCounts } from "@/lib/visitor-counting";
+
 /** Runtime bindings supplied by the platform or Alchemy local runtime. */
 export interface AppEnv {
   readonly CONTACT_RECIPIENT?: string;
@@ -8,8 +10,10 @@ export interface AppEnv {
   readonly GITHUB_TOKEN?: Redacted.Redacted<string>;
   readonly WORKER_GITHUB_TOKEN?: Redacted.Redacted<string>;
   readonly MDFROMX_API_KEY?: Redacted.Redacted<string>;
-  readonly VISITOR_SERVICE?: {
-    readonly fetch: (request: Request) => Promise<Response>;
+  readonly VISITOR_COUNTER?: {
+    readonly getByName: (name: string) => {
+      readonly track: (visitorId: string) => Promise<VisitorCounts>;
+    };
   };
 }
 
@@ -20,7 +24,7 @@ interface RawAppEnv {
   readonly GITHUB_TOKEN?: string;
   readonly WORKER_GITHUB_TOKEN?: string;
   readonly MDFROMX_API_KEY?: string;
-  readonly VISITOR_SERVICE?: AppEnv["VISITOR_SERVICE"];
+  readonly VISITOR_COUNTER?: AppEnv["VISITOR_COUNTER"];
 }
 
 const redactSecrets = (bindings: RawAppEnv): AppEnv => ({

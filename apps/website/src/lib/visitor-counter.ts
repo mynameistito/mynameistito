@@ -1,14 +1,9 @@
-import type { RuntimeContext } from "alchemy";
-import type { DurableObjectStorageError } from "alchemy/Cloudflare";
-import { DurableObject, DurableObjectState } from "alchemy/Cloudflare";
-import { currentTimeMillis } from "effect/Clock";
-import { fn, gen, succeed } from "effect/Effect";
-import type { Effect as EffectType } from "effect/Effect";
+import { DurableObject } from "cloudflare:workers";
 
 import {
   dailyCountAfterVisit,
-  expiredVisitorKeys,
   expiredLiveVisitorKeys,
+  expiredVisitorKeys,
   heartbeatMs,
   keysForVisitor,
   liveCountAfterVisit,
@@ -20,99 +15,76 @@ interface VisitorCounts {
   readonly live: number;
 }
 
-/** Public Effect operations exposed by the visitor Durable Object. */
-export interface VisitorCounterMethods {
-  readonly track: (
-    visitorId: string
-  ) => EffectType<VisitorCounts, DurableObjectStorageError, RuntimeContext>;
-  readonly alarm: () => EffectType<
-    void,
-    DurableObjectStorageError,
-    RuntimeContext
-  >;
-}
+/** Persistent visitor counter hosted by the website Worker. */
+export class VisitorCounter extends DurableObject {
+  /**
+   * Record a heartbeat for a visitor and return current counts.
+   * @param visitorId - The stable visitor identifier.
+   * @returns Current daily and live visitor counts.
+   */
+  async track(visitorId: string): Promise<VisitorCounts> {
+    const now = Date.now();
+    const keys = keysForVisitor(now, visitorId);
+    const { storage } = this.ctx;
 
-/** The typed Alchemy Durable Object namespace for portfolio visitor state. */
-export class VisitorCounter extends DurableObject<
-  VisitorCounter,
-  VisitorCounterMethods
->()("VisitorCounter") {}
+    const counts = await storage.transaction(async (transaction) => {
+      const storedToday = await transaction.get<string>("today");
+      if (storedToday !== keys.today) {
+        const dailyKeys = await transaction.list({ prefix: "daily:" });
+        const seenKeys = await transaction.list({ prefix: "seen:" });
+        const expired = expiredVisitorKeys({
+          today: keys.today,
+          now,
+          dailyKeys: dailyKeys.keys(),
+          seenKeys: seenKeys.keys(),
+          liveEntries: [],
+        });
+        await Promise.all(expired.map((key) => transaction.delete(key)));
+        await transaction.put("today", keys.today);
+      }
 
-export default VisitorCounter.make(
-  gen(function* makeVisitorCounter() {
-    const state = yield* DurableObjectState;
+      const active = await transaction.list<number>({ prefix: "live:" });
+      const expiredLive = expiredLiveVisitorKeys(active, now);
+      const expiredLiveSet = new Set(expiredLive);
+      const visitorWasActive =
+        active.has(keys.live) && !expiredLiveSet.has(keys.live);
+      await Promise.all(expiredLive.map((key) => transaction.delete(key)));
 
-    const track = fn("VisitorCounter.track")(function* trackVisitor(
-      visitorId: string
-    ) {
-      const now = yield* currentTimeMillis;
-      const keys = keysForVisitor(now, visitorId);
-
-      const counts = yield* state.storage.transaction(
-        gen(function* countVisitors() {
-          const storedToday = yield* state.storage.get<string>("today");
-          if (storedToday !== keys.today) {
-            const dailyKeys = yield* state.storage.list({ prefix: "daily:" });
-            const seenKeys = yield* state.storage.list({ prefix: "seen:" });
-            const expired = expiredVisitorKeys({
-              today: keys.today,
-              now,
-              dailyKeys: dailyKeys.keys(),
-              seenKeys: seenKeys.keys(),
-              liveEntries: [],
-            });
-            for (const key of expired) {
-              yield* state.storage.delete(key);
-            }
-            yield* state.storage.put("today", keys.today);
-          }
-
-          const active = yield* state.storage.list<number>({ prefix: "live:" });
-          const expiredLive = expiredLiveVisitorKeys(active, now);
-          const expiredLiveSet = new Set(expiredLive);
-          const visitorWasActive =
-            active.has(keys.live) && !expiredLiveSet.has(keys.live);
-          for (const key of expiredLive) {
-            yield* state.storage.delete(key);
-          }
-
-          const seen = yield* state.storage.get<boolean>(keys.seen);
-          const current = (yield* state.storage.get<number>(keys.daily)) ?? 0;
-          if (!seen) {
-            yield* state.storage.put(keys.seen, true);
-          }
-          yield* state.storage.put(
-            keys.daily,
-            dailyCountAfterVisit(current, seen ?? false)
-          );
-          yield* state.storage.put(keys.live, now);
-          return {
-            daily: (yield* state.storage.get<number>(keys.daily)) ?? 0,
-            live: liveCountAfterVisit(
-              active.size,
-              expiredLive.length,
-              visitorWasActive
-            ),
-          } satisfies VisitorCounts;
-        })
+      const seen = await transaction.get<boolean>(keys.seen);
+      const current = (await transaction.get<number>(keys.daily)) ?? 0;
+      if (!seen) {
+        await transaction.put(keys.seen, true);
+      }
+      await transaction.put(
+        keys.daily,
+        dailyCountAfterVisit(current, seen ?? false)
       );
+      await transaction.put(keys.live, now);
 
-      yield* state.storage.setAlarm(now + heartbeatMs);
-      return counts;
+      return {
+        daily: (await transaction.get<number>(keys.daily)) ?? 0,
+        live: liveCountAfterVisit(
+          active.size,
+          expiredLive.length,
+          visitorWasActive
+        ),
+      } satisfies VisitorCounts;
     });
 
-    const alarm = fn("VisitorCounter.alarm")(function* cleanLiveVisitors() {
-      const now = yield* currentTimeMillis;
-      const active = yield* state.storage.list<number>({ prefix: "live:" });
-      const expired = expiredLiveVisitorKeys(active, now);
-      for (const key of expired) {
-        yield* state.storage.delete(key);
-      }
-      if ((yield* state.storage.list({ prefix: "live:" })).size > 0) {
-        yield* state.storage.setAlarm(now + heartbeatMs);
-      }
-    });
+    await storage.setAlarm(now + heartbeatMs);
+    return counts;
+  }
 
-    return succeed({ alarm, track });
-  })
-);
+  /** Remove expired live visitor leases and schedule the next cleanup. */
+  async alarm(): Promise<void> {
+    const now = Date.now();
+    const { storage } = this.ctx;
+    const active = await storage.list<number>({ prefix: "live:" });
+    const expired = expiredLiveVisitorKeys(active, now);
+    await Promise.all(expired.map((key) => storage.delete(key)));
+    const remaining = await storage.list({ prefix: "live:" });
+    if (remaining.size > 0) {
+      await storage.setAlarm(now + heartbeatMs);
+    }
+  }
+}

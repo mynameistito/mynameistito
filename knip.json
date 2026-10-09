@@ -7,7 +7,7 @@
       "entry": ["alchemy.run.ts"]
     },
     "apps/website": {
-      "entry": ["src/lib/utils.ts"]
+      "entry": ["src/lib/utils.ts", "worker.ts"]
     }
   }
 }
