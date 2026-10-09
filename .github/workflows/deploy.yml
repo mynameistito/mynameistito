@@ -55,7 +55,7 @@ jobs:
           deploy-command: bun run --cwd apps/website build && bunx --no-install alchemy deploy --stage "$STAGE" --yes
           destroy-command: bunx --no-install alchemy destroy --stage "$STAGE" --yes
           production-stage: prod
-          production-url: https://mynameistito.mynameistito.workers.dev
+          production-url: https://mynameistito.com
           preview-artifact: alchemy-worker
           preview-entrypoint: server/server.js
           preview-assets-directory: client
@@ -103,7 +103,7 @@ jobs:
           deploy-command: bunx --no-install alchemy deploy --stage "$STAGE" --yes
           destroy-command: bunx --no-install alchemy destroy --stage "$STAGE" --yes
           production-stage: prod
-          production-url: https://mynameistito.mynameistito.workers.dev
+          production-url: https://mynameistito.mynameistito.com
           preview-compatibility-date: "2026-10-07"
           preview-compatibility-flags: '["nodejs_compat"]'
           reconcile: true

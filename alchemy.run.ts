@@ -14,7 +14,7 @@ import { gen } from "effect/Effect";
 
 const WebsiteResource = gen(function* deployWebsiteResource() {
   const contactTurnstile = yield* Turnstile.Widget("ContactTurnstile", {
-    domains: ["localhost", "127.0.0.1", "mynameistito.workers.dev"],
+    domains: ["localhost", "127.0.0.1", "mynameistito.com"],
     mode: "managed",
   });
 
