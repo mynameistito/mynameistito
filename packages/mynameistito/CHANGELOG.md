@@ -1,5 +1,11 @@
 # mynameistito
 
+## 0.3.2
+
+### Patch Changes
+
+- 479e7f5: Run the CLI output through Effect.
+
 ## 0.3.1
 
 ### Patch Changes
