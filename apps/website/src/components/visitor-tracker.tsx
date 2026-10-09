@@ -6,7 +6,7 @@ import {
   Number as SchemaNumber,
   Struct,
 } from "effect/Schema";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { getTurnstileToken } from "@/lib/turnstile-client";
 import { getTurnstileSitekey } from "@/server/functions/contact-turnstile-config";
@@ -21,6 +21,22 @@ const VisitorCountsSchema = Struct({
   daily: SchemaNumber,
   live: SchemaNumber,
 });
+const runWithHeartbeatGuard = async <A,>(
+  guard: { active: boolean },
+  task: () => Promise<A>
+): Promise<A | null> => {
+  if (guard.active) {
+    return null;
+  }
+  guard.active = true;
+  try {
+    return await task();
+  } catch {
+    return null;
+  } finally {
+    guard.active = false;
+  }
+};
 
 const loadVisitorCounts = (pathname: string, sitekey: string) =>
   Effect.gen(function* loadVisitorCountsProgram() {
@@ -52,8 +68,6 @@ export const VisitorTracker = () => {
   const [turnstileSitekey, setTurnstileSitekey] = useState<
     string | null | undefined
   >();
-  const heartbeatInProgress = useRef(false);
-
   useEffect(() => {
     let cancelled = false;
     const loadSitekey = async () => {
@@ -79,15 +93,11 @@ export const VisitorTracker = () => {
       return;
     }
     let cancelled = false;
+    const heartbeatGuard = { active: false };
     const trackHeartbeat = async () => {
-      if (heartbeatInProgress.current) {
-        return;
-      }
-      heartbeatInProgress.current = true;
-      const value = await Effect.runPromise(
-        loadVisitorCounts(pathname, turnstileSitekey)
+      const value = await runWithHeartbeatGuard(heartbeatGuard, () =>
+        Effect.runPromise(loadVisitorCounts(pathname, turnstileSitekey))
       );
-      heartbeatInProgress.current = false;
       if (!cancelled && value) {
         setCounts(value satisfies VisitorCounts);
       }
