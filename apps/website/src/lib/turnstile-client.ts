@@ -42,10 +42,15 @@ const loadTurnstileApi = (): Promise<TurnstileApi> => {
   if (!script) {
     return Promise.reject(new Error("Turnstile script is not configured."));
   }
+  if (document.readyState === "complete") {
+    return Promise.reject(new Error("Turnstile did not initialize."));
+  }
 
   // eslint-disable-next-line promise/avoid-new -- Bridge the script's load events.
   const pending = new Promise<TurnstileApi>((resolve, reject) => {
+    let timeout = 0;
     const onLoad = () => {
+      window.clearTimeout(timeout);
       if (window.turnstile) {
         resolve(window.turnstile);
       } else {
@@ -54,9 +59,16 @@ const loadTurnstileApi = (): Promise<TurnstileApi> => {
       }
     };
     const onError = () => {
+      window.clearTimeout(timeout);
       apiPromise = null;
       reject(new Error("Turnstile failed to load."));
     };
+    timeout = window.setTimeout(() => {
+      script.removeEventListener("load", onLoad);
+      script.removeEventListener("error", onError);
+      apiPromise = null;
+      reject(new Error("Turnstile load timed out."));
+    }, 15_000);
     script.addEventListener("load", onLoad, { once: true });
     script.addEventListener("error", onError, { once: true });
   });
