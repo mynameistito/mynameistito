@@ -7,6 +7,8 @@ export interface AppEnv {
   readonly CONTACT_RECIPIENT?: string;
   readonly RESEND_API_KEY?: Redacted.Redacted<string>;
   readonly RESEND_FROM?: string;
+  readonly TURNSTILE_SITEKEY?: string;
+  readonly TURNSTILE_SECRET?: Redacted.Redacted<string>;
   readonly GITHUB_TOKEN?: Redacted.Redacted<string>;
   readonly WORKER_GITHUB_TOKEN?: Redacted.Redacted<string>;
   readonly MDFROMX_API_KEY?: Redacted.Redacted<string>;
@@ -21,6 +23,8 @@ interface RawAppEnv {
   readonly CONTACT_RECIPIENT?: string;
   readonly RESEND_API_KEY?: string;
   readonly RESEND_FROM?: string;
+  readonly TURNSTILE_SITEKEY?: string;
+  readonly TURNSTILE_SECRET?: string;
   readonly GITHUB_TOKEN?: string;
   readonly WORKER_GITHUB_TOKEN?: string;
   readonly MDFROMX_API_KEY?: string;
@@ -37,6 +41,9 @@ const redactSecrets = (bindings: RawAppEnv): AppEnv => ({
     : undefined,
   RESEND_API_KEY: bindings.RESEND_API_KEY
     ? Redacted.make(bindings.RESEND_API_KEY)
+    : undefined,
+  TURNSTILE_SECRET: bindings.TURNSTILE_SECRET
+    ? Redacted.make(bindings.TURNSTILE_SECRET)
     : undefined,
   MDFROMX_API_KEY: bindings.MDFROMX_API_KEY
     ? Redacted.make(bindings.MDFROMX_API_KEY)
@@ -72,6 +79,9 @@ export const getAppEnv = Effect.fn("getAppEnv")(function* getAppEnv() {
     GITHUB_TOKEN: githubToken,
     RESEND_API_KEY: process.env.RESEND_API_KEY ?? bindings.RESEND_API_KEY,
     RESEND_FROM: process.env.RESEND_FROM ?? bindings.RESEND_FROM,
+    TURNSTILE_SITEKEY:
+      process.env.TURNSTILE_SITEKEY ?? bindings.TURNSTILE_SITEKEY,
+    TURNSTILE_SECRET: process.env.TURNSTILE_SECRET ?? bindings.TURNSTILE_SECRET,
     MDFROMX_API_KEY: process.env.MDFROMX_API_KEY ?? bindings.MDFROMX_API_KEY,
   } satisfies RawAppEnv;
   return redactSecrets(merged);

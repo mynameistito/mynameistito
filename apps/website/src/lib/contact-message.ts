@@ -4,12 +4,13 @@ import {
   isMaxLength,
   isMinLength,
   isPattern,
+  optional as SchemaOptional,
   String as SchemaString,
   Struct,
 } from "effect/Schema";
 
 /** Parsed message submitted through the website contact form. */
-export const ContactMessageSchema = Struct({
+const ContactMessageSchema = Struct({
   name: SchemaString.pipe(check(isMinLength(1), isMaxLength(120))),
   email: SchemaString.pipe(
     check(
@@ -19,6 +20,12 @@ export const ContactMessageSchema = Struct({
   ),
   message: SchemaString.pipe(check(isMinLength(1), isMaxLength(5000))),
   company: SchemaString,
+});
+
+/** Parsed contact submission, including the optional anti-bot token. */
+export const ContactSubmissionSchema = Struct({
+  message: ContactMessageSchema,
+  turnstileToken: SchemaOptional(SchemaString),
 });
 
 /** The contact-form values after boundary decoding. */
