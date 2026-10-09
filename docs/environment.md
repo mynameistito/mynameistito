@@ -1,19 +1,19 @@
 # Environment and secrets
 
-## Local development
+## Local setup
 
-Install dependencies and the 1Password CLI, then enable its desktop-app integration and sign in to the account with access to the existing items. Run `bun run dev` (or `bun run dev:website`). Varlock resolves the website's 1Password references in memory; app credentials are optional in development, and Cloudflare deployment credentials are only loaded for production. `bun run env:check` validates development settings; `bun run env:check:prod` validates the production deployment configuration.
+Install the 1Password CLI, enable desktop-app integration, and sign in with access to the existing items. Then run `bun run dev`; use `bun run env:check` or `bun run env:check:prod` to validate development or production configuration. Varlock resolves credentials in memory. Production-only app and Cloudflare settings are not required for development.
 
-1Password is the source of truth. The schemas use Varlock's `op(op://...)` resolver; importing a plain `.env.tpl` leaves raw `op://...` values literal. Keep references, resolution, and validation together in `apps/website/.env.schema`. CI repeats the required references for its separate pinned 1Password action. Keep local `.env` files, resolved config, and credential-bearing artifacts uncommitted. Never copy resolved credentials into source or client code.
+The schemas use Varlock's `op(op://...)` resolver; importing a plain `.env.tpl` leaves references literal. Keep references and validation in `apps/website/.env.schema`. Never commit resolved values, local env files, or credential-bearing artifacts.
 
-## CI and deployments
+## CI and deployment
 
-CI has no production credentials. It scans committed history with Gitleaks and builds the Worker artifact. `bun run env:scan` uses Varlock to scan source and build output for actual resolved sensitive values; run it locally after a build with production 1Password access.
+CI has no production credentials. Gitleaks scans repository history; the build artifact is credential-free. Run `bun run env:scan` after a build with production 1Password access to scan source and output for resolved sensitive values.
 
-The pinned 1Password action loads Cloudflare credentials for deploy and reconciliation. It loads application credentials only on a successful `main` push. Preview deployment, PR close/cleanup, and scheduled reconciliation do not load app credentials. The pinned Alchemy deployment action remains responsible for authorized production deploys, validated preview SHAs, and preview lifecycle. Preview lifecycle still requires the account-scoped Cloudflare token.
+The pinned 1Password action loads Cloudflare credentials for deploy/reconciliation and application credentials only for successful `main` pushes. Preview, cleanup, and reconciliation paths do not load app secrets. The pinned Alchemy action retains production authorization, preview-SHA validation, and lifecycle management; preview lifecycle still requires the account-scoped Cloudflare token.
 
-Restrict `OP_SERVICE_ACCOUNT_TOKEN` to the required 1Password vaults and keep its GitHub use limited to trusted workflow paths. Alchemy binds app secrets only to production Workers; Turnstile remains an Alchemy-managed binding. This flow does not enable Varlock's Cloudflare runtime response-leak integration because Alchemy owns Worker binding and deployment lifecycle.
+Restrict the GitHub 1Password service account to required vaults. Alchemy binds app secrets only to production Workers and manages Turnstile. Varlock's Cloudflare runtime response-leak integration is not enabled because Alchemy owns Worker binding and deployment.
 
-## Add or rotate a secret
+## Adding or rotating credentials
 
-Add the reference to the owning schema and mark credentials sensitive. Make credentials required only in environments that need them. If GitHub must resolve one, add it to the production-only action step; preserve immutable action pins. For rotation, update the existing 1Password field, verify the relevant local/CI path, then revoke the old credential. Never put resolved values in logs, PRs, or artifacts.
+Add sensitive references to the owning schema and require them only in the environments that use them. Keep CI references in the production-only action step and action pins immutable. Rotate the existing 1Password field, verify the relevant path, then revoke the old credential; never put values in logs, PRs, or artifacts.

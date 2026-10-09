@@ -1,29 +1,21 @@
 import { spawnSync } from "node:child_process";
-import { randomBytes } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
 const websiteDirectory = fileURLToPath(new URL("../../", import.meta.url));
-const testCloudflareAccountId = randomBytes(16).toString("hex");
-const secretValues = [
-  "not-a-real-cloudflare-token-123456",
-  "not-a-real-mdfromx-key-123456789",
-  "not-a-real-resend-key-123456789",
-  "not-a-real-github-token-123456789",
-];
-
-const validProductionConfig = {
+const secret = "test-secret-value-not-for-production";
+const productionConfig = {
   ...process.env,
   OP_SERVICE_ACCOUNT_TOKEN: "",
   APP_ENV: "production",
-  CLOUDFLARE_ACCOUNT_ID: testCloudflareAccountId,
-  CLOUDFLARE_API_TOKEN: secretValues[0],
+  CLOUDFLARE_ACCOUNT_ID: "0123456789abcdef0123456789abcdef",
+  CLOUDFLARE_API_TOKEN: secret,
   CONTACT_RECIPIENT: "contact@example.invalid",
-  MDFROMX_API_KEY: secretValues[1],
-  RESEND_API_KEY: secretValues[2],
+  MDFROMX_API_KEY: secret,
+  RESEND_API_KEY: secret,
   RESEND_FROM: "noreply@example.invalid",
-  WORKER_GITHUB_TOKEN: secretValues[3],
+  WORKER_GITHUB_TOKEN: secret,
 };
 
 const loadConfig = (env: NodeJS.ProcessEnv) =>
@@ -35,28 +27,25 @@ const loadConfig = (env: NodeJS.ProcessEnv) =>
   });
 
 describe("Varlock website schema", () => {
-  it("accepts complete production deployment configuration without exposing secrets", () => {
-    const result = loadConfig(validProductionConfig);
+  it("validates production config without exposing sensitive values", () => {
+    const result = loadConfig(productionConfig);
 
     expect(result.error).toBeUndefined();
     expect(result.status).toBe(0);
-    for (const secret of secretValues) {
-      expect(result.stdout).not.toContain(secret);
-    }
+    expect(result.stdout).not.toContain(secret);
   });
 
-  it("allows development without production-only credentials", () => {
+  it("allows development without production credentials", () => {
     const result = loadConfig({
-      ...process.env,
-      OP_SERVICE_ACCOUNT_TOKEN: "",
+      ...productionConfig,
       APP_ENV: "development",
-      WORKER_GITHUB_TOKEN: "",
+      CLOUDFLARE_ACCOUNT_ID: "",
+      CLOUDFLARE_API_TOKEN: "",
+      CONTACT_RECIPIENT: "",
       MDFROMX_API_KEY: "",
       RESEND_API_KEY: "",
       RESEND_FROM: "",
-      CONTACT_RECIPIENT: "",
-      CLOUDFLARE_ACCOUNT_ID: "",
-      CLOUDFLARE_API_TOKEN: "",
+      WORKER_GITHUB_TOKEN: "",
     });
 
     expect(result.error).toBeUndefined();
@@ -64,25 +53,16 @@ describe("Varlock website schema", () => {
     expect(result.stdout).not.toContain("CLOUDFLARE_API_TOKEN");
   });
 
-  it("rejects an invalid production contact recipient", () => {
-    const result = loadConfig({
-      ...validProductionConfig,
-      CONTACT_RECIPIENT: "not-an-email-address",
-    });
+  it("rejects invalid or missing production values", () => {
+    for (const [key, value] of [
+      ["CONTACT_RECIPIENT", "not-an-email-address"],
+      ["RESEND_API_KEY", ""],
+    ]) {
+      const result = loadConfig({ ...productionConfig, [key]: value });
 
-    expect(result.error).toBeUndefined();
-    expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain("CONTACT_RECIPIENT");
-  });
-
-  it("rejects a missing production application credential", () => {
-    const result = loadConfig({
-      ...validProductionConfig,
-      RESEND_API_KEY: "",
-    });
-
-    expect(result.error).toBeUndefined();
-    expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain("RESEND_API_KEY");
+      expect(result.error).toBeUndefined();
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toContain(key);
+    }
   });
 });
