@@ -4,7 +4,7 @@
 
 Install dependencies and the 1Password CLI, then enable its desktop-app integration and sign in to the account with access to the existing items. Run `bun run dev` (or `bun run dev:website`). Varlock resolves the website's 1Password references in memory; app credentials are optional in development, and Cloudflare deployment credentials are only loaded for production. `bun run env:check` validates development settings; `bun run env:check:prod` validates the production deployment configuration.
 
-1Password is the source of truth. `.env.schema` and `apps/website/.env.schema` contain references, not credential values. Keep local `.env` files, resolved config, and credential-bearing artifacts uncommitted. Never copy resolved credentials into source or client code.
+1Password is the source of truth. The schemas use Varlock's `op(op://...)` resolver; importing a plain `.env.tpl` leaves raw `op://...` values literal. Keep references, resolution, and validation together in `apps/website/.env.schema`. CI repeats the required references for its separate pinned 1Password action. Keep local `.env` files, resolved config, and credential-bearing artifacts uncommitted. Never copy resolved credentials into source or client code.
 
 ## CI and deployments
 
