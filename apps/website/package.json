@@ -9,10 +9,13 @@
   "scripts": {
     "fix": "ultracite fix",
     "check": "ultracite check",
-    "dev": "2password env run .env.tpl -- bun run --cwd ../.. alchemy dev",
+    "dev": "varlock run --inject vars -- bun run --cwd ../.. alchemy dev",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "2password env run .env.tpl -- bun run --cwd ../.. alchemy deploy --stage prod --yes",
+    "deploy": "bun --env-file=.env.production run varlock run --inject vars -- bun run --cwd ../.. alchemy deploy --stage prod --yes",
+    "env:check": "varlock load --agent",
+    "env:check:prod": "bun --env-file=.env.production run varlock load --agent",
+    "env:scan": "bun --env-file=.env.production run varlock load --agent && bun --env-file=.env.production run varlock scan src dist",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
