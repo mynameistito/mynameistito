@@ -18,7 +18,7 @@ if (!artifactDirectory) {
 
 const e2eHostname = "e2e.mynameistito.com";
 const e2eName = "mynameistito-e2e";
-const workerMain = path.join(artifactDirectory, "server", "server.js");
+const workerMain = path.join(artifactDirectory, "e2e-worker.js");
 const assetsDirectory = path.join(artifactDirectory, "client");
 
 export default Stack(
@@ -42,6 +42,7 @@ export default Stack(
 
     const accessApplication = yield* Access.Application("E2EAccess", {
       appLauncherVisible: false,
+      destinations: [{ type: "public", uri: e2eHostname }],
       domain: e2eHostname,
       name: e2eName,
       policies: [accessPolicy],

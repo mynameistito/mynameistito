@@ -51,6 +51,11 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
 
+      - name: Prepare isolated Worker entrypoint
+        env:
+          ALCHEMY_E2E_ARTIFACT: ${{ runner.temp }}/alchemy-e2e
+        run: bun run scripts/prepare-e2e-worker.ts
+
       - name: Deploy isolated E2E Worker
         env:
           ALCHEMY_E2E_ARTIFACT: ${{ runner.temp }}/alchemy-e2e
