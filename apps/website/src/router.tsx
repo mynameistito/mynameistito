@@ -17,7 +17,7 @@ export const getRouter = () => {
     defaultPreloadStaleTime: 0,
     defaultNotFoundComponent: NotFoundPage,
     history:
-      typeof window === "undefined" || !window.history
+      typeof window === "undefined" || typeof document === "undefined"
         ? createMemoryHistory()
         : createBrowserHistory(),
     routeTree,
