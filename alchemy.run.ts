@@ -15,8 +15,14 @@ import { gen } from "effect/Effect";
 const WebsiteResource = gen(function* deployWebsiteResource() {
   const stack = yield* Stack;
   const isProduction = stack.stage === "prod";
+  const turnstileDomains = ["localhost", "127.0.0.1", "mynameistito.com"];
+
+  if (!isProduction) {
+    turnstileDomains.push("mynameistito.mynameistito.workers.dev");
+  }
+
   const contactTurnstile = yield* Turnstile.Widget("ContactTurnstile", {
-    domains: ["localhost", "127.0.0.1", "mynameistito.com"],
+    domains: turnstileDomains,
     mode: "managed",
   });
 
