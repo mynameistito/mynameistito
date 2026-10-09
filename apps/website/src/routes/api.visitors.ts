@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Effect, Option } from "effect";
+import { Effect } from "effect";
 import { catch as catchEffect } from "effect/Effect";
 import {
   check,
@@ -9,9 +9,8 @@ import {
   Struct,
 } from "effect/Schema";
 
-import { getAppEnv } from "@/env";
 import { recordVisitor } from "@/server/functions/record-visitor";
-import { verifyTurnstile } from "@/server/functions/turnstile";
+import { verifyConfiguredTurnstile } from "@/server/functions/turnstile";
 
 const VisitorRequest = Struct({
   path: SchemaString.pipe(
@@ -44,20 +43,9 @@ const post = ({ request }: { request: Request }) =>
         return Response.json({ error: "Invalid route." }, { status: 400 });
       }
 
-      const loadedEnv = yield* getAppEnv().pipe(Effect.option);
       const token = decoded.turnstileToken;
-      if (
-        !token ||
-        token.length > 2048 ||
-        Option.isNone(loadedEnv) ||
-        !loadedEnv.value.TURNSTILE_SECRET
-      ) {
-        return Response.json({ error: "Forbidden." }, { status: 403 });
-      }
-
-      const verified = yield* verifyTurnstile({
+      const verified = yield* verifyConfiguredTurnstile({
         token,
-        secret: loadedEnv.value.TURNSTILE_SECRET,
         expectedHostname: new URL(request.url).hostname,
         expectedAction: "visitor",
         remoteIp: request.headers.get("cf-connecting-ip") ?? "",

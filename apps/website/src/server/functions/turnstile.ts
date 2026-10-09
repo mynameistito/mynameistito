@@ -1,6 +1,8 @@
 import { Effect, Option, Redacted, Schema } from "effect";
 import { decodeUnknownEffect } from "effect/Schema";
 
+import { getAppEnv } from "@/env";
+
 const SiteverifyResponseSchema = Schema.Struct({
   success: Schema.Boolean,
   action: Schema.optional(Schema.String),
@@ -77,3 +79,23 @@ export const verifyTurnstile = Effect.fn("Turnstile.verify")(
     );
   }
 );
+
+/** Inputs needed to verify a Turnstile response with configured credentials. */
+export type VerifyConfiguredTurnstileInput = Omit<
+  VerifyTurnstileInput,
+  "secret"
+>;
+
+/** Loads the configured secret and verifies a Turnstile response. */
+export const verifyConfiguredTurnstile = Effect.fn(
+  "Turnstile.verifyConfigured"
+)(function* verifyConfiguredTurnstile(input: VerifyConfiguredTurnstileInput) {
+  const loadedEnv = yield* getAppEnv().pipe(Effect.option);
+  if (Option.isNone(loadedEnv) || !loadedEnv.value.TURNSTILE_SECRET) {
+    return false;
+  }
+  return yield* verifyTurnstile({
+    ...input,
+    secret: loadedEnv.value.TURNSTILE_SECRET,
+  });
+});

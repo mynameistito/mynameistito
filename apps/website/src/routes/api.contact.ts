@@ -1,12 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Effect, Option } from "effect";
+import { Effect } from "effect";
 import { catch as catchEffect } from "effect/Effect";
 import { decodeUnknownEffect } from "effect/Schema";
 
-import { getAppEnv } from "@/env";
 import { ContactSubmissionSchema } from "@/lib/contact-message";
 import { sendContactMessage } from "@/server/functions/send-contact-message";
-import { verifyTurnstile } from "@/server/functions/turnstile";
+import { verifyConfiguredTurnstile } from "@/server/functions/turnstile";
 
 const json = (body: Record<string, string>, status: number) =>
   Response.json(body, {
@@ -31,19 +30,8 @@ const post = ({ request }: { request: Request }) =>
       }
 
       const token = submission.turnstileToken;
-      const loadedEnv = yield* getAppEnv().pipe(Effect.option);
-      if (
-        !token ||
-        token.length > 2048 ||
-        Option.isNone(loadedEnv) ||
-        !loadedEnv.value.TURNSTILE_SECRET
-      ) {
-        return json({ error: "Forbidden." }, 403);
-      }
-
-      const verified = yield* verifyTurnstile({
+      const verified = yield* verifyConfiguredTurnstile({
         token,
-        secret: loadedEnv.value.TURNSTILE_SECRET,
         expectedHostname: new URL(request.url).hostname,
         expectedAction: "contact",
         remoteIp: request.headers.get("cf-connecting-ip") ?? "",
