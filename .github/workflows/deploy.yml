@@ -52,7 +52,7 @@ jobs:
           WORKER_GITHUB_TOKEN: ${{ steps.onepassword.outputs.WORKER_GITHUB_TOKEN }}
         with:
           worker-name: mynameistito
-          deploy-command: bunx --no-install alchemy deploy --stage "$STAGE" --yes
+          deploy-command: bun run --cwd apps/website build && bunx --no-install alchemy deploy --stage "$STAGE" --yes
           destroy-command: bunx --no-install alchemy destroy --stage "$STAGE" --yes
           production-stage: prod
           production-url: https://mynameistito.mynameistito.workers.dev
