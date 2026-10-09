@@ -2,32 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Effect } from "effect";
 import { catch as catchEffect } from "effect/Effect";
 import { ArrowUpRight } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { FormEvent } from "react";
 
 import { profile } from "@/lib/profile";
-import { getContactTurnstileSitekey } from "@/server/functions/contact-turnstile-config";
-
-interface TurnstileApi {
-  readonly render: (
-    container: HTMLElement,
-    options: {
-      readonly sitekey: string;
-      readonly action: "contact";
-      readonly callback: (token: string) => void;
-      readonly "error-callback": () => void;
-      readonly "expired-callback": () => void;
-    }
-  ) => string;
-  readonly reset: (widgetId: string) => void;
-  readonly remove: (widgetId: string) => void;
-}
-
-declare global {
-  interface Window {
-    turnstile?: TurnstileApi;
-  }
-}
+import { getTurnstileToken } from "@/lib/turnstile-client";
+import { getTurnstileSitekey } from "@/server/functions/contact-turnstile-config";
 
 type SubmissionStatus = "idle" | "submitting" | "success" | "error";
 
@@ -35,72 +15,13 @@ const statusMessages: Record<SubmissionStatus, string> = {
   idle: "Messages go straight to my inbox.",
   submitting: "Sending your message.",
   success: "Thanks. I'll get back to you soon.",
-  error: "Verify the challenge and try again.",
+  error: "Verification failed. Try again.",
 };
 
 const ContactPage = () => {
   const turnstileSitekey = Route.useLoaderData();
-  const turnstileContainer = useRef<HTMLDivElement>(null);
-  const turnstileWidgetId = useRef<string | null>(null);
-  const turnstileToken = useRef("");
   const submissionInProgress = useRef(false);
   const [status, setStatus] = useState<SubmissionStatus>("idle");
-
-  useEffect(() => {
-    if (!turnstileSitekey) {
-      return;
-    }
-
-    let disposed = false;
-    const script = document.querySelector<HTMLScriptElement>(
-      'script[src^="https://challenges.cloudflare.com/turnstile/v0/api.js"]'
-    );
-    const renderWidget = () => {
-      if (
-        disposed ||
-        !window.turnstile ||
-        !turnstileContainer.current ||
-        turnstileWidgetId.current
-      ) {
-        return;
-      }
-
-      turnstileWidgetId.current = window.turnstile.render(
-        turnstileContainer.current,
-        {
-          sitekey: turnstileSitekey,
-          action: "contact",
-          callback: (token) => {
-            turnstileToken.current = token;
-          },
-          "error-callback": () => {
-            turnstileToken.current = "";
-          },
-          "expired-callback": () => {
-            turnstileToken.current = "";
-          },
-        }
-      );
-    };
-    const handleScriptError = () => setStatus("error");
-
-    if (window.turnstile) {
-      renderWidget();
-    } else if (script) {
-      script.addEventListener("load", renderWidget);
-      script.addEventListener("error", handleScriptError);
-    }
-
-    return () => {
-      disposed = true;
-      script?.removeEventListener("load", renderWidget);
-      script?.removeEventListener("error", handleScriptError);
-      if (turnstileWidgetId.current) {
-        window.turnstile?.remove(turnstileWidgetId.current);
-        turnstileWidgetId.current = null;
-      }
-    };
-  }, [turnstileSitekey]);
 
   const sendMessage = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -108,7 +29,7 @@ const ContactPage = () => {
       return;
     }
 
-    if (!turnstileToken.current) {
+    if (!turnstileSitekey) {
       setStatus("error");
       return;
     }
@@ -119,15 +40,17 @@ const ContactPage = () => {
     setStatus("submitting");
 
     const submission = Effect.tryPromise({
-      try: () =>
-        fetch("/api/contact", {
+      try: async () => {
+        const token = await getTurnstileToken(turnstileSitekey, "contact");
+        return fetch("/api/contact", {
           body: JSON.stringify({
             message: values,
-            turnstileToken: turnstileToken.current,
+            turnstileToken: token,
           }),
           headers: { "content-type": "application/json" },
           method: "POST",
-        }),
+        });
+      },
       catch: (cause) => cause,
     }).pipe(
       Effect.map((response) => response.ok),
@@ -135,17 +58,13 @@ const ContactPage = () => {
     );
     const submit = async () => {
       const sent = await Effect.runPromise(submission);
+      submissionInProgress.current = false;
       if (sent) {
         form.reset();
         setStatus("success");
       } else {
         setStatus("error");
       }
-      if (turnstileWidgetId.current) {
-        window.turnstile?.reset(turnstileWidgetId.current);
-      }
-      turnstileToken.current = "";
-      submissionInProgress.current = false;
     };
     void submit();
   };
@@ -261,7 +180,6 @@ const ContactPage = () => {
             rows={6}
           />
         </label>
-        {turnstileSitekey ? <div ref={turnstileContainer} /> : null}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <p
             aria-live="polite"
@@ -290,19 +208,12 @@ const ContactPage = () => {
 };
 
 export const Route = createFileRoute("/contact")({
-  loader: () => getContactTurnstileSitekey(),
+  loader: () => getTurnstileSitekey(),
   component: ContactPage,
   head: () => ({
     meta: [
       { title: "Contact | Tito" },
       { content: "Get in touch with Tito.", name: "description" },
-    ],
-    scripts: [
-      {
-        async: true,
-        defer: true,
-        src: "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit",
-      },
     ],
   }),
 });

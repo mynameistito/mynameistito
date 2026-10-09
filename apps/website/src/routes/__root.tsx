@@ -77,6 +77,13 @@ export const Route = createRootRoute({
         name: "description",
       },
     ],
+    scripts: [
+      {
+        async: true,
+        defer: true,
+        src: "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit",
+      },
+    ],
   }),
   notFoundComponent: NotFoundPage,
   shellComponent: RootDocument,

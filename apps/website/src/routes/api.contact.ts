@@ -6,7 +6,7 @@ import { decodeUnknownEffect } from "effect/Schema";
 import { getAppEnv } from "@/env";
 import { ContactSubmissionSchema } from "@/lib/contact-message";
 import { sendContactMessage } from "@/server/functions/send-contact-message";
-import { verifyContactTurnstile } from "@/server/functions/turnstile";
+import { verifyTurnstile } from "@/server/functions/turnstile";
 
 const json = (body: Record<string, string>, status: number) =>
   Response.json(body, {
@@ -41,10 +41,11 @@ const post = ({ request }: { request: Request }) =>
         return json({ error: "Forbidden." }, 403);
       }
 
-      const verified = yield* verifyContactTurnstile({
+      const verified = yield* verifyTurnstile({
         token,
         secret: loadedEnv.value.TURNSTILE_SECRET,
         expectedHostname: new URL(request.url).hostname,
+        expectedAction: "contact",
         remoteIp: request.headers.get("cf-connecting-ip") ?? "",
       });
       if (!verified) {

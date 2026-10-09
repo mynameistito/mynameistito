@@ -3,8 +3,8 @@ import { Effect, Option } from "effect";
 
 import { getAppEnv } from "@/env";
 
-/** Loads the public Turnstile sitekey for rendering the contact form widget. */
-export const getContactTurnstileSitekey = createServerFn({
+/** Loads the public Turnstile sitekey for client-side token requests. */
+export const getTurnstileSitekey = createServerFn({
   method: "GET",
 }).handler(() =>
   Effect.runPromise(
