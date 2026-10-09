@@ -17,7 +17,11 @@ const config = defineConfig({
       platform: "browser",
     },
   },
-  ssr: { noExternal: true, target: "webworker" },
+  ssr: {
+    noExternal: true,
+    resolve: { conditions: ["module", "workerd", "development|production"] },
+    target: "webworker",
+  },
   server: { port: 3000 },
 });
 
