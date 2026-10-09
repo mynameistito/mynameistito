@@ -1,4 +1,8 @@
-import { createRouter as createTanStackRouter } from "@tanstack/react-router";
+import {
+  createBrowserHistory,
+  createMemoryHistory,
+  createRouter as createTanStackRouter,
+} from "@tanstack/react-router";
 
 import { NotFoundPage } from "@/components/not-found-page";
 
@@ -12,6 +16,10 @@ export const getRouter = () => {
     defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
     defaultNotFoundComponent: NotFoundPage,
+    history:
+      typeof window === "undefined" || !window.history
+        ? createMemoryHistory()
+        : createBrowserHistory(),
     routeTree,
     scrollRestoration: true,
   });
