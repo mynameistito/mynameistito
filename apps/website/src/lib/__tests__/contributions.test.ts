@@ -82,7 +82,7 @@ describe("open-source contribution snapshots", () => {
   it("serves the last valid KV snapshot without contacting GitHub", async () => {
     const { binding } = createKV(
       JSON.stringify({
-        refreshedAt: "2026-10-10T00:00:00Z",
+        refreshedAt: "2099-10-10T00:00:00Z",
         repositories: [repository],
       })
     );
@@ -100,7 +100,7 @@ describe("open-source contribution snapshots", () => {
     expect(create).not.toHaveBeenCalled();
   });
 
-  it("returns promptly and starts one deterministic bootstrap Workflow on a cache miss", async () => {
+  it("returns promptly and starts one deterministic refresh Workflow on a cache miss", async () => {
     const { binding } = createKV();
     const create = vi
       .fn<ContributionsRefreshBinding["create"]>()
@@ -114,7 +114,31 @@ describe("open-source contribution snapshots", () => {
       Effect.runPromise(loadContributions(env))
     ).resolves.toStrictEqual([]);
     expect(create).toHaveBeenCalledWith({
-      id: expect.stringMatching(/^contributions-bootstrap-\d+$/u),
+      id: expect.stringMatching(/^contributions-refresh-\d+$/u),
+      params: {},
+    });
+  });
+
+  it("serves stale snapshots and starts a refresh Workflow", async () => {
+    const { binding } = createKV(
+      JSON.stringify({
+        refreshedAt: "2000-01-01T00:00:00Z",
+        repositories: [repository],
+      })
+    );
+    const create = vi
+      .fn<ContributionsRefreshBinding["create"]>()
+      .mockImplementation(({ id }) => Promise.resolve({ id }));
+    const env = createAppEnv({
+      OPEN_SOURCE_KV: binding,
+      CONTRIBUTIONS_REFRESH: { create },
+    });
+
+    await expect(
+      Effect.runPromise(loadContributions(env))
+    ).resolves.toStrictEqual([repository]);
+    expect(create).toHaveBeenCalledExactlyOnceWith({
+      id: expect.stringMatching(/^contributions-refresh-\d+$/u),
       params: {},
     });
   });

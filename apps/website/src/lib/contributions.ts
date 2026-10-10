@@ -58,6 +58,7 @@ const ContributionSnapshotSchema = Schema.Struct({
 });
 
 const snapshotKey = "open-source:contributions:v1";
+const snapshotRefreshIntervalMs = 6 * 60 * 60 * 1000;
 const minimumStars = 1000;
 // Set featured: true for a full GitHub slug, e.g. "owner/repo".
 const repositoryOverrides = new Map<
@@ -167,8 +168,8 @@ const fetchContributionRepositories = Effect.gen(
   }
 );
 
-const startBootstrapRefresh = Effect.fn("startBootstrapRefresh")(
-  function* startBootstrapRefresh(env: AppEnv) {
+const startContributionsRefresh = Effect.fn("startContributionsRefresh")(
+  function* startContributionsRefresh(env: AppEnv) {
     const refresh = env.CONTRIBUTIONS_REFRESH;
     if (!refresh) {
       return;
@@ -179,7 +180,7 @@ const startBootstrapRefresh = Effect.fn("startBootstrapRefresh")(
       Effect.tryPromise({
         try: () =>
           refresh.create({
-            id: `contributions-bootstrap-${hour}`,
+            id: `contributions-refresh-${hour}`,
             params: {},
           }),
         catch: (cause) =>
@@ -190,7 +191,7 @@ const startBootstrapRefresh = Effect.fn("startBootstrapRefresh")(
     );
     if (result._tag === "Failure") {
       console.warn(
-        "[open-source] Unable to start the initial refresh workflow."
+        "[open-source] Unable to start the contribution refresh workflow."
       );
     }
   }
@@ -221,7 +222,7 @@ export const loadContributions = Effect.fn("loadContributions")(
     }
     const snapshotText = stored.success;
     if (snapshotText === null) {
-      yield* startBootstrapRefresh(env);
+      yield* startContributionsRefresh(env);
       return [];
     }
 
@@ -238,8 +239,16 @@ export const loadContributions = Effect.fn("loadContributions")(
     );
     if (decoded._tag === "Failure") {
       console.error("[open-source] The contribution snapshot is invalid.");
-      yield* startBootstrapRefresh(env);
+      yield* startContributionsRefresh(env);
       return [];
+    }
+    const refreshedAt = Date.parse(decoded.success.refreshedAt);
+    const now = yield* DateTime.now;
+    if (
+      !Number.isFinite(refreshedAt) ||
+      now.epochMilliseconds - refreshedAt >= snapshotRefreshIntervalMs
+    ) {
+      yield* startContributionsRefresh(env);
     }
     return decoded.success.repositories;
   }

@@ -41,7 +41,6 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
       CONTACT_RECIPIENT: ConfigString("CONTACT_RECIPIENT"),
       CONTRIBUTIONS_REFRESH: Workflow("ContributionsRefresh", {
         className: "ContributionsRefreshWorkflow",
-        schedules: isProduction ? ["0 */6 * * *"] : [],
       }),
       GITHUB_TOKEN: ConfigRedacted("WORKER_GITHUB_TOKEN"),
       MDFROMX_API_KEY: ConfigRedacted("MDFROMX_API_KEY"),
