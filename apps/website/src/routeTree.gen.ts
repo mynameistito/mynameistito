@@ -12,13 +12,23 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
 import { Route as LinksRouteImport } from './routes/links'
 import { Route as OpenSourceRouteImport } from './routes/open-source'
 import { Route as ProjectsRouteImport } from './routes/projects'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as DotwellKnownAtprotoDidRouteImport } from './routes/[.]well-known.atproto-did'
+import { Route as DotwellKnownHostMetaRouteImport } from './routes/[.]well-known.host-meta'
+import { Route as DotwellKnownHostMetaDotjsonRouteImport } from './routes/[.]well-known.host-meta[.]json'
+import { Route as DotwellKnownNostrDotjsonRouteImport } from './routes/[.]well-known.nostr[.]json'
+import { Route as DotwellKnownWebfingerRouteImport } from './routes/[.]well-known.webfinger'
+import { Route as DotwellKnownWebfingerDotjsonRouteImport } from './routes/[.]well-known.webfinger[.]json'
 import { Route as ApiContactRouteImport } from './routes/api.contact'
 import { Route as ApiVisitorsRouteImport } from './routes/api.visitors'
 import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
 import { Route as ProjectsSlugRouteImport } from './routes/projects.$slug'
+import { Route as RRefRouteImport } from './routes/r.$ref'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -33,6 +43,11 @@ const AboutRoute = AboutRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedDotxmlRoute = FeedDotxmlRouteImport.update({
+  id: '/feed.xml',
+  path: '/feed.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LinksRoute = LinksRouteImport.update({
@@ -50,6 +65,49 @@ const ProjectsRoute = ProjectsRouteImport.update({
   path: '/projects',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DotwellKnownAtprotoDidRoute = DotwellKnownAtprotoDidRouteImport.update({
+  id: '/.well-known/atproto-did',
+  path: '/.well-known/atproto-did',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DotwellKnownHostMetaRoute = DotwellKnownHostMetaRouteImport.update({
+  id: '/.well-known/host-meta',
+  path: '/.well-known/host-meta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DotwellKnownHostMetaDotjsonRoute =
+  DotwellKnownHostMetaDotjsonRouteImport.update({
+    id: '/.well-known/host-meta.json',
+    path: '/.well-known/host-meta.json',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotwellKnownNostrDotjsonRoute =
+  DotwellKnownNostrDotjsonRouteImport.update({
+    id: '/.well-known/nostr.json',
+    path: '/.well-known/nostr.json',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotwellKnownWebfingerRoute = DotwellKnownWebfingerRouteImport.update({
+  id: '/.well-known/webfinger',
+  path: '/.well-known/webfinger',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DotwellKnownWebfingerDotjsonRoute =
+  DotwellKnownWebfingerDotjsonRouteImport.update({
+    id: '/.well-known/webfinger.json',
+    path: '/.well-known/webfinger.json',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiContactRoute = ApiContactRouteImport.update({
   id: '/api/contact',
   path: '/api/contact',
@@ -70,28 +128,53 @@ const ProjectsSlugRoute = ProjectsSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => ProjectsRoute,
 } as any)
+const RRefRoute = RRefRouteImport.update({
+  id: '/r/$ref',
+  path: '/r/$ref',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/feed.xml': typeof FeedDotxmlRoute
   '/links': typeof LinksRoute
   '/open-source': typeof OpenSourceRoute
   '/projects': typeof ProjectsRouteWithChildren
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/.well-known/atproto-did': typeof DotwellKnownAtprotoDidRoute
+  '/.well-known/host-meta': typeof DotwellKnownHostMetaRoute
+  '/.well-known/host-meta.json': typeof DotwellKnownHostMetaDotjsonRoute
+  '/.well-known/nostr.json': typeof DotwellKnownNostrDotjsonRoute
+  '/.well-known/webfinger': typeof DotwellKnownWebfingerRoute
+  '/.well-known/webfinger.json': typeof DotwellKnownWebfingerDotjsonRoute
   '/api/contact': typeof ApiContactRoute
   '/api/visitors': typeof ApiVisitorsRoute
   '/projects/$slug': typeof ProjectsSlugRoute
+  '/r/$ref': typeof RRefRoute
   '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/feed.xml': typeof FeedDotxmlRoute
   '/links': typeof LinksRoute
   '/open-source': typeof OpenSourceRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/.well-known/atproto-did': typeof DotwellKnownAtprotoDidRoute
+  '/.well-known/host-meta': typeof DotwellKnownHostMetaRoute
+  '/.well-known/host-meta.json': typeof DotwellKnownHostMetaDotjsonRoute
+  '/.well-known/nostr.json': typeof DotwellKnownNostrDotjsonRoute
+  '/.well-known/webfinger': typeof DotwellKnownWebfingerRoute
+  '/.well-known/webfinger.json': typeof DotwellKnownWebfingerDotjsonRoute
   '/api/contact': typeof ApiContactRoute
   '/api/visitors': typeof ApiVisitorsRoute
   '/projects/$slug': typeof ProjectsSlugRoute
+  '/r/$ref': typeof RRefRoute
   '/projects': typeof ProjectsIndexRoute
 }
 export interface FileRoutesById {
@@ -99,12 +182,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/feed.xml': typeof FeedDotxmlRoute
   '/links': typeof LinksRoute
   '/open-source': typeof OpenSourceRoute
   '/projects': typeof ProjectsRouteWithChildren
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/.well-known/atproto-did': typeof DotwellKnownAtprotoDidRoute
+  '/.well-known/host-meta': typeof DotwellKnownHostMetaRoute
+  '/.well-known/host-meta.json': typeof DotwellKnownHostMetaDotjsonRoute
+  '/.well-known/nostr.json': typeof DotwellKnownNostrDotjsonRoute
+  '/.well-known/webfinger': typeof DotwellKnownWebfingerRoute
+  '/.well-known/webfinger.json': typeof DotwellKnownWebfingerDotjsonRoute
   '/api/contact': typeof ApiContactRoute
   '/api/visitors': typeof ApiVisitorsRoute
   '/projects/$slug': typeof ProjectsSlugRoute
+  '/r/$ref': typeof RRefRoute
   '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRouteTypes {
@@ -113,35 +206,65 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/feed.xml'
     | '/links'
     | '/open-source'
     | '/projects'
+    | '/robots.txt'
+    | '/sitemap.xml'
+    | '/.well-known/atproto-did'
+    | '/.well-known/host-meta'
+    | '/.well-known/host-meta.json'
+    | '/.well-known/nostr.json'
+    | '/.well-known/webfinger'
+    | '/.well-known/webfinger.json'
     | '/api/contact'
     | '/api/visitors'
     | '/projects/$slug'
+    | '/r/$ref'
     | '/projects/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/contact'
+    | '/feed.xml'
     | '/links'
     | '/open-source'
+    | '/robots.txt'
+    | '/sitemap.xml'
+    | '/.well-known/atproto-did'
+    | '/.well-known/host-meta'
+    | '/.well-known/host-meta.json'
+    | '/.well-known/nostr.json'
+    | '/.well-known/webfinger'
+    | '/.well-known/webfinger.json'
     | '/api/contact'
     | '/api/visitors'
     | '/projects/$slug'
+    | '/r/$ref'
     | '/projects'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/contact'
+    | '/feed.xml'
     | '/links'
     | '/open-source'
     | '/projects'
+    | '/robots.txt'
+    | '/sitemap.xml'
+    | '/.well-known/atproto-did'
+    | '/.well-known/host-meta'
+    | '/.well-known/host-meta.json'
+    | '/.well-known/nostr.json'
+    | '/.well-known/webfinger'
+    | '/.well-known/webfinger.json'
     | '/api/contact'
     | '/api/visitors'
     | '/projects/$slug'
+    | '/r/$ref'
     | '/projects/'
   fileRoutesById: FileRoutesById
 }
@@ -149,11 +272,21 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
+  FeedDotxmlRoute: typeof FeedDotxmlRoute
   LinksRoute: typeof LinksRoute
   OpenSourceRoute: typeof OpenSourceRoute
   ProjectsRoute: typeof ProjectsRouteWithChildren
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  DotwellKnownAtprotoDidRoute: typeof DotwellKnownAtprotoDidRoute
+  DotwellKnownHostMetaRoute: typeof DotwellKnownHostMetaRoute
+  DotwellKnownHostMetaDotjsonRoute: typeof DotwellKnownHostMetaDotjsonRoute
+  DotwellKnownNostrDotjsonRoute: typeof DotwellKnownNostrDotjsonRoute
+  DotwellKnownWebfingerRoute: typeof DotwellKnownWebfingerRoute
+  DotwellKnownWebfingerDotjsonRoute: typeof DotwellKnownWebfingerDotjsonRoute
   ApiContactRoute: typeof ApiContactRoute
   ApiVisitorsRoute: typeof ApiVisitorsRoute
+  RRefRoute: typeof RRefRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -179,6 +312,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/feed.xml': {
+      id: '/feed.xml'
+      path: '/feed.xml'
+      fullPath: '/feed.xml'
+      preLoaderRoute: typeof FeedDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/links': {
       id: '/links'
       path: '/links'
@@ -198,6 +338,62 @@ declare module '@tanstack/react-router' {
       path: '/projects'
       fullPath: '/projects'
       preLoaderRoute: typeof ProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/atproto-did': {
+      id: '/.well-known/atproto-did'
+      path: '/.well-known/atproto-did'
+      fullPath: '/.well-known/atproto-did'
+      preLoaderRoute: typeof DotwellKnownAtprotoDidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/host-meta': {
+      id: '/.well-known/host-meta'
+      path: '/.well-known/host-meta'
+      fullPath: '/.well-known/host-meta'
+      preLoaderRoute: typeof DotwellKnownHostMetaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/host-meta.json': {
+      id: '/.well-known/host-meta.json'
+      path: '/.well-known/host-meta.json'
+      fullPath: '/.well-known/host-meta.json'
+      preLoaderRoute: typeof DotwellKnownHostMetaDotjsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/nostr.json': {
+      id: '/.well-known/nostr.json'
+      path: '/.well-known/nostr.json'
+      fullPath: '/.well-known/nostr.json'
+      preLoaderRoute: typeof DotwellKnownNostrDotjsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/webfinger': {
+      id: '/.well-known/webfinger'
+      path: '/.well-known/webfinger'
+      fullPath: '/.well-known/webfinger'
+      preLoaderRoute: typeof DotwellKnownWebfingerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/webfinger.json': {
+      id: '/.well-known/webfinger.json'
+      path: '/.well-known/webfinger.json'
+      fullPath: '/.well-known/webfinger.json'
+      preLoaderRoute: typeof DotwellKnownWebfingerDotjsonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/contact': {
@@ -228,6 +424,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsSlugRouteImport
       parentRoute: typeof ProjectsRoute
     }
+    '/r/$ref': {
+      id: '/r/$ref'
+      path: '/r/$ref'
+      fullPath: '/r/$ref'
+      preLoaderRoute: typeof RRefRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -249,11 +452,21 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
+  FeedDotxmlRoute: FeedDotxmlRoute,
   LinksRoute: LinksRoute,
   OpenSourceRoute: OpenSourceRoute,
   ProjectsRoute: ProjectsRouteWithChildren,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  DotwellKnownAtprotoDidRoute: DotwellKnownAtprotoDidRoute,
+  DotwellKnownHostMetaRoute: DotwellKnownHostMetaRoute,
+  DotwellKnownHostMetaDotjsonRoute: DotwellKnownHostMetaDotjsonRoute,
+  DotwellKnownNostrDotjsonRoute: DotwellKnownNostrDotjsonRoute,
+  DotwellKnownWebfingerRoute: DotwellKnownWebfingerRoute,
+  DotwellKnownWebfingerDotjsonRoute: DotwellKnownWebfingerDotjsonRoute,
   ApiContactRoute: ApiContactRoute,
   ApiVisitorsRoute: ApiVisitorsRoute,
+  RRefRoute: RRefRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
