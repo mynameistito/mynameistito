@@ -238,6 +238,7 @@ export const loadContributions = Effect.fn("loadContributions")(
     );
     if (decoded._tag === "Failure") {
       console.error("[open-source] The contribution snapshot is invalid.");
+      yield* startBootstrapRefresh(env);
       return [];
     }
     return decoded.success.repositories;

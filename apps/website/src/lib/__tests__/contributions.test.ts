@@ -121,13 +121,22 @@ describe("open-source contribution snapshots", () => {
 
   it("ignores a malformed snapshot instead of failing the page loader", async () => {
     const { binding } = createKV("not-json");
+    const create = vi
+      .fn<ContributionsRefreshBinding["create"]>()
+      .mockImplementation(({ id }) => Promise.resolve({ id }));
     vi.spyOn(console, "error").mockImplementation(() => {});
 
     await expect(
       Effect.runPromise(
-        loadContributions(createAppEnv({ OPEN_SOURCE_KV: binding }))
+        loadContributions(
+          createAppEnv({
+            OPEN_SOURCE_KV: binding,
+            CONTRIBUTIONS_REFRESH: { create },
+          })
+        )
       )
     ).resolves.toStrictEqual([]);
+    expect(create).toHaveBeenCalledOnce();
   });
 
   it("publishes a complete snapshot after successful GitHub fetches", async () => {
