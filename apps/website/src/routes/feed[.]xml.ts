@@ -6,7 +6,7 @@ const feed = `<?xml version="1.0" encoding="utf-8"?>
   <subtitle>Building cool things on the internet</subtitle>
   <link href="https://mynameistito.com/feed.xml" rel="self" />
   <link href="https://mynameistito.com/" />
-  <updated>2026-10-11T00:00:00.000Z</updated>
+  <updated>2026-10-10T11:37:24.000Z</updated>
   <id>https://mynameistito.com/</id>
   <author><name>Tito</name></author>
 </feed>`;

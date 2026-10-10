@@ -13,7 +13,7 @@ const responseFor = (resource?: string) => {
 
 describe("WebFinger response", () => {
   it("returns the JRD for a supported account URI", async () => {
-    const response = responseFor("acct:contact@mynameistito.com");
+    const response = await responseFor("acct:contact@mynameistito.com");
 
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("application/jrd+json");
@@ -21,11 +21,15 @@ describe("WebFinger response", () => {
   });
 
   it("returns a bad request when the resource is missing or malformed", async () => {
-    const missingResponse = responseFor();
-    const malformedResponse = responseFor("not a URI");
+    const missingResponse = await responseFor();
+    const malformedResponse = await responseFor("not a URI");
+    const malformedAccountResponse = await responseFor(
+      "acct:contact%ZZ@mynameistito.com"
+    );
 
     expect(missingResponse.status).toBe(400);
     expect(malformedResponse.status).toBe(400);
+    expect(malformedAccountResponse.status).toBe(400);
     await expect(missingResponse.json()).resolves.toStrictEqual({
       error: "Bad Request",
     });
@@ -35,9 +39,23 @@ describe("WebFinger response", () => {
   });
 
   it("returns no match for a valid but unsupported resource", async () => {
-    const response = responseFor("acct:someone-else@example.com");
+    const response = await responseFor("acct:someone-else@example.com");
 
     expect(response.status).toBe(404);
     await expect(response.json()).resolves.toStrictEqual({ error: "No match" });
+  });
+
+  it("normalizes acct URI hosts and unreserved escapes, preserving username case", async () => {
+    const normalizedHost = await responseFor("ACCT:contact@MYNAMEISTITO.COM");
+    const normalizedEscape = await responseFor(
+      "acct:cont%61ct@mynameistito.com"
+    );
+    const differentUsernameCase = await responseFor(
+      "acct:Contact@mynameistito.com"
+    );
+
+    expect(normalizedHost.status).toBe(200);
+    expect(normalizedEscape.status).toBe(200);
+    expect(differentUsernameCase.status).toBe(404);
   });
 });

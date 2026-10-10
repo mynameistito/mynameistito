@@ -1,3 +1,6 @@
+import type { Schema } from "effect";
+import { refine, String as SchemaString, Struct } from "effect/Schema";
+
 export const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
   "Access-Control-Allow-Origin": "*",
@@ -131,37 +134,69 @@ export type WebfingerDocument = typeof webfinger | typeof webfingerJson;
 /** The result of looking up a WebFinger resource identifier. */
 export type WebfingerResourceLookup =
   | { readonly _tag: "Found" }
-  | { readonly _tag: "InvalidResource" }
   | { readonly _tag: "NotFound" };
+
+const isWebfingerUri = (
+  resource: string
+): resource is `${string}:${string}` => {
+  if (resource.trim() !== resource || /%(?![\da-f]{2})/iu.test(resource)) {
+    return false;
+  }
+  if (/^acct:/iu.test(resource)) {
+    return /^acct:[^@\s]+@[^@\s]+$/iu.test(resource);
+  }
+  return URL.canParse(resource);
+};
+
+/** Effect Schema for a syntactically valid absolute WebFinger resource URI. */
+export const WebfingerResourceSchema = Struct({
+  value: SchemaString.pipe(refine(isWebfingerUri)),
+});
+
+/** A parsed WebFinger resource URI. */
+export type WebfingerResource = Schema.Schema.Type<
+  typeof WebfingerResourceSchema
+>;
 
 const knownResources = new Set([
   "acct:contact@mynameistito.com",
-  "https://mynameistito.com",
   "https://mynameistito.com/",
 ]);
+
+const normalizePercentEncoding = (value: string): string =>
+  value.replaceAll(/%[\da-f]{2}/giu, (encoded) => {
+    const character = String.fromCodePoint(
+      Number.parseInt(encoded.slice(1), 16)
+    );
+    return /^[a-z\d._~-]$/iu.test(character)
+      ? character
+      : encoded.toUpperCase();
+  });
+
+const normalizeResource = (resource: WebfingerResource): string => {
+  const { value } = resource;
+  if (/^acct:/iu.test(value)) {
+    const account = value.slice(value.indexOf(":") + 1);
+    const separator = account.indexOf("@");
+    const username = normalizePercentEncoding(account.slice(0, separator));
+    const host = normalizePercentEncoding(account.slice(separator + 1));
+    return `acct:${username}@${host.toLowerCase()}`;
+  }
+  if (/^https?:/iu.test(value)) {
+    return new URL(value).href;
+  }
+  return value;
+};
 
 /**
  * Resolve a WebFinger resource against this site's published identifiers.
  *
- * @param resource - The resource query parameter, or `null` when it is absent.
- * @returns Whether the resource is supported, malformed, or valid but unknown.
+ * @param resource - A resource URI parsed at the request boundary.
+ * @returns Whether the resource is supported or valid but unknown.
  */
 export const resolveWebfingerResource = (
-  resource: string | null
-): WebfingerResourceLookup => {
-  if (!resource || resource.trim() !== resource) {
-    return { _tag: "InvalidResource" };
-  }
-
-  const isAccountUri = resource.startsWith("acct:");
-  if (
-    (isAccountUri && !/^acct:[^@\s]+@[^@\s]+$/iu.test(resource)) ||
-    (!isAccountUri && !URL.canParse(resource))
-  ) {
-    return { _tag: "InvalidResource" };
-  }
-
-  return knownResources.has(resource)
+  resource: WebfingerResource
+): WebfingerResourceLookup =>
+  knownResources.has(normalizeResource(resource))
     ? { _tag: "Found" }
     : { _tag: "NotFound" };
-};
