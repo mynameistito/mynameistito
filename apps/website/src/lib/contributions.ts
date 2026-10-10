@@ -1,7 +1,8 @@
-import { DateTime, Effect } from "effect";
+import { DateTime, Effect, Schema } from "effect";
 import { HttpClientError } from "effect/http";
 
 import { getAppEnv } from "@/env";
+import type { AppEnv } from "@/env";
 import { profile } from "@/lib/profile";
 import { GitHub } from "@/lib/provider/github/client";
 
@@ -16,6 +17,13 @@ interface ContributionPullRequest {
   readonly url: string;
 }
 
+const ContributionPullRequestSchema = Schema.Struct({
+  title: Schema.String,
+  state: Schema.Literals(["Open", "Merged", "Closed"]),
+  number: Schema.Int,
+  url: Schema.String,
+});
+
 /** Repository and pull requests included in the contribution browser. */
 export interface ContributionRepository {
   readonly featured: boolean;
@@ -27,7 +35,28 @@ export interface ContributionRepository {
   readonly pullRequests: readonly ContributionPullRequest[];
 }
 
-const cacheDuration = 60 * 60 * 1000;
+const ContributionRepositorySchema = Schema.Struct({
+  featured: Schema.Boolean,
+  name: Schema.String,
+  repo: Schema.String,
+  stars: Schema.Int,
+  url: Schema.String,
+  avatarUrl: Schema.String,
+  pullRequests: Schema.Array(ContributionPullRequestSchema),
+});
+
+/** Last successfully refreshed contribution data. */
+interface ContributionSnapshot {
+  readonly refreshedAt: string;
+  readonly repositories: readonly ContributionRepository[];
+}
+
+const ContributionSnapshotSchema = Schema.Struct({
+  refreshedAt: Schema.String,
+  repositories: Schema.Array(ContributionRepositorySchema),
+});
+
+const snapshotKey = "open-source:contributions:v1";
 const minimumStars = 1000;
 // Set featured: true for a full GitHub slug, e.g. "owner/repo".
 const repositoryOverrides = new Map<
@@ -41,8 +70,6 @@ const repositoryOverrides = new Map<
   ["haydenbleasel/ultracite", { featured: true }],
   // Add ignored repositories here as ["owner/repo", { ignored: true }].
 ]);
-let cachedAt = 0;
-let cachedContributions: readonly ContributionRepository[] | undefined;
 
 const summarizeGitHubFailure = (cause: unknown): string => {
   if (HttpClientError.isHttpClientError(cause)) {
@@ -130,36 +157,122 @@ const fetchContributionRepositories = Effect.gen(
   }
 );
 
-/** Loads cached GitHub pull-request contributions. */
-export const loadContributions = Effect.fn("loadContributions")(
-  function* fetchContributions() {
-    const now = yield* DateTime.now;
-    if (
-      cachedContributions &&
-      now.epochMilliseconds - cachedAt < cacheDuration
-    ) {
-      return cachedContributions;
+const startBootstrapRefresh = Effect.fn("startBootstrapRefresh")(
+  function* startBootstrapRefresh(env: AppEnv) {
+    const refresh = env.CONTRIBUTIONS_REFRESH;
+    if (!refresh) {
+      return;
     }
-    const env = yield* getAppEnv();
-    return yield* fetchContributionRepositories.pipe(
+    const now = yield* DateTime.now;
+    const day = Math.floor(now.epochMilliseconds / 86_400_000);
+    const result = yield* Effect.result(
+      Effect.tryPromise({
+        try: () =>
+          refresh.create({
+            id: `contributions-bootstrap-${day}`,
+            params: {},
+          }),
+        catch: (cause) =>
+          cause instanceof Error
+            ? cause
+            : new Error("Workflow start failed", { cause }),
+      })
+    );
+    if (result._tag === "Failure") {
+      console.warn(
+        "[open-source] Unable to start the initial refresh workflow."
+      );
+    }
+  }
+);
+
+/** Loads the last successfully published GitHub contribution snapshot. */
+export const loadContributions = Effect.fn("loadContributions")(
+  function* loadContributions(bindings?: AppEnv) {
+    const env = bindings ?? (yield* getAppEnv());
+    const kv = env.OPEN_SOURCE_KV;
+    if (!kv) {
+      console.error("[open-source] The KV snapshot binding is not configured.");
+      return [];
+    }
+
+    const stored = yield* Effect.result(
+      Effect.tryPromise({
+        try: () => kv.get(snapshotKey, "text"),
+        catch: (cause) =>
+          cause instanceof Error
+            ? cause
+            : new Error("KV read failed", { cause }),
+      })
+    );
+    if (stored._tag === "Failure") {
+      console.error("[open-source] Unable to read the contribution snapshot.");
+      return [];
+    }
+    const snapshotText = stored.success;
+    if (snapshotText === null) {
+      yield* startBootstrapRefresh(env);
+      return [];
+    }
+
+    const decoded = yield* Effect.result(
+      Effect.try({
+        try: () => JSON.parse(snapshotText),
+        catch: (cause) =>
+          cause instanceof Error
+            ? cause
+            : new Error("Invalid snapshot JSON", { cause }),
+      }).pipe(
+        Effect.flatMap(Schema.decodeUnknownEffect(ContributionSnapshotSchema))
+      )
+    );
+    if (decoded._tag === "Failure") {
+      console.error("[open-source] The contribution snapshot is invalid.");
+      return [];
+    }
+    return decoded.success.repositories;
+  }
+);
+
+/** Fetches GitHub contributions and publishes a complete KV snapshot. */
+export const refreshContributions = Effect.fn("refreshContributions")(
+  function* refreshContributions(env: AppEnv) {
+    const kv = env.OPEN_SOURCE_KV;
+    if (!kv) {
+      return yield* Effect.fail(
+        new Error("The open-source KV binding is not configured.")
+      );
+    }
+
+    const repositories = yield* fetchContributionRepositories.pipe(
       Effect.provide(
         GitHub.layer({
           username: profile.github,
           token: env.GITHUB_TOKEN,
         })
       ),
-      Effect.tap((contributions) =>
-        Effect.sync(() => {
-          cachedContributions = contributions;
-          cachedAt = now.epochMilliseconds;
-        })
-      ),
       Effect.catchTag("GitHubRequestError", (error) => {
         console.error(
-          `[open-source] GitHub ${error.operation} failed: ${summarizeGitHubFailure(error.cause)}. Returning ${cachedContributions ? "cached contributions" : "no contributions (cache empty)"}.`
+          `[open-source] GitHub ${error.operation} failed: ${summarizeGitHubFailure(error.cause)}.`
         );
-        return Effect.succeed(cachedContributions ?? []);
+        return Effect.fail(error);
       })
     );
+    const now = yield* DateTime.now;
+    const snapshot: ContributionSnapshot = {
+      refreshedAt: DateTime.formatIso(now),
+      repositories,
+    };
+    yield* Effect.tryPromise({
+      try: () => kv.put(snapshotKey, JSON.stringify(snapshot)),
+      catch: (cause) =>
+        cause instanceof Error
+          ? cause
+          : new Error("Unable to write the open-source snapshot.", { cause }),
+    });
+    return {
+      refreshedAt: snapshot.refreshedAt,
+      repositoryCount: repositories.length,
+    };
   }
 );

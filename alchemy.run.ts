@@ -1,10 +1,12 @@
 import { Stack } from "alchemy";
 import {
   DurableObject as DurableObjectResource,
+  KV,
   providers,
   state,
   Turnstile,
   Website,
+  Workflow,
 } from "alchemy/Cloudflare";
 import {
   Redacted as ConfigRedacted,
@@ -15,6 +17,9 @@ import { gen } from "effect/Effect";
 const WebsiteResource = gen(function* deployWebsiteResource() {
   const stack = yield* Stack;
   const isProduction = stack.stage === "prod";
+  const openSourceKV = yield* KV.Namespace("OpenSourceContributions", {
+    title: `mynameistito-${stack.stage}-open-source-contributions`,
+  });
   const turnstileDomains = ["localhost", "127.0.0.1", "mynameistito.com"];
 
   if (!isProduction) {
@@ -34,8 +39,13 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
     domain: isProduction ? "mynameistito.com" : undefined,
     env: {
       CONTACT_RECIPIENT: ConfigString("CONTACT_RECIPIENT"),
+      CONTRIBUTIONS_REFRESH: Workflow("ContributionsRefresh", {
+        className: "ContributionsRefreshWorkflow",
+        schedules: isProduction ? ["0 */6 * * *"] : [],
+      }),
       GITHUB_TOKEN: ConfigRedacted("WORKER_GITHUB_TOKEN"),
       MDFROMX_API_KEY: ConfigRedacted("MDFROMX_API_KEY"),
+      OPEN_SOURCE_KV: openSourceKV,
       RESEND_API_KEY: ConfigRedacted("RESEND_API_KEY"),
       RESEND_FROM: ConfigString("RESEND_FROM"),
       TURNSTILE_SECRET: contactTurnstile.secret,

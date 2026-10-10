@@ -3,9 +3,24 @@ import { Effect, Redacted } from "effect";
 
 import type { VisitorCounts } from "@/lib/visitor-counting";
 
+/** KV methods used by the open-source contribution snapshot. */
+export interface OpenSourceKVBinding {
+  readonly get: (key: string, type: "text") => Promise<string | null>;
+  readonly put: (key: string, value: string) => Promise<void>;
+}
+
+/** Workflow binding used to bootstrap a missing contribution snapshot. */
+export interface ContributionsRefreshBinding {
+  readonly create: (options: {
+    readonly id: string;
+    readonly params: Record<string, never>;
+  }) => Promise<{ readonly id: string }>;
+}
+
 /** Runtime bindings supplied by the platform or Alchemy local runtime. */
 export interface AppEnv {
   readonly CONTACT_RECIPIENT?: string;
+  readonly CONTRIBUTIONS_REFRESH?: ContributionsRefreshBinding;
   readonly RESEND_API_KEY?: Redacted.Redacted<string>;
   readonly RESEND_FROM?: string;
   readonly TURNSTILE_SITEKEY?: string;
@@ -13,6 +28,7 @@ export interface AppEnv {
   readonly GITHUB_TOKEN?: Redacted.Redacted<string>;
   readonly WORKER_GITHUB_TOKEN?: Redacted.Redacted<string>;
   readonly MDFROMX_API_KEY?: Redacted.Redacted<string>;
+  readonly OPEN_SOURCE_KV?: OpenSourceKVBinding;
   readonly VISITOR_COUNTER?: {
     readonly getByName: (name: string) => {
       readonly track: (visitorId: string) => Promise<VisitorCounts>;
@@ -20,8 +36,10 @@ export interface AppEnv {
   };
 }
 
-interface RawAppEnv {
+/** Unredacted platform bindings at the runtime ingress boundary. */
+export interface RuntimeBindings {
   readonly CONTACT_RECIPIENT?: string;
+  readonly CONTRIBUTIONS_REFRESH?: ContributionsRefreshBinding;
   readonly RESEND_API_KEY?: string;
   readonly RESEND_FROM?: string;
   readonly TURNSTILE_SITEKEY?: string;
@@ -29,6 +47,7 @@ interface RawAppEnv {
   readonly GITHUB_TOKEN?: string;
   readonly WORKER_GITHUB_TOKEN?: string;
   readonly MDFROMX_API_KEY?: string;
+  readonly OPEN_SOURCE_KV?: OpenSourceKVBinding;
   readonly VISITOR_COUNTER?: AppEnv["VISITOR_COUNTER"];
 }
 
@@ -36,7 +55,7 @@ interface RawAppEnv {
  * @param bindings - Worker bindings before secret redaction.
  * @returns The application environment with secret bindings redacted.
  */
-export const createAppEnv = (bindings: RawAppEnv): AppEnv => ({
+export const createAppEnv = (bindings: RuntimeBindings): AppEnv => ({
   ...bindings,
   GITHUB_TOKEN: bindings.GITHUB_TOKEN
     ? Redacted.make(bindings.GITHUB_TOKEN)
@@ -60,8 +79,8 @@ export const createAppEnv = (bindings: RawAppEnv): AppEnv => ({
  */
 export const getAppEnv = Effect.fn("getAppEnv")(() =>
   Effect.sync(() => {
-    // SAFETY: Alchemy's Worker config supplies bindings matching RawAppEnv.
-    const bindings = env as RawAppEnv;
+    // SAFETY: Alchemy's Worker config supplies bindings matching RuntimeBindings.
+    const bindings = env as RuntimeBindings;
     return createAppEnv(bindings);
   })
 );
