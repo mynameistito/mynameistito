@@ -36,12 +36,12 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
       date: "2026-09-25",
       flags: ["nodejs_compat"],
     },
+    crons: isProduction ? ["0 */6 * * *"] : [],
     domain: isProduction ? "mynameistito.com" : undefined,
     env: {
       CONTACT_RECIPIENT: ConfigString("CONTACT_RECIPIENT"),
       CONTRIBUTIONS_REFRESH: Workflow("ContributionsRefresh", {
         className: "ContributionsRefreshWorkflow",
-        schedules: isProduction ? ["0 */6 * * *"] : [],
       }),
       GITHUB_TOKEN: ConfigRedacted("WORKER_GITHUB_TOKEN"),
       MDFROMX_API_KEY: ConfigRedacted("MDFROMX_API_KEY"),
