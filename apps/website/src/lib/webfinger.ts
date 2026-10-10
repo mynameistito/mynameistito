@@ -10,7 +10,8 @@ interface ProfileLink {
   readonly type: string;
 }
 
-const profilePageRel = "https://webfinger.net/rel/profile-page";
+// oxlint-disable-next-line sonarjs/no-clear-text-protocols -- The registered WebFinger relation URI is defined with HTTP.
+const profilePageRel = "http://webfinger.net/rel/profile-page";
 
 const profileLinks: readonly ProfileLink[] = [
   "https://www.7cups.com/@mynameistito",
@@ -122,4 +123,45 @@ export const webfingerJson = {
       type: "text/html",
     },
   ],
+};
+
+/** A WebFinger JRD representation served by this site. */
+export type WebfingerDocument = typeof webfinger | typeof webfingerJson;
+
+/** The result of looking up a WebFinger resource identifier. */
+export type WebfingerResourceLookup =
+  | { readonly _tag: "Found" }
+  | { readonly _tag: "InvalidResource" }
+  | { readonly _tag: "NotFound" };
+
+const knownResources = new Set([
+  "acct:contact@mynameistito.com",
+  "https://mynameistito.com",
+  "https://mynameistito.com/",
+]);
+
+/**
+ * Resolve a WebFinger resource against this site's published identifiers.
+ *
+ * @param resource - The resource query parameter, or `null` when it is absent.
+ * @returns Whether the resource is supported, malformed, or valid but unknown.
+ */
+export const resolveWebfingerResource = (
+  resource: string | null
+): WebfingerResourceLookup => {
+  if (!resource || resource.trim() !== resource) {
+    return { _tag: "InvalidResource" };
+  }
+
+  const isAccountUri = resource.startsWith("acct:");
+  if (
+    (isAccountUri && !/^acct:[^@\s]+@[^@\s]+$/iu.test(resource)) ||
+    (!isAccountUri && !URL.canParse(resource))
+  ) {
+    return { _tag: "InvalidResource" };
+  }
+
+  return knownResources.has(resource)
+    ? { _tag: "Found" }
+    : { _tag: "NotFound" };
 };
