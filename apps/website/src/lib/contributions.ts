@@ -1,3 +1,4 @@
+import type { Layer } from "effect";
 import { DateTime, Effect, Schema } from "effect";
 import { HttpClientError } from "effect/http";
 
@@ -85,6 +86,11 @@ const summarizeGitHubFailure = (cause: unknown): string => {
   return String(cause);
 };
 
+const isGitHubNotFound = (cause: unknown): boolean =>
+  HttpClientError.isHttpClientError(cause) &&
+  cause.reason._tag === "StatusCodeError" &&
+  cause.reason.response.status === 404;
+
 const fetchContributionRepositories = Effect.gen(
   function* fetchContributionRepositories() {
     const github = yield* GitHub;
@@ -109,7 +115,11 @@ const fetchContributionRepositories = Effect.gen(
           const repository = yield* github
             .repository(owner, name)
             .pipe(
-              Effect.catchTag("GitHubRequestError", () => Effect.succeed(null))
+              Effect.catchTag("GitHubRequestError", (error) =>
+                isGitHubNotFound(error.cause)
+                  ? Effect.succeed(null)
+                  : Effect.fail(error)
+              )
             );
           if (!repository || repository.stargazers_count < minimumStars) {
             return null;
@@ -236,7 +246,10 @@ export const loadContributions = Effect.fn("loadContributions")(
 
 /** Fetches GitHub contributions and publishes a complete KV snapshot. */
 export const refreshContributions = Effect.fn("refreshContributions")(
-  function* refreshContributions(env: AppEnv) {
+  function* refreshContributions(
+    env: AppEnv,
+    githubLayer?: Layer.Layer<GitHub>
+  ) {
     const kv = env.OPEN_SOURCE_KV;
     if (!kv) {
       return yield* Effect.fail(
@@ -246,10 +259,11 @@ export const refreshContributions = Effect.fn("refreshContributions")(
 
     const repositories = yield* fetchContributionRepositories.pipe(
       Effect.provide(
-        GitHub.layer({
-          username: profile.github,
-          token: env.GITHUB_TOKEN,
-        })
+        githubLayer ??
+          GitHub.layer({
+            username: profile.github,
+            token: env.GITHUB_TOKEN,
+          })
       ),
       Effect.catchTag("GitHubRequestError", (error) => {
         console.error(

@@ -1,9 +1,12 @@
-import { Effect } from "effect";
+import { Effect, Layer } from "effect";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createAppEnv } from "@/env";
 import type { ContributionsRefreshBinding, OpenSourceKVBinding } from "@/env";
 import { loadContributions, refreshContributions } from "@/lib/contributions";
+import { GitHub } from "@/lib/provider/github/client";
+import type { PullRequestSearchItem } from "@/lib/provider/github/client";
+import { GitHubRequestError } from "@/lib/provider/github/errors";
 
 const snapshotKey = "open-source:contributions:v1";
 
@@ -39,9 +42,40 @@ const repository = {
   url: "https://github.com/owner/repo",
 } as const;
 
+const pullRequest = {
+  html_url: "https://github.com/owner/repo/pull/42",
+  number: 42,
+  pull_request: { merged_at: "2026-10-09T12:00:00Z" },
+  repository_url: "https://api.github.com/repos/owner/repo",
+  state: "closed",
+  title: "Add a useful feature",
+} satisfies PullRequestSearchItem;
+
+const createGitHubLayer = (
+  searchPullRequests: readonly PullRequestSearchItem[],
+  repositoryLookup: GitHub["Service"]["repository"]
+) =>
+  Layer.succeed(
+    GitHub,
+    GitHub.of({
+      listRepositories: () => Effect.succeed([]),
+      profilePage: Effect.succeed(""),
+      searchPullRequests: Effect.succeed(searchPullRequests),
+      repository: repositoryLookup,
+      profile: () =>
+        Effect.fail(
+          new GitHubRequestError({
+            operation: "profile",
+            cause: new Error(
+              "Profile is not used by contribution refresh tests."
+            ),
+          })
+        ),
+    })
+  );
+
 describe("open-source contribution snapshots", () => {
   afterEach(() => {
-    vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
@@ -98,45 +132,19 @@ describe("open-source contribution snapshots", () => {
 
   it("publishes a complete snapshot after successful GitHub fetches", async () => {
     const { binding, values } = createKV();
-    vi.stubGlobal(
-      "fetch",
-      vi.fn<(input: string | URL | Request) => Promise<Response>>((input) => {
-        const url = new URL(
-          input instanceof Request ? input.url : String(input)
-        );
-        if (url.pathname === "/search/issues") {
-          return Promise.resolve(
-            Response.json({
-              items: [
-                {
-                  html_url: "https://github.com/owner/repo/pull/42",
-                  number: 42,
-                  pull_request: { merged_at: "2026-10-09T12:00:00Z" },
-                  repository_url: "https://api.github.com/repos/owner/repo",
-                  state: "closed",
-                  title: "Add a useful feature",
-                },
-              ],
-            })
-          );
-        }
-        if (url.pathname === "/repos/owner/repo") {
-          return Promise.resolve(
-            Response.json({
-              full_name: "owner/repo",
-              owner: { avatar_url: repository.avatarUrl },
-              stargazers_count: repository.stars,
-            })
-          );
-        }
-        return Promise.resolve(
-          new Response("Unexpected GitHub request", { status: 404 })
-        );
+    const githubLayer = createGitHubLayer([pullRequest], () =>
+      Effect.succeed({
+        full_name: repository.repo,
+        stargazers_count: repository.stars,
+        owner_avatar_url: repository.avatarUrl,
       })
     );
 
     const result = await Effect.runPromise(
-      refreshContributions(createAppEnv({ OPEN_SOURCE_KV: binding }))
+      refreshContributions(
+        createAppEnv({ OPEN_SOURCE_KV: binding }),
+        githubLayer
+      )
     );
 
     expect(result.repositoryCount).toBe(1);
@@ -151,26 +159,43 @@ describe("open-source contribution snapshots", () => {
       ...binding,
       put: () => Promise.reject(new Error("KV unavailable")),
     };
-    vi.stubGlobal(
-      "fetch",
-      vi.fn<(input: string | URL | Request) => Promise<Response>>((input) => {
-        const url = new URL(
-          input instanceof Request ? input.url : String(input)
-        );
-        if (url.pathname === "/search/issues") {
-          return Promise.resolve(Response.json({ items: [] }));
-        }
-        return Promise.resolve(
-          new Response("Unexpected GitHub request", { status: 404 })
-        );
+    const githubLayer = createGitHubLayer([], () =>
+      Effect.succeed({
+        full_name: repository.repo,
+        stargazers_count: repository.stars,
+        owner_avatar_url: repository.avatarUrl,
       })
     );
 
     await expect(
       Effect.runPromise(
-        refreshContributions(createAppEnv({ OPEN_SOURCE_KV: failingBinding }))
+        refreshContributions(
+          createAppEnv({ OPEN_SOURCE_KV: failingBinding }),
+          githubLayer
+        )
       )
     ).rejects.toThrow("KV unavailable");
+    expect(values.get(snapshotKey)).toBe("previous snapshot");
+  });
+
+  it("keeps the old snapshot when a repository lookup fails", async () => {
+    const { binding, values } = createKV("previous snapshot");
+    const githubError = new GitHubRequestError({
+      operation: "repository",
+      cause: new Error("GitHub unavailable"),
+    });
+    const githubLayer = createGitHubLayer([pullRequest], () =>
+      Effect.fail(githubError)
+    );
+
+    await expect(
+      Effect.runPromise(
+        refreshContributions(
+          createAppEnv({ OPEN_SOURCE_KV: binding }),
+          githubLayer
+        )
+      )
+    ).rejects.toMatchObject({ _tag: "GitHubRequestError" });
     expect(values.get(snapshotKey)).toBe("previous snapshot");
   });
 });
