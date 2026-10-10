@@ -36,6 +36,7 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
       date: "2026-09-25",
       flags: ["nodejs_compat"],
     },
+    crons: isProduction ? ["0 */6 * * *"] : [],
     domain: isProduction ? "mynameistito.com" : undefined,
     env: {
       CONTACT_RECIPIENT: ConfigString("CONTACT_RECIPIENT"),
