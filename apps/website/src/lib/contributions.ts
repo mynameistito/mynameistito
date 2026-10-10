@@ -164,12 +164,12 @@ const startBootstrapRefresh = Effect.fn("startBootstrapRefresh")(
       return;
     }
     const now = yield* DateTime.now;
-    const day = Math.floor(now.epochMilliseconds / 86_400_000);
+    const hour = Math.floor(now.epochMilliseconds / 3_600_000);
     const result = yield* Effect.result(
       Effect.tryPromise({
         try: () =>
           refresh.create({
-            id: `contributions-bootstrap-${day}`,
+            id: `contributions-bootstrap-${hour}`,
             params: {},
           }),
         catch: (cause) =>
