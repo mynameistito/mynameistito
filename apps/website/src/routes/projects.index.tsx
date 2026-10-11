@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { ProjectList } from "@/components/project-list";
 import { isProjectVisible } from "@/lib/project";
+import { socialMeta } from "@/lib/social-meta";
 import { getProjects } from "@/server/functions/projects";
 
 const ProjectsPage = () => {
@@ -62,6 +63,7 @@ export const Route = createFileRoute("/projects/")({
         content: "Projects Tito has built and shipped.",
         name: "description",
       },
+      ...socialMeta("Projects | Tito", "Projects Tito has built and shipped."),
     ],
   }),
 });

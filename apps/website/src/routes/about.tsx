@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { profile } from "@/lib/profile";
+import { socialMeta } from "@/lib/social-meta";
 
 const AboutPage = () => (
   <main className="page-shell pt-page-top-header pb-page-bottom">
@@ -27,6 +28,10 @@ export const Route = createFileRoute("/about")({
         content: "About Tito, a developer from New Zealand.",
         name: "description",
       },
+      ...socialMeta(
+        "About | Tito",
+        "About Tito, a developer from New Zealand."
+      ),
     ],
   }),
 });

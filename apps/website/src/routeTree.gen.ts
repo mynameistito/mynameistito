@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
 import { Route as LinksRouteImport } from './routes/links'
+import { Route as OgImageRouteImport } from './routes/og-image'
 import { Route as OpenSourceRouteImport } from './routes/open-source'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
@@ -53,6 +54,11 @@ const FeedDotxmlRoute = FeedDotxmlRouteImport.update({
 const LinksRoute = LinksRouteImport.update({
   id: '/links',
   path: '/links',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OgImageRoute = OgImageRouteImport.update({
+  id: '/og-image',
+  path: '/og-image',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OpenSourceRoute = OpenSourceRouteImport.update({
@@ -140,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/links': typeof LinksRoute
+  '/og-image': typeof OgImageRoute
   '/open-source': typeof OpenSourceRoute
   '/projects': typeof ProjectsRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
@@ -162,6 +169,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/links': typeof LinksRoute
+  '/og-image': typeof OgImageRoute
   '/open-source': typeof OpenSourceRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -184,6 +192,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/links': typeof LinksRoute
+  '/og-image': typeof OgImageRoute
   '/open-source': typeof OpenSourceRoute
   '/projects': typeof ProjectsRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
@@ -208,6 +217,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/feed.xml'
     | '/links'
+    | '/og-image'
     | '/open-source'
     | '/projects'
     | '/robots.txt'
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/feed.xml'
     | '/links'
+    | '/og-image'
     | '/open-source'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/feed.xml'
     | '/links'
+    | '/og-image'
     | '/open-source'
     | '/projects'
     | '/robots.txt'
@@ -274,6 +286,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   FeedDotxmlRoute: typeof FeedDotxmlRoute
   LinksRoute: typeof LinksRoute
+  OgImageRoute: typeof OgImageRoute
   OpenSourceRoute: typeof OpenSourceRoute
   ProjectsRoute: typeof ProjectsRouteWithChildren
   RobotsDottxtRoute: typeof RobotsDottxtRoute
@@ -324,6 +337,13 @@ declare module '@tanstack/react-router' {
       path: '/links'
       fullPath: '/links'
       preLoaderRoute: typeof LinksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/og-image': {
+      id: '/og-image'
+      path: '/og-image'
+      fullPath: '/og-image'
+      preLoaderRoute: typeof OgImageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/open-source': {
@@ -454,6 +474,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   FeedDotxmlRoute: FeedDotxmlRoute,
   LinksRoute: LinksRoute,
+  OgImageRoute: OgImageRoute,
   OpenSourceRoute: OpenSourceRoute,
   ProjectsRoute: ProjectsRouteWithChildren,
   RobotsDottxtRoute: RobotsDottxtRoute,

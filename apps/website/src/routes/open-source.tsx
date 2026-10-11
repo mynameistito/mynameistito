@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { OpenSourceBrowser } from "@/components/open-source-browser";
+import { socialMeta } from "@/lib/social-meta";
 import { getContributions } from "@/server/functions/contributions";
 
 const OpenSourcePage = () => (
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/open-source")({
         content: "Open-source contributions by Tito.",
         name: "description",
       },
+      ...socialMeta("Open source | Tito", "Open-source contributions by Tito."),
     ],
   }),
 });

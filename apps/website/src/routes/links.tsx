@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowUpRight } from "lucide-react";
 
 import { SiteControls } from "@/components/site-controls";
 import { profile } from "@/lib/profile";
+import { socialMeta } from "@/lib/social-meta";
 
 const links = [
   {
@@ -115,6 +116,7 @@ export const Route = createFileRoute("/links")({
     meta: [
       { title: "Links | Tito" },
       { content: "Find Tito around the web.", name: "description" },
+      ...socialMeta("Links | Tito", "Find Tito around the web."),
     ],
   }),
 });

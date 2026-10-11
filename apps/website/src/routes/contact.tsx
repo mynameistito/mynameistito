@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import type { FormEvent } from "react";
 
 import { profile } from "@/lib/profile";
+import { socialMeta } from "@/lib/social-meta";
 import { getTurnstileToken } from "@/lib/turnstile-client";
 import { getTurnstileSitekey } from "@/server/functions/contact-turnstile-config";
 
@@ -214,6 +215,7 @@ export const Route = createFileRoute("/contact")({
     meta: [
       { title: "Contact | Tito" },
       { content: "Get in touch with Tito.", name: "description" },
+      ...socialMeta("Contact | Tito", "Get in touch with Tito."),
     ],
   }),
 });

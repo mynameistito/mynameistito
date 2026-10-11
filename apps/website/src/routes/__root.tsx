@@ -9,6 +9,7 @@ import { NotFoundPage } from "@/components/not-found-page";
 import { SiteHeader } from "@/components/site-header";
 import { SocialDock } from "@/components/social-dock";
 import { VisitorTracker } from "@/components/visitor-tracker";
+import { socialMeta } from "@/lib/social-meta";
 
 import appCss from "@/styles.css?url";
 
@@ -77,6 +78,10 @@ export const Route = createRootRoute({
           "Tito is a developer from New Zealand who likes messing with things and seeing where they go.",
         name: "description",
       },
+      ...socialMeta(
+        "Tito | mynameistito.com",
+        "Tito is a developer from New Zealand who likes messing with things and seeing where they go."
+      ),
     ],
     scripts: [
       {

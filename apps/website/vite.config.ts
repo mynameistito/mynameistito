@@ -21,6 +21,7 @@ const config = defineConfig({
     ssr: { resolve: { external: ["node:async_hooks", "node:stream"] } },
   },
   ssr: {
+    external: ["takumi-js"],
     noExternal: true,
     resolve: { conditions: ["module", "workerd", "development|production"] },
     target: "webworker",

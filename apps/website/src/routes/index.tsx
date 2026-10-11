@@ -4,6 +4,7 @@ import { ExperienceSection } from "@/components/experience-section";
 import { ProjectList } from "@/components/project-list";
 import { HomeProfile, SiteHeader } from "@/components/site-header";
 import { profile } from "@/lib/profile";
+import { socialMeta } from "@/lib/social-meta";
 import { getProjects } from "@/server/functions/projects";
 
 const Home = () => (
@@ -92,6 +93,10 @@ export const Route = createFileRoute("/")({
         content: `${profile.name} is a developer from New Zealand who likes messing with things and seeing where they go.`,
         name: "description",
       },
+      ...socialMeta(
+        "Tito — mynameistito.com",
+        `${profile.name} is a developer from New Zealand who likes messing with things and seeing where they go.`
+      ),
     ],
   }),
 });
