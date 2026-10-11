@@ -57,6 +57,21 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
     },
     main: "worker.ts",
     name: "mynameistito",
+    observability: {
+      enabled: true,
+      headSamplingRate: 1,
+      logs: {
+        enabled: true,
+        headSamplingRate: 1,
+        invocationLogs: true,
+        persist: true,
+      },
+      traces: {
+        enabled: true,
+        headSamplingRate: 1,
+        persist: true,
+      },
+    },
     rootDir: "apps/website",
     workersDev: isProduction ? false : undefined,
   });
