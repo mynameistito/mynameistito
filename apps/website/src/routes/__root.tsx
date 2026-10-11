@@ -1,4 +1,5 @@
 import {
+  Link,
   HeadContent,
   Scripts,
   createRootRoute,
@@ -42,6 +43,14 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
           {children}
           <SocialDock />
         </VisitorTracker>
+        <footer className="page-shell pb-4 text-center">
+          <Link
+            className="text-xs text-muted transition-colors hover:text-text"
+            to="/privacy"
+          >
+            Privacy
+          </Link>
+        </footer>
         <Scripts />
       </body>
     </html>

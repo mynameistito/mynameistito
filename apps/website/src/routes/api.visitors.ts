@@ -16,7 +16,7 @@ const VisitorRequest = Struct({
   path: SchemaString.pipe(
     check(
       isPattern(
-        /^\/(?:about|contact|links|open-source|projects(?:\/[a-z0-9-]+)?)?$/u
+        /^\/(?:about|contact|links|open-source|privacy|projects(?:\/[a-z0-9-]+)?)?$/u
       )
     )
   ),
@@ -28,7 +28,7 @@ const post = ({ request }: { request: Request }) =>
   Effect.runPromise(
     Effect.gen(function* trackVisitor() {
       const origin = request.headers.get("origin");
-      if (origin && origin !== new URL(request.url).origin) {
+      if (origin !== new URL(request.url).origin) {
         return Response.json(
           { error: "Invalid request origin." },
           { status: 403 }
@@ -43,9 +43,8 @@ const post = ({ request }: { request: Request }) =>
         return Response.json({ error: "Invalid route." }, { status: 400 });
       }
 
-      const token = decoded.turnstileToken;
       const verified = yield* verifyConfiguredTurnstile({
-        token,
+        token: decoded.turnstileToken,
         expectedHostname: new URL(request.url).hostname,
         expectedAction: "visitor",
         remoteIp: request.headers.get("cf-connecting-ip") ?? "",

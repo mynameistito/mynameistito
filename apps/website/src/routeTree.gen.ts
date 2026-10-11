@@ -15,6 +15,7 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
 import { Route as LinksRouteImport } from './routes/links'
 import { Route as OpenSourceRouteImport } from './routes/open-source'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -58,6 +59,11 @@ const LinksRoute = LinksRouteImport.update({
 const OpenSourceRoute = OpenSourceRouteImport.update({
   id: '/open-source',
   path: '/open-source',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProjectsRoute = ProjectsRouteImport.update({
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/feed.xml': typeof FeedDotxmlRoute
   '/links': typeof LinksRoute
   '/open-source': typeof OpenSourceRoute
+  '/privacy': typeof PrivacyRoute
   '/projects': typeof ProjectsRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByTo {
   '/feed.xml': typeof FeedDotxmlRoute
   '/links': typeof LinksRoute
   '/open-source': typeof OpenSourceRoute
+  '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.well-known/atproto-did': typeof DotwellKnownAtprotoDidRoute
@@ -185,6 +193,7 @@ export interface FileRoutesById {
   '/feed.xml': typeof FeedDotxmlRoute
   '/links': typeof LinksRoute
   '/open-source': typeof OpenSourceRoute
+  '/privacy': typeof PrivacyRoute
   '/projects': typeof ProjectsRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -209,6 +218,7 @@ export interface FileRouteTypes {
     | '/feed.xml'
     | '/links'
     | '/open-source'
+    | '/privacy'
     | '/projects'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/feed.xml'
     | '/links'
     | '/open-source'
+    | '/privacy'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/.well-known/atproto-did'
@@ -252,6 +263,7 @@ export interface FileRouteTypes {
     | '/feed.xml'
     | '/links'
     | '/open-source'
+    | '/privacy'
     | '/projects'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -275,6 +287,7 @@ export interface RootRouteChildren {
   FeedDotxmlRoute: typeof FeedDotxmlRoute
   LinksRoute: typeof LinksRoute
   OpenSourceRoute: typeof OpenSourceRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProjectsRoute: typeof ProjectsRouteWithChildren
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -331,6 +344,13 @@ declare module '@tanstack/react-router' {
       path: '/open-source'
       fullPath: '/open-source'
       preLoaderRoute: typeof OpenSourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/projects': {
@@ -455,6 +475,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeedDotxmlRoute: FeedDotxmlRoute,
   LinksRoute: LinksRoute,
   OpenSourceRoute: OpenSourceRoute,
+  PrivacyRoute: PrivacyRoute,
   ProjectsRoute: ProjectsRouteWithChildren,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

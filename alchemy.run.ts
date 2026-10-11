@@ -28,7 +28,7 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
 
   const contactTurnstile = yield* Turnstile.Widget("ContactTurnstile", {
     domains: turnstileDomains,
-    mode: "managed",
+    mode: "invisible",
   });
 
   return yield* Website.Vite("Website", {
