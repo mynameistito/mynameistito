@@ -193,6 +193,45 @@ describe("open-source contribution snapshots", () => {
     expect(stored.refreshedAt).toStrictEqual(expect.any(String));
   });
 
+  it("features OpenTechCheck instead of opencode", async () => {
+    const { binding, values } = createKV();
+    const repositories = ["PGHQdev/OpenTechCheck", "anomalyco/opencode"];
+    const searchResults = repositories.map((repo) => ({
+      ...pullRequest,
+      repository_url: `https://api.github.com/repos/${repo}`,
+    }));
+    const githubLayer = createGitHubLayer(searchResults, (owner, name) =>
+      Effect.succeed({
+        full_name: `${owner}/${name}`,
+        stargazers_count: 1,
+        owner_avatar_url: repository.avatarUrl,
+      })
+    );
+
+    await Effect.runPromise(
+      refreshContributions(
+        createAppEnv({ OPEN_SOURCE_KV: binding }),
+        githubLayer
+      )
+    );
+
+    const stored = JSON.parse(values.get(snapshotKey) ?? "null");
+    expect(
+      stored.repositories.map(
+        ({
+          repo: name,
+          featured,
+        }: {
+          readonly repo: string;
+          readonly featured: boolean;
+        }) => [name, featured]
+      )
+    ).toStrictEqual([
+      ["PGHQdev/OpenTechCheck", true],
+      ["anomalyco/opencode", false],
+    ]);
+  });
+
   it("omits explicitly ignored repositories, ignored organizations, and own repos", async () => {
     const { binding, values } = createKV();
     const repositoryNames = [
