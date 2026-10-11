@@ -7,6 +7,7 @@ import {
 import { ArrowRight } from "lucide-react";
 
 import { isProjectVisible, projectSlug } from "@/lib/project";
+import { socialMeta } from "@/lib/social-meta";
 import { getProjects } from "@/server/functions/projects";
 
 const ProjectPage = () => {
@@ -139,10 +140,19 @@ export const Route = createFileRoute("/projects/$slug")({
     return projects;
   },
   component: ProjectPage,
-  head: ({ params }) => ({
-    meta: [
-      { title: `${params.slug.replaceAll("-", " ")} | Tito` },
-      { content: "A project built by Tito.", name: "description" },
-    ],
-  }),
+  head: ({ params, loaderData }) => {
+    const project = loaderData?.find(
+      (item) => projectSlug(item.name) === params.slug
+    );
+    const title = `${project?.name ?? params.slug.replaceAll("-", " ")} | Tito`;
+    const description = project?.description ?? "A project built by Tito.";
+
+    return {
+      meta: [
+        { title },
+        { content: description, name: "description" },
+        ...socialMeta(title, description),
+      ],
+    };
+  },
 });

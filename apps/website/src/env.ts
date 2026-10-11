@@ -17,8 +17,14 @@ export interface ContributionsRefreshBinding {
   }) => Promise<{ readonly id: string }>;
 }
 
+/** Static asset binding available to the deployed Worker. */
+interface StaticAssetsBinding {
+  readonly fetch: (request: Request | URL | string) => Promise<Response>;
+}
+
 /** Runtime bindings supplied by the platform or Alchemy local runtime. */
 export interface AppEnv {
+  readonly ASSETS?: StaticAssetsBinding;
   readonly CONTACT_RECIPIENT?: string;
   readonly CONTRIBUTIONS_REFRESH?: ContributionsRefreshBinding;
   readonly RESEND_API_KEY?: Redacted.Redacted<string>;
@@ -38,6 +44,7 @@ export interface AppEnv {
 
 /** Unredacted platform bindings at the runtime ingress boundary. */
 export interface RuntimeBindings {
+  readonly ASSETS?: StaticAssetsBinding;
   readonly CONTACT_RECIPIENT?: string;
   readonly CONTRIBUTIONS_REFRESH?: ContributionsRefreshBinding;
   readonly RESEND_API_KEY?: string;
