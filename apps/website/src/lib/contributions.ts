@@ -65,10 +65,10 @@ const repositoryOverrides = new Map<
   { readonly featured?: boolean; readonly ignored?: boolean }
 >([
   // Featured repositories.
-  ["anomalyco/opencode", { featured: true }],
   ["cloudflare/cloudflare-docs", { featured: true }],
   ["haydenbleasel/blume", { featured: true }],
   ["haydenbleasel/ultracite", { featured: true }],
+  ["pghqdev/opentechcheck", { featured: true }],
   // Ignore rules accept exact repositories and owner-wide "owner/*" patterns.
   ["kus/csgo-modded-server-assets", { ignored: true }],
   ["r44vc0rp/opencode-cloudflare", { ignored: true }],
