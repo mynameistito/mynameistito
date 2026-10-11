@@ -69,8 +69,25 @@ const repositoryOverrides = new Map<
   ["cloudflare/cloudflare-docs", { featured: true }],
   ["haydenbleasel/blume", { featured: true }],
   ["haydenbleasel/ultracite", { featured: true }],
-  // Add ignored repositories here as ["owner/repo", { ignored: true }].
+  // Ignore rules accept exact repositories and owner-wide "owner/*" patterns.
+  ["kus/csgo-modded-server-assets", { ignored: true }],
+  ["r44vc0rp/opencode-cloudflare", { ignored: true }],
+  ["r44vc0rp/opencode-browserbase", { ignored: true }],
+  ["coppinger/screenshotgun-app", { ignored: true }],
+  ["theskeld/*", { ignored: true }],
+  ["killzonegaming/*", { ignored: true }],
+  [`${profile.github.toLowerCase()}/*`, { ignored: true }],
 ]);
+
+const isRepositoryIgnored = (repo: string): boolean => {
+  const normalizedRepo = repo.toLowerCase();
+  const [owner] = normalizedRepo.split("/");
+  return (
+    repositoryOverrides.get(normalizedRepo)?.ignored ??
+    (owner ? repositoryOverrides.get(`${owner}/*`)?.ignored : undefined) ??
+    owner === profile.github.toLowerCase()
+  );
+};
 
 const summarizeGitHubFailure = (cause: unknown): string => {
   if (HttpClientError.isHttpClientError(cause)) {
@@ -110,6 +127,9 @@ const fetchContributionRepositories = Effect.gen(
             .filter(Boolean)
             .slice(-2);
           if (!(owner && name)) {
+            return null;
+          }
+          if (isRepositoryIgnored(`${owner}/${name}`)) {
             return null;
           }
           const repository = yield* github
@@ -155,10 +175,7 @@ const fetchContributionRepositories = Effect.gen(
       { concurrency: 10 }
     );
     const repositories = contributionData.flatMap((repository) => {
-      if (
-        repository === null ||
-        repositoryOverrides.get(repository.repo.toLowerCase())?.ignored
-      ) {
+      if (repository === null) {
         return [];
       }
       return [repository];
@@ -254,7 +271,9 @@ export const loadContributions = Effect.fn("loadContributions")(
     ) {
       yield* startContributionsRefresh(env);
     }
-    return decoded.success.repositories;
+    return decoded.success.repositories.filter(
+      (repository) => !isRepositoryIgnored(repository.repo)
+    );
   }
 );
 

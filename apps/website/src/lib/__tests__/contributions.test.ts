@@ -83,7 +83,14 @@ describe("open-source contribution snapshots", () => {
     const { binding } = createKV(
       JSON.stringify({
         refreshedAt: "2099-10-10T00:00:00Z",
-        repositories: [repository],
+        repositories: [
+          repository,
+          {
+            ...repository,
+            name: "personal-project",
+            repo: "mynameistito/personal-project",
+          },
+        ],
       })
     );
     const create = vi
@@ -184,6 +191,44 @@ describe("open-source contribution snapshots", () => {
     const stored = JSON.parse(values.get(snapshotKey) ?? "null");
     expect(stored).toMatchObject({ repositories: [repository] });
     expect(stored.refreshedAt).toStrictEqual(expect.any(String));
+  });
+
+  it("omits explicitly ignored repositories, ignored organizations, and own repos", async () => {
+    const { binding, values } = createKV();
+    const repositoryNames = [
+      "kus/csgo-modded-server-assets",
+      "R44VC0RP/opencode-cloudflare",
+      "R44VC0RP/opencode-browserbase",
+      "coppinger/screenshotgun-app",
+      "TheSkeld/game-server",
+      "KillzoneGaming/game-server",
+      "mynameistito/personal-project",
+      "keep/visible-repo",
+    ];
+    const searchResults = repositoryNames.map((repo) => ({
+      ...pullRequest,
+      html_url: `https://github.com/${repo}/pull/42`,
+      repository_url: `https://api.github.com/repos/${repo}`,
+    }));
+    const githubLayer = createGitHubLayer(searchResults, (owner, name) =>
+      Effect.succeed({
+        full_name: `${owner}/${name}`,
+        stargazers_count: 1,
+        owner_avatar_url: repository.avatarUrl,
+      })
+    );
+
+    await Effect.runPromise(
+      refreshContributions(
+        createAppEnv({ OPEN_SOURCE_KV: binding }),
+        githubLayer
+      )
+    );
+
+    const stored = JSON.parse(values.get(snapshotKey) ?? "null");
+    expect(
+      stored.repositories.map(({ repo }: { readonly repo: string }) => repo)
+    ).toStrictEqual(["keep/visible-repo"]);
   });
 
   it("includes contributions from repositories with fewer than 1,000 stars", async () => {
