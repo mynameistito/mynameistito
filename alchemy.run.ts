@@ -73,7 +73,9 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
       },
     },
     rootDir: "apps/website",
-    workersDev: isProduction ? false : undefined,
+    workersDev: isProduction
+      ? { enabled: false, previewsEnabled: true }
+      : undefined,
   });
 });
 
