@@ -210,13 +210,15 @@ describe("open-source contribution snapshots", () => {
       html_url: `https://github.com/${repo}/pull/42`,
       repository_url: `https://api.github.com/repos/${repo}`,
     }));
-    const githubLayer = createGitHubLayer(searchResults, (owner, name) =>
-      Effect.succeed({
+    const repositoryLookups: string[] = [];
+    const githubLayer = createGitHubLayer(searchResults, (owner, name) => {
+      repositoryLookups.push(`${owner}/${name}`);
+      return Effect.succeed({
         full_name: `${owner}/${name}`,
         stargazers_count: 1,
         owner_avatar_url: repository.avatarUrl,
-      })
-    );
+      });
+    });
 
     await Effect.runPromise(
       refreshContributions(
@@ -229,6 +231,7 @@ describe("open-source contribution snapshots", () => {
     expect(
       stored.repositories.map(({ repo }: { readonly repo: string }) => repo)
     ).toStrictEqual(["keep/visible-repo"]);
+    expect(repositoryLookups).toStrictEqual(["keep/visible-repo"]);
   });
 
   it("includes contributions from repositories with fewer than 1,000 stars", async () => {
