@@ -2,6 +2,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 
 import { SiteControls } from "@/components/site-controls";
+import { VisitorActivity } from "@/components/visitor-tracker";
 import { profile } from "@/lib/profile";
 import { socialMeta } from "@/lib/social-meta";
 
@@ -57,7 +58,10 @@ const LinksPage = () => (
       >
         <ArrowLeft aria-hidden="true" size={14} /> Back to portfolio
       </Link>
-      <SiteControls />
+      <div className="flex items-center gap-1">
+        <VisitorActivity />
+        <SiteControls />
+      </div>
     </nav>
     <header className="mb-8 text-center">
       <Link

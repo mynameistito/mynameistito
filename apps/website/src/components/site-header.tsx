@@ -24,7 +24,10 @@ const siteHeader = ({ backTo, backLabel }: SiteHeaderProps) =>
           <ArrowLeft aria-hidden="true" size={14} />
           {backLabel}
         </Link>
-        <SiteControls />
+        <div className="flex items-center gap-1">
+          <VisitorActivity />
+          <SiteControls />
+        </div>
       </div>
     </header>
   ) : (
