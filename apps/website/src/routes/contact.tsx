@@ -21,7 +21,6 @@ const statusMessages: Record<SubmissionStatus, string> = {
 const ContactPage = () => {
   const turnstileSitekey = Route.useLoaderData();
   const submissionInProgress = useRef(false);
-  const turnstileContainer = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<SubmissionStatus>("idle");
 
   const sendMessage = (event: FormEvent<HTMLFormElement>) => {
@@ -42,15 +41,7 @@ const ContactPage = () => {
 
     const submission = Effect.tryPromise({
       try: async () => {
-        const container = turnstileContainer.current;
-        if (!container) {
-          throw new Error("Turnstile container is unavailable.");
-        }
-        const token = await getTurnstileToken(
-          turnstileSitekey,
-          "contact",
-          container
-        );
+        const token = await getTurnstileToken(turnstileSitekey, "contact");
         return fetch("/api/contact", {
           body: JSON.stringify({
             message: values,
@@ -189,7 +180,6 @@ const ContactPage = () => {
             rows={6}
           />
         </label>
-        <div ref={turnstileContainer} />
         <div className="flex flex-wrap items-center justify-between gap-4">
           <p
             aria-live="polite"

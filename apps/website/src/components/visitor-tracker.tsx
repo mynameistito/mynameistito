@@ -5,8 +5,10 @@ import { decodeUnknownEffect } from "effect/Schema";
 import { UsersRound } from "lucide-react";
 import { createContext, useContext, useEffect, useState } from "react";
 
+import { getTurnstileToken } from "@/lib/turnstile-client";
 import { VisitorCountsSchema } from "@/lib/visitor-counting";
 import type { VisitorCounts } from "@/lib/visitor-counting";
+import { getTurnstileSitekey } from "@/server/functions/contact-turnstile-config";
 
 const VisitorCountsContext = createContext<VisitorCounts | undefined>(
   undefined
@@ -30,11 +32,14 @@ const runWithHeartbeatGuard = async <A,>(
   }
 };
 
-const loadVisitorCounts = (pathname: string) =>
+const loadVisitorCounts = (pathname: string, sitekey: string) =>
   Effect.gen(function* loadVisitorCountsProgram() {
+    const token = yield* Effect.tryPromise(() =>
+      getTurnstileToken(sitekey, "visitor")
+    );
     const response = yield* Effect.tryPromise(() =>
       fetch("/api/visitors", {
-        body: JSON.stringify({ path: pathname }),
+        body: JSON.stringify({ path: pathname, turnstileToken: token }),
         headers: { "content-type": "application/json" },
         method: "POST",
       })
@@ -55,13 +60,38 @@ export const VisitorTracker = ({ children }: { children: React.ReactNode }) => {
     select: (state) => state.location.pathname,
   });
   const [counts, setCounts] = useState<VisitorCounts>();
+  const [turnstileSitekey, setTurnstileSitekey] = useState<
+    string | null | undefined
+  >();
+  useEffect(() => {
+    let cancelled = false;
+    const loadSitekey = async () => {
+      try {
+        const sitekey = await getTurnstileSitekey();
+        if (!cancelled) {
+          setTurnstileSitekey(sitekey);
+        }
+      } catch {
+        if (!cancelled) {
+          setTurnstileSitekey(null);
+        }
+      }
+    };
+    void loadSitekey();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
+    if (!turnstileSitekey) {
+      return;
+    }
     let cancelled = false;
     const heartbeatGuard = { active: false };
     const trackHeartbeat = async () => {
       const value = await runWithHeartbeatGuard(heartbeatGuard, () =>
-        Effect.runPromise(loadVisitorCounts(pathname))
+        Effect.runPromise(loadVisitorCounts(pathname, turnstileSitekey))
       );
       if (!cancelled && value) {
         setCounts(value satisfies VisitorCounts);
@@ -78,7 +108,7 @@ export const VisitorTracker = ({ children }: { children: React.ReactNode }) => {
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [pathname]);
+  }, [pathname, turnstileSitekey]);
 
   return (
     <VisitorCountsContext.Provider value={counts}>

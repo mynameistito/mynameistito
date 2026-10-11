@@ -10,15 +10,17 @@ import {
 } from "effect/Schema";
 
 import { recordVisitor } from "@/server/functions/record-visitor";
+import { verifyConfiguredTurnstile } from "@/server/functions/turnstile";
 
 const VisitorRequest = Struct({
   path: SchemaString.pipe(
     check(
       isPattern(
-        /^\/(?:about|contact|links|open-source|projects(?:\/[a-z0-9-]+)?)?$/u
+        /^\/(?:about|contact|links|open-source|privacy|projects(?:\/[a-z0-9-]+)?)?$/u
       )
     )
   ),
+  turnstileToken: SchemaString,
 });
 const visitorUnavailableMessage = "Visitor counts are unavailable.";
 
@@ -39,6 +41,16 @@ const post = ({ request }: { request: Request }) =>
       );
       if (!decoded) {
         return Response.json({ error: "Invalid route." }, { status: 400 });
+      }
+
+      const verified = yield* verifyConfiguredTurnstile({
+        token: decoded.turnstileToken,
+        expectedHostname: new URL(request.url).hostname,
+        expectedAction: "visitor",
+        remoteIp: request.headers.get("cf-connecting-ip") ?? "",
+      });
+      if (!verified) {
+        return Response.json({ error: "Forbidden." }, { status: 403 });
       }
 
       const cookie = request.headers.get("cookie") ?? "";

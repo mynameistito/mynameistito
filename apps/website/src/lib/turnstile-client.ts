@@ -84,10 +84,11 @@ const loadTurnstileApi = (): Promise<TurnstileApi> => {
  */
 export const getTurnstileToken = async (
   sitekey: string,
-  action: string,
-  container: HTMLElement
+  action: string
 ): Promise<string> => {
   const turnstile = await loadTurnstileApi();
+  const container = document.createElement("div");
+  document.body.append(container);
 
   // eslint-disable-next-line promise/avoid-new -- Bridge Turnstile's callback API.
   return new Promise<string>((resolve, reject) => {
@@ -100,6 +101,7 @@ export const getTurnstileToken = async (
       if (widget.id) {
         turnstile.remove(widget.id);
       }
+      container.remove();
     };
     const settle = (result: string | Error) => {
       if (settled) {
