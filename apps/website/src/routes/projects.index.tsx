@@ -4,7 +4,9 @@ import { ProjectList } from "@/components/project-list";
 import { getProjects } from "@/server/functions/projects";
 
 const ProjectsPage = () => {
-  const projects = Route.useLoaderData();
+  const projects = Route.useLoaderData().filter(
+    (project) => project.showInProjects ?? !project.archived
+  );
   const featuredProjects = projects.filter((project) => project.featured);
   const otherProjects = projects.filter((project) => !project.featured);
   return (

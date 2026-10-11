@@ -4,7 +4,13 @@ export interface Project {
   readonly description: string;
   readonly languages: readonly string[];
   readonly image: string;
+  readonly detailImage?: string;
+  /** Whether this project should render a local detail page. */
+  readonly hasDetailPage?: boolean;
+  /** Whether the project appears on the /projects page; defaults to `true`. */
+  readonly showInProjects?: boolean;
   readonly previewImage?: string;
+  readonly archived: boolean;
   readonly featured: boolean;
   readonly source: string;
   readonly demo?: string;

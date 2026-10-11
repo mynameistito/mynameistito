@@ -1,5 +1,10 @@
-import { Link, createFileRoute, notFound } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import {
+  Link,
+  createFileRoute,
+  notFound,
+  redirect,
+} from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
 
 import { projectSlug } from "@/lib/project";
 import { getProjects } from "@/server/functions/projects";
@@ -22,51 +27,50 @@ const ProjectPage = () => {
           <p className="mt-2 mb-0 max-w-prose text-base leading-copy text-muted">
             {project.description}
           </p>
-          <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted">
-            <span className="rounded-control border border-line bg-surface px-2 py-1">
+          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted">
+            <span className="inline-flex min-h-6 items-center rounded-control border border-line bg-surface px-2">
               GitHub project
             </span>
             {project.languages.length > 0 && (
-              <span>{project.languages.join(" / ")}</span>
+              <span className="inline-flex min-h-6 items-center">
+                {project.languages.join(" / ")}
+              </span>
             )}
-          </div>
-          <nav aria-label="Project links" className="mt-5 flex flex-wrap gap-3">
-            {project.demo && (
+            <nav
+              aria-label="Project links"
+              className="flex min-h-6 flex-wrap items-center gap-x-3 gap-y-2"
+            >
+              {project.demo && (
+                <a
+                  className="inline-flex min-h-6 items-center text-text underline underline-offset-2 transition-colors hover:text-accent"
+                  href={project.demo}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  View live project
+                </a>
+              )}
               <a
-                className="rounded-control border border-line bg-surface px-3 py-2 text-sm font-medium text-text transition-colors hover:border-accent"
-                href={project.demo}
+                className="inline-flex min-h-6 items-center text-text underline underline-offset-2 transition-colors hover:text-accent"
+                href={project.source}
                 rel="noreferrer"
                 target="_blank"
               >
-                View live project <ArrowUpRight aria-hidden="true" size={14} />
+                View source
               </a>
-            )}
-            <a
-              className="rounded-control bg-text px-3 py-2 text-sm font-medium text-page transition-transform active:scale-[0.98]"
-              href={project.source}
-              rel="noreferrer"
-              target="_blank"
-            >
-              View source <ArrowUpRight aria-hidden="true" size={14} />
-            </a>
-            <a
-              className="rounded-control border border-line bg-surface px-3 py-2 text-sm font-medium text-text transition-colors hover:border-accent"
-              href={`${project.source}/blob/HEAD/README.md`}
-              rel="noreferrer"
-              target="_blank"
-            >
-              Read README <ArrowUpRight aria-hidden="true" size={14} />
-            </a>
-          </nav>
+            </nav>
+          </div>
         </header>
 
-        <img
-          alt={`${project.name} owner avatar`}
-          className="mt-6 aspect-[59/38] w-full rounded-lg border border-line-strong bg-surface-raised object-contain p-12"
-          height="416"
-          src={project.image}
-          width="646"
-        />
+        {project.detailImage && (
+          <img
+            alt={`${project.name} project preview`}
+            className="mt-6 aspect-[59/38] w-full rounded-lg border border-line-strong bg-surface-raised object-cover"
+            height="416"
+            src={project.detailImage}
+            width="646"
+          />
+        )}
 
         <section
           aria-labelledby="about-project-title"
@@ -121,10 +125,14 @@ const ProjectPage = () => {
 export const Route = createFileRoute("/projects/$slug")({
   loader: async ({ params }) => {
     const projects = await getProjects();
-    if (
-      !projects.some((project) => projectSlug(project.name) === params.slug)
-    ) {
+    const project = projects.find(
+      (item) => projectSlug(item.name) === params.slug
+    );
+    if (!project) {
       throw notFound();
+    }
+    if (!project.hasDetailPage) {
+      throw redirect({ href: project.source });
     }
     return projects;
   },

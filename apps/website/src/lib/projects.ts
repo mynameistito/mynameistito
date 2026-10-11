@@ -15,7 +15,39 @@ const cacheDuration = 60 * 60 * 1000;
 let cachedAt = 0;
 let cachedProjects: readonly Project[] | undefined;
 
-const overrides: Readonly<Record<string, Partial<Project>>> = {};
+const overrides = new Map<string, Partial<Project>>([
+  [".github", { showInProjects: false }],
+  ["alchemy-windows-wsarecv-repro", { showInProjects: false }],
+  ["better-history", { showInProjects: false }],
+  ["biome-check-write-repro", { showInProjects: false }],
+  ["cf-free-tier-imgs", { showInProjects: false }],
+  ["claude-notifier", { showInProjects: false }],
+  ["create-tito-app", { showInProjects: false }],
+  ["CSGO-CONFIGS", { showInProjects: false }],
+  ["cursor-rules", { showInProjects: false }],
+  ["hide-email-ext", { showInProjects: false }],
+  ["hide-ip-ext", { showInProjects: false }],
+  ["ig-video-controls", { showInProjects: false }],
+  ["mute-tab-manager", { showInProjects: false }],
+  ["native-sdk-coff-repro", { showInProjects: false }],
+  ["new-tab-ext", { showInProjects: false }],
+  ["opencode-config", { showInProjects: false }],
+  ["opencode-dangerously-skip-permissions", { showInProjects: false }],
+  ["opentui-vitest-windows-dll-repro", { showInProjects: false }],
+  ["opentui-osc11-repro", { showInProjects: false }],
+  ["opentui-pr-x", { showInProjects: false }],
+  ["quote-viewer", { showInProjects: false }],
+  ["r2explorer", { showInProjects: false }],
+  ["router-cli-node-circular-warning", { showInProjects: false }],
+  ["tampermonkey-addons", { showInProjects: false }],
+  ["ultracite-benchmark", { showInProjects: false }],
+  ["v0-holographic-profile-app", { showInProjects: false }],
+  ["volume-master", { showInProjects: false }],
+  ["windhawk-perform-speedtest", { showInProjects: false }],
+  ["WOL-Android", { showInProjects: false }],
+  ["workers-preview-alias-repro", { showInProjects: false }],
+  ["wrangler-types-new-config-repro", { showInProjects: false }],
+]);
 
 const fetchProjects = Effect.gen(function* fetchProjects() {
   const github = yield* GitHub;
@@ -38,12 +70,13 @@ const fetchProjects = Effect.gen(function* fetchProjects() {
     pinnedNames
   );
   return orderedRepositories.map(({ repository, featured }) => {
-    const override = overrides[repository.name];
+    const override = overrides.get(repository.name);
     const project: Project = {
       name: repository.name,
       description: repository.description ?? `${repository.name} on GitHub.`,
       languages: repository.language ? [repository.language] : [],
       image: repository.owner_avatar_url,
+      archived: repository.archived,
       featured,
       source: repository.html_url,
       ...override,
