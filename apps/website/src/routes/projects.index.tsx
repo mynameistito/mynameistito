@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { ProjectList } from "@/components/project-list";
+import { isProjectVisible } from "@/lib/project";
 import { getProjects } from "@/server/functions/projects";
 
 const ProjectsPage = () => {
-  const projects = Route.useLoaderData();
+  const projects = Route.useLoaderData().filter(isProjectVisible);
   const featuredProjects = projects.filter((project) => project.featured);
   const otherProjects = projects.filter((project) => !project.featured);
   return (

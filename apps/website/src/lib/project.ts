@@ -4,12 +4,28 @@ export interface Project {
   readonly description: string;
   readonly languages: readonly string[];
   readonly image: string;
+  readonly detailImage?: string;
+  /** Whether this project should render a local detail page. */
+  readonly hasDetailPage?: boolean;
+  /** Whether the project appears on the /projects page; defaults to `true`. */
+  readonly showInProjects?: boolean;
   readonly previewImage?: string;
+  readonly archived: boolean;
   readonly featured: boolean;
   readonly source: string;
   readonly demo?: string;
   readonly readme?: string;
 }
+
+/**
+ * Determines whether a project should appear in project listings.
+ *
+ * @param project - Project archive and listing settings.
+ * @returns Whether the project should appear in project listings.
+ */
+export const isProjectVisible = (
+  project: Pick<Project, "archived" | "showInProjects">
+) => project.showInProjects ?? !project.archived;
 
 /** Returns a stable URL-safe route segment for a project.
  * @param name - The GitHub repository name.

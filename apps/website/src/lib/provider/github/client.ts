@@ -44,6 +44,7 @@ export interface Repository {
   readonly description: string | null;
   readonly language?: string | null;
   readonly homepage?: string | null;
+  readonly archived: boolean;
   readonly fork: boolean;
   readonly private: boolean;
   readonly owner_avatar_url: string;
@@ -81,6 +82,7 @@ const RepositorySchema = Schema.Struct({
   description: Schema.NullOr(Schema.String),
   language: Schema.optional(Schema.NullOr(Schema.String)),
   homepage: Schema.optional(Schema.NullOr(Schema.String)),
+  archived: Schema.Boolean,
   fork: Schema.Boolean,
   private: Schema.Boolean,
   owner: Schema.Struct({ avatar_url: Schema.String }),
@@ -281,6 +283,7 @@ export class GitHub extends Context.Service<
                 description: repository.description ?? null,
                 language: repository.language,
                 homepage: repository.homepage,
+                archived: repository.archived ?? false,
                 fork: repository.fork,
                 private: repository.private,
                 owner_avatar_url: repository.owner.avatar_url,
