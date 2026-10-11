@@ -17,6 +17,16 @@ export interface Project {
   readonly readme?: string;
 }
 
+/**
+ * Determines whether a project should appear in project listings.
+ *
+ * @param project - Project archive and listing settings.
+ * @returns Whether the project should appear in project listings.
+ */
+export const isProjectVisible = (
+  project: Pick<Project, "archived" | "showInProjects">
+) => project.showInProjects ?? !project.archived;
+
 /** Returns a stable URL-safe route segment for a project.
  * @param name - The GitHub repository name.
  * @returns The URL-safe project route segment.

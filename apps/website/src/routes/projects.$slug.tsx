@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 
-import { projectSlug } from "@/lib/project";
+import { isProjectVisible, projectSlug } from "@/lib/project";
 import { getProjects } from "@/server/functions/projects";
 
 const ProjectPage = () => {
@@ -97,7 +97,9 @@ const ProjectPage = () => {
           </h2>
           <ul className="mt-2 list-none border-t border-line p-0">
             {projects
-              .filter((item) => item.name !== project.name)
+              .filter(
+                (item) => item.name !== project.name && isProjectVisible(item)
+              )
               .slice(0, 3)
               .map((item) => (
                 <li className="border-b border-line" key={item.name}>
