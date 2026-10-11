@@ -14,6 +14,23 @@ import {
 } from "effect/Config";
 import { gen } from "effect/Effect";
 
+const websiteObservability = {
+  enabled: true,
+  headSamplingRate: 1,
+  issues: { enabled: true },
+  logs: {
+    enabled: true,
+    headSamplingRate: 1,
+    invocationLogs: true,
+    persist: true,
+  },
+  traces: {
+    enabled: true,
+    headSamplingRate: 1,
+    persist: true,
+  },
+};
+
 const WebsiteResource = gen(function* deployWebsiteResource() {
   const stack = yield* Stack;
   const isProduction = stack.stage === "prod";
@@ -57,21 +74,7 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
     },
     main: "worker.ts",
     name: "mynameistito",
-    observability: {
-      enabled: true,
-      headSamplingRate: 1,
-      logs: {
-        enabled: true,
-        headSamplingRate: 1,
-        invocationLogs: true,
-        persist: true,
-      },
-      traces: {
-        enabled: true,
-        headSamplingRate: 1,
-        persist: true,
-      },
-    },
+    observability: websiteObservability,
     rootDir: "apps/website",
     workersDev: isProduction ? false : undefined,
   });
