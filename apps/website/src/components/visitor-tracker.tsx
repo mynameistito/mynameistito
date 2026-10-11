@@ -117,7 +117,7 @@ export const VisitorTracker = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-/** Shows today's unique visitors and expands to the current live count.
+/** Shows live, daily, and lifetime visitor counts in an expandable panel.
  * @returns The compact visitor activity disclosure.
  */
 export const VisitorActivity = () => {
