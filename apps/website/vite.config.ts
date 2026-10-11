@@ -10,14 +10,17 @@ import { defineConfig } from "vite";
 import type { Plugin } from "vite";
 
 const cloudflareWorkersModule = "cloudflare:workers";
+const isAlchemyCloudflareBuild =
+  process.env.ALCHEMY_CLOUDFLARE_VITE_INJECTED === "1";
 const require = createRequire(import.meta.url);
 const takumiWasmPath = require.resolve("@takumi-rs/wasm/takumi_wasm_bg.wasm");
 
-/** Keeps Takumi's WASM as a Worker CompiledWasm module instead of runtime bytes. */
-const takumiWasmModulePlugin: Plugin = {
-  name: "takumi-wasm-module",
+/** Keeps standalone Vite builds valid; Alchemy uses Cloudflare's native WASM handling. */
+const standaloneTakumiWasmPlugin: Plugin = {
+  name: "standalone-takumi-wasm",
   enforce: "pre",
-  apply: "build",
+  apply: (_config, { command }) =>
+    command === "build" && !isAlchemyCloudflareBuild,
   resolveId(source, importer) {
     const normalizedImporter = importer?.replaceAll("\\", "/");
     if (
@@ -32,7 +35,6 @@ const takumiWasmModulePlugin: Plugin = {
       return;
     }
 
-    // Alchemy's Worker module rules compile this adjacent file before execution.
     writeFileSync(
       path.join(outputOptions.dir ?? "", "takumi_wasm_bg.wasm"),
       readFileSync(takumiWasmPath)
@@ -44,7 +46,7 @@ const config = defineConfig({
   plugins: [
     devtools(),
     tailwindcss(),
-    takumiWasmModulePlugin,
+    standaloneTakumiWasmPlugin,
     tanstackStart(),
     viteReact(),
   ],
