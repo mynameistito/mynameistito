@@ -100,6 +100,7 @@ const SearchItemSchema = Schema.Struct({
 });
 
 const SearchResponseSchema = Schema.Struct({
+  total_count: Schema.Int,
   items: Schema.Array(SearchItemSchema),
 });
 
@@ -264,6 +265,25 @@ export class GitHub extends Context.Service<
             )
           );
 
+        const fetchPullRequestSearchPage = (
+          query: string,
+          page: number
+        ): Effect.Effect<
+          (typeof SearchResponseSchema)["Type"],
+          GitHubRequestError
+        > => {
+          const searchUrl = new URL("https://api.github.com/search/issues");
+          searchUrl.searchParams.set("q", query);
+          searchUrl.searchParams.set("per_page", "100");
+          searchUrl.searchParams.set("page", String(page));
+          searchUrl.searchParams.set("sort", "updated");
+          return readJson(
+            "searchPullRequests",
+            SearchResponseSchema,
+            HttpClientRequest.get(searchUrl.toString())
+          );
+        };
+
         const listRepositories = Effect.fn("GitHub.listRepositories")(
           function* listRepositories(page: number, perPage: number) {
             if (token) {
@@ -313,23 +333,63 @@ export class GitHub extends Context.Service<
           );
         const searchPullRequests = Effect.fn("GitHub.searchPullRequests")(
           function* searchPullRequests() {
-            const items: PullRequestSearchItem[] = [];
-            // GitHub Search exposes at most 1,000 results per query.
-            for (let page = 1; page <= 10; page += 1) {
-              const searchUrl = new URL("https://api.github.com/search/issues");
-              searchUrl.searchParams.set("q", `author:${username} type:pr`);
-              searchUrl.searchParams.set("per_page", "100");
-              searchUrl.searchParams.set("page", String(page));
-              searchUrl.searchParams.set("sort", "updated");
-              const result = yield* readJson(
-                "searchPullRequests",
-                SearchResponseSchema,
-                HttpClientRequest.get(searchUrl.toString())
-              );
-              items.push(...result.items);
-              if (result.items.length < 100) {
-                break;
+            const fetchDatePartitions = Effect.fnUntraced(
+              function* fetchDatePartitions(
+                startDate: string,
+                endDate: string
+              ): Effect.fn.Return<
+                readonly PullRequestSearchItem[],
+                GitHubRequestError
+              > {
+                const query = `author:${username} type:pr created:${startDate}..${endDate}`;
+                const firstPage = yield* fetchPullRequestSearchPage(query, 1);
+                if (firstPage.total_count > 1000) {
+                  const start = Date.parse(`${startDate}T00:00:00Z`);
+                  const end = Date.parse(`${endDate}T00:00:00Z`);
+                  if (start >= end) {
+                    return yield* new GitHubRequestError({
+                      operation: "searchPullRequests",
+                      cause: new Error(
+                        `GitHub returned more than 1,000 pull requests for ${startDate}.`
+                      ),
+                    });
+                  }
+                  const middle = new Date(Math.floor((start + end) / 2))
+                    .toISOString()
+                    .slice(0, 10);
+                  const nextDate = new Date(
+                    Date.parse(`${middle}T00:00:00Z`) + 86_400_000
+                  )
+                    .toISOString()
+                    .slice(0, 10);
+                  return [
+                    ...(yield* fetchDatePartitions(startDate, middle)),
+                    ...(yield* fetchDatePartitions(nextDate, endDate)),
+                  ];
+                }
+
+                const items = [...firstPage.items];
+                const totalPages = Math.ceil(firstPage.total_count / 100);
+                for (let page = 2; page <= totalPages; page += 1) {
+                  const result = yield* fetchPullRequestSearchPage(query, page);
+                  items.push(...result.items);
+                }
+                return items;
               }
+            );
+            const query = `author:${username} type:pr`;
+            const firstPage = yield* fetchPullRequestSearchPage(query, 1);
+            if (firstPage.total_count > 1000) {
+              return yield* fetchDatePartitions(
+                "2008-01-01",
+                new Date().toISOString().slice(0, 10)
+              );
+            }
+            const items = [...firstPage.items];
+            const totalPages = Math.ceil(firstPage.total_count / 100);
+            for (let page = 2; page <= totalPages; page += 1) {
+              const result = yield* fetchPullRequestSearchPage(query, page);
+              items.push(...result.items);
             }
             return items;
           }

@@ -19,13 +19,28 @@ export const scheduled = async (
 ): Promise<void> => {
   const refresh = bindings.CONTRIBUTIONS_REFRESH;
   if (!refresh) {
+    console.warn(
+      "[open-source] Scheduled contribution refresh skipped: Workflow binding is not configured."
+    );
     return;
   }
   const scheduledHour = Math.floor(controller.scheduledTime / 3_600_000);
-  await refresh.create({
-    id: `contributions-refresh-${scheduledHour}`,
-    params: {},
-  });
+  const id = `contributions-refresh-${scheduledHour}`;
+  try {
+    const instance = await refresh.create({ id, params: {} });
+    console.info("[open-source] Scheduled contribution refresh started.", {
+      workflowId: instance.id,
+    });
+  } catch (error) {
+    console.error(
+      "[open-source] Unable to start scheduled contribution refresh.",
+      {
+        workflowId: id,
+        error: error instanceof Error ? error.message : String(error),
+      }
+    );
+    throw error;
+  }
 };
 
 export default { ...server, scheduled };
@@ -36,20 +51,36 @@ export class ContributionsRefreshWorkflow extends WorkflowEntrypoint<
   Record<string, never>
 > {
   /** Executes one durable refresh attempt and publishes its result.
-   * @param _event - The event that started this Workflow run.
+   * @param event - The event that started this Workflow run.
    * @param step - The durable step interface supplied by Cloudflare.
    * @returns The published snapshot summary.
    */
-  override run(
-    _event: Readonly<WorkflowEvent<Record<string, never>>>,
+  override async run(
+    event: Readonly<WorkflowEvent<Record<string, never>>>,
     step: WorkflowStep
   ) {
-    return step.do(
-      "refresh-and-publish-contributions",
-      {
-        retries: { limit: 3, delay: "30 seconds", backoff: "exponential" },
-      },
-      () => Effect.runPromise(refreshContributions(createAppEnv(this.env)))
-    );
+    console.info("[open-source] Contribution refresh workflow started.", {
+      workflowId: event.instanceId,
+    });
+    try {
+      const result = await step.do(
+        "refresh-and-publish-contributions",
+        {
+          retries: { limit: 3, delay: "30 seconds", backoff: "exponential" },
+        },
+        () => Effect.runPromise(refreshContributions(createAppEnv(this.env)))
+      );
+      console.info("[open-source] Contribution refresh workflow completed.", {
+        workflowId: event.instanceId,
+        ...result,
+      });
+      return result;
+    } catch (error) {
+      console.error("[open-source] Contribution refresh workflow failed.", {
+        workflowId: event.instanceId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
   }
 }

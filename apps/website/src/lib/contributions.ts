@@ -57,9 +57,8 @@ const ContributionSnapshotSchema = Schema.Struct({
   repositories: Schema.Array(ContributionRepositorySchema),
 });
 
-const snapshotKey = "open-source:contributions:v1";
+const snapshotKey = "open-source:contributions:v2";
 const snapshotRefreshIntervalMs = 6 * 60 * 60 * 1000;
-const minimumStars = 1000;
 // Set featured: true for a full GitHub slug, e.g. "owner/repo".
 const repositoryOverrides = new Map<
   string,
@@ -122,7 +121,7 @@ const fetchContributionRepositories = Effect.gen(
                   : Effect.fail(error)
               )
             );
-          if (!repository || repository.stargazers_count < minimumStars) {
+          if (!repository) {
             return null;
           }
           const pullRequests = items.map((item): ContributionPullRequest => {
@@ -172,15 +171,19 @@ const startContributionsRefresh = Effect.fn("startContributionsRefresh")(
   function* startContributionsRefresh(env: AppEnv) {
     const refresh = env.CONTRIBUTIONS_REFRESH;
     if (!refresh) {
+      console.warn(
+        "[open-source] Unable to start contribution refresh: Workflow binding is not configured."
+      );
       return;
     }
     const now = yield* DateTime.now;
     const hour = Math.floor(now.epochMilliseconds / 3_600_000);
+    const workflowId = `contributions-refresh-${hour}`;
     const result = yield* Effect.result(
       Effect.tryPromise({
         try: () =>
           refresh.create({
-            id: `contributions-refresh-${hour}`,
+            id: workflowId,
             params: {},
           }),
         catch: (cause) =>
@@ -190,9 +193,10 @@ const startContributionsRefresh = Effect.fn("startContributionsRefresh")(
       })
     );
     if (result._tag === "Failure") {
-      console.warn(
-        "[open-source] Unable to start the contribution refresh workflow."
-      );
+      console.warn("[open-source] Unable to start contribution refresh.", {
+        workflowId,
+        error: result.failure.message,
+      });
     }
   }
 );
