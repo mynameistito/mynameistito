@@ -18,7 +18,7 @@ export interface ContributionsRefreshBinding {
 }
 
 /** Static asset binding available to the deployed Worker. */
-export interface StaticAssetsBinding {
+interface StaticAssetsBinding {
   readonly fetch: (request: Request | URL | string) => Promise<Response>;
 }
 
