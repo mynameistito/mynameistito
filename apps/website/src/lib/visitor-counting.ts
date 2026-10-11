@@ -4,10 +4,11 @@ import { Schema } from "effect";
 export const liveWindowMs = 2 * 60 * 1000;
 export const heartbeatMs = 60 * 1000;
 
-/** Daily unique and currently active visitor counts returned by the Worker. */
+/** Lifetime, daily, and currently active visitor counts returned by the Worker. */
 export const VisitorCountsSchema = Schema.Struct({
   daily: Schema.Number,
   live: Schema.Number,
+  total: Schema.Number,
 });
 
 /** Parsed visitor count response. */
@@ -22,6 +23,7 @@ export const keysForVisitor = (timestamp: number, visitorId: string) => {
   const today = new Date(timestamp).toISOString().slice(0, 10);
   return {
     daily: `daily:${today}`,
+    joined: `joined:${visitorId}`,
     live: `live:${visitorId}`,
     seen: `seen:${today}:${visitorId}`,
     today,
@@ -83,3 +85,13 @@ export const dailyCountAfterVisit = (
   current: number,
   alreadySeen: boolean
 ): number => (alreadySeen ? current : current + 1);
+
+/** Computes the lifetime unique visitor count without recounting returning IDs.
+ * @param current - The stored lifetime count.
+ * @param alreadyJoined - Whether this visitor has ever been counted.
+ * @returns The count to persist.
+ */
+export const totalCountAfterVisit = (
+  current: number,
+  alreadyJoined: boolean
+): number => (alreadyJoined ? current : current + 1);
