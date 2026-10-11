@@ -17,6 +17,9 @@ const config = defineConfig({
       platform: "browser",
     },
   },
+  environments: {
+    ssr: { resolve: { external: ["node:async_hooks", "node:stream"] } },
+  },
   ssr: {
     noExternal: true,
     resolve: { conditions: ["module", "workerd", "development|production"] },
