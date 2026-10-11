@@ -79,16 +79,15 @@ const loadTurnstileApi = (): Promise<TurnstileApi> => {
 /** Requests a one-use token without displaying the widget unless challenged.
  * @param sitekey - The public Turnstile sitekey.
  * @param action - The action associated with the protected request.
+ * @param container - The element that hosts the widget if interaction is needed.
  * @returns A one-use token for the requested action.
  */
 export const getTurnstileToken = async (
   sitekey: string,
-  action: string
+  action: string,
+  container: HTMLElement
 ): Promise<string> => {
   const turnstile = await loadTurnstileApi();
-  const container = document.createElement("div");
-  container.setAttribute("aria-hidden", "true");
-  document.body.append(container);
 
   // eslint-disable-next-line promise/avoid-new -- Bridge Turnstile's callback API.
   return new Promise<string>((resolve, reject) => {
@@ -101,7 +100,6 @@ export const getTurnstileToken = async (
       if (widget.id) {
         turnstile.remove(widget.id);
       }
-      container.remove();
     };
     const settle = (result: string | Error) => {
       if (settled) {

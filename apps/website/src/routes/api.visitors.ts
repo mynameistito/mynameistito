@@ -10,7 +10,6 @@ import {
 } from "effect/Schema";
 
 import { recordVisitor } from "@/server/functions/record-visitor";
-import { verifyConfiguredTurnstile } from "@/server/functions/turnstile";
 
 const VisitorRequest = Struct({
   path: SchemaString.pipe(
@@ -20,7 +19,6 @@ const VisitorRequest = Struct({
       )
     )
   ),
-  turnstileToken: SchemaString,
 });
 const visitorUnavailableMessage = "Visitor counts are unavailable.";
 
@@ -28,7 +26,7 @@ const post = ({ request }: { request: Request }) =>
   Effect.runPromise(
     Effect.gen(function* trackVisitor() {
       const origin = request.headers.get("origin");
-      if (origin && origin !== new URL(request.url).origin) {
+      if (origin !== new URL(request.url).origin) {
         return Response.json(
           { error: "Invalid request origin." },
           { status: 403 }
@@ -41,17 +39,6 @@ const post = ({ request }: { request: Request }) =>
       );
       if (!decoded) {
         return Response.json({ error: "Invalid route." }, { status: 400 });
-      }
-
-      const token = decoded.turnstileToken;
-      const verified = yield* verifyConfiguredTurnstile({
-        token,
-        expectedHostname: new URL(request.url).hostname,
-        expectedAction: "visitor",
-        remoteIp: request.headers.get("cf-connecting-ip") ?? "",
-      });
-      if (!verified) {
-        return Response.json({ error: "Forbidden." }, { status: 403 });
       }
 
       const cookie = request.headers.get("cookie") ?? "";
