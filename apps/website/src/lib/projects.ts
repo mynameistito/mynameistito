@@ -33,6 +33,7 @@ const overrides = new Map<string, Partial<Project>>([
   ["new-tab-ext", { showInProjects: false }],
   ["opencode-config", { showInProjects: false }],
   ["opencode-dangerously-skip-permissions", { showInProjects: false }],
+  ["petition-of-felix", { showInProjects: false }],
   ["opentui-vitest-windows-dll-repro", { showInProjects: false }],
   ["opentui-osc11-repro", { showInProjects: false }],
   ["opentui-pr-x", { showInProjects: false }],
