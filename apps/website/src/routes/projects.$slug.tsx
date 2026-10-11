@@ -140,9 +140,12 @@ export const Route = createFileRoute("/projects/$slug")({
     return projects;
   },
   component: ProjectPage,
-  head: ({ params }) => {
-    const title = `${params.slug.replaceAll("-", " ")} | Tito`;
-    const description = "A project built by Tito.";
+  head: ({ params, loaderData }) => {
+    const project = loaderData?.find(
+      (item) => projectSlug(item.name) === params.slug
+    );
+    const title = `${project?.name ?? params.slug.replaceAll("-", " ")} | Tito`;
+    const description = project?.description ?? "A project built by Tito.";
 
     return {
       meta: [
