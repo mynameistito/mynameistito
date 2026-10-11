@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
 import { SiteControls } from "@/components/site-controls";
+import { VisitorActivity } from "@/components/visitor-tracker";
 import { profile } from "@/lib/profile";
 
 interface SiteHeaderProps {
@@ -55,6 +56,7 @@ export const HomeProfile = () => (
       </div>
     </div>
     <div className="flex shrink-0 items-center gap-1">
+      <VisitorActivity />
       <SiteControls />
     </div>
   </div>

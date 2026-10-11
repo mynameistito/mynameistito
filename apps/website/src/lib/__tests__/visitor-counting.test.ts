@@ -8,6 +8,7 @@ import {
   keysForVisitor,
   liveCountAfterVisit,
   liveWindowMs,
+  totalCountAfterVisit,
 } from "@/lib/visitor-counting";
 
 describe("visitor counting rules", () => {
@@ -16,6 +17,7 @@ describe("visitor counting rules", () => {
       keysForVisitor(Date.parse("2026-10-09T23:59:59.000Z"), "id")
     ).toStrictEqual({
       daily: "daily:2026-10-09",
+      joined: "joined:id",
       live: "live:id",
       seen: "seen:2026-10-09:id",
       today: "2026-10-09",
@@ -26,6 +28,11 @@ describe("visitor counting rules", () => {
   it("counts one daily visit and leaves a repeat unchanged", () => {
     expect(dailyCountAfterVisit(4, false)).toBe(5);
     expect(dailyCountAfterVisit(4, true)).toBe(4);
+  });
+
+  it("counts each visitor once toward the lifetime total", () => {
+    expect(totalCountAfterVisit(12, false)).toBe(13);
+    expect(totalCountAfterVisit(12, true)).toBe(12);
   });
 
   it("expires only prior-day data and visitors past the live window", () => {

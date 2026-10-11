@@ -32,15 +32,16 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
         <HeadContent />
       </head>
       <body className="min-h-screen bg-page font-sans text-text antialiased">
-        {!isHome && (
-          <SiteHeader
-            backLabel={headerLabel}
-            backTo={isProjectDetail ? "/projects" : "/"}
-          />
-        )}
-        {children}
-        <SocialDock />
-        <VisitorTracker />
+        <VisitorTracker>
+          {!isHome && (
+            <SiteHeader
+              backLabel={headerLabel}
+              backTo={isProjectDetail ? "/projects" : "/"}
+            />
+          )}
+          {children}
+          <SocialDock />
+        </VisitorTracker>
         <Scripts />
       </body>
     </html>

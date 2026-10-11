@@ -7,20 +7,16 @@ import {
   heartbeatMs,
   keysForVisitor,
   liveCountAfterVisit,
+  totalCountAfterVisit,
 } from "./visitor-counting";
-
-/** Daily unique and currently active visitor counts. */
-interface VisitorCounts {
-  readonly daily: number;
-  readonly live: number;
-}
+import type { VisitorCounts } from "./visitor-counting";
 
 /** Persistent visitor counter hosted by the website Worker. */
 export class VisitorCounter extends DurableObject {
   /**
    * Record a heartbeat for a visitor and return current counts.
    * @param visitorId - The stable visitor identifier.
-   * @returns Current daily and live visitor counts.
+   * @returns Current lifetime, daily, and live visitor counts.
    */
   async track(visitorId: string): Promise<VisitorCounts> {
     const now = Date.now();
@@ -51,13 +47,22 @@ export class VisitorCounter extends DurableObject {
       await Promise.all(expiredLive.map((key) => transaction.delete(key)));
 
       const seen = await transaction.get<boolean>(keys.seen);
+      const joined = await transaction.get<boolean>(keys.joined);
       const current = (await transaction.get<number>(keys.daily)) ?? 0;
+      const total = (await transaction.get<number>("total")) ?? 0;
       if (!seen) {
         await transaction.put(keys.seen, true);
+      }
+      if (!joined) {
+        await transaction.put(keys.joined, true);
       }
       await transaction.put(
         keys.daily,
         dailyCountAfterVisit(current, seen ?? false)
+      );
+      await transaction.put(
+        "total",
+        totalCountAfterVisit(total, joined ?? false)
       );
       await transaction.put(keys.live, now);
 
@@ -68,6 +73,7 @@ export class VisitorCounter extends DurableObject {
           expiredLive.length,
           visitorWasActive
         ),
+        total: (await transaction.get<number>("total")) ?? 0,
       } satisfies VisitorCounts;
     });
 
