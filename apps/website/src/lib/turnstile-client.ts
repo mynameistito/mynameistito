@@ -6,7 +6,7 @@ interface TurnstileApi {
       readonly action: string;
       readonly appearance: "interaction-only";
       readonly execution: "execute";
-      readonly size: "invisible";
+      readonly size: "normal";
       readonly callback: (token: string) => void;
       readonly "error-callback": () => void;
       readonly "expired-callback": () => void;
@@ -127,7 +127,7 @@ export const getTurnstileToken = async (
         action,
         appearance: "interaction-only",
         execution: "execute",
-        size: "invisible",
+        size: "normal",
         callback: (token) => settle(token),
         "error-callback": () =>
           settle(new Error("Turnstile token request failed.")),
