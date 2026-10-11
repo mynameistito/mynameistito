@@ -8,7 +8,7 @@ import { GitHub } from "@/lib/provider/github/client";
 import type { PullRequestSearchItem } from "@/lib/provider/github/client";
 import { GitHubRequestError } from "@/lib/provider/github/errors";
 
-const snapshotKey = "open-source:contributions:v1";
+const snapshotKey = "open-source:contributions:v2";
 
 const createKV = (initial?: string) => {
   const values = new Map<string, string>();
@@ -184,6 +184,44 @@ describe("open-source contribution snapshots", () => {
     const stored = JSON.parse(values.get(snapshotKey) ?? "null");
     expect(stored).toMatchObject({ repositories: [repository] });
     expect(stored.refreshedAt).toStrictEqual(expect.any(String));
+  });
+
+  it("includes contributions from repositories with fewer than 1,000 stars", async () => {
+    const { binding, values } = createKV();
+    const smallRepository = {
+      ...repository,
+      name: "small-repo",
+      pullRequests: [
+        {
+          ...repository.pullRequests[0],
+          url: "https://github.com/owner/small-repo/pull/42",
+        },
+      ],
+      repo: "owner/small-repo",
+      stars: 12,
+      url: "https://github.com/owner/small-repo",
+    };
+    const githubLayer = createGitHubLayer([pullRequest], () =>
+      Effect.succeed({
+        full_name: smallRepository.repo,
+        stargazers_count: smallRepository.stars,
+        owner_avatar_url: smallRepository.avatarUrl,
+      })
+    );
+
+    await Effect.runPromise(
+      refreshContributions(
+        createAppEnv({ OPEN_SOURCE_KV: binding }),
+        githubLayer
+      )
+    );
+
+    const stored = JSON.parse(values.get(snapshotKey) ?? "null");
+    expect(stored.repositories).toHaveLength(1);
+    expect(stored.repositories[0]).toMatchObject({
+      repo: "owner/small-repo",
+      stars: 12,
+    });
   });
 
   it("keeps the old snapshot when publishing the refreshed data fails", async () => {
