@@ -14,8 +14,6 @@ import {
 } from "effect/Config";
 import { gen } from "effect/Effect";
 
-const websiteIssues = { issues: { enabled: true } };
-
 const WebsiteResource = gen(function* deployWebsiteResource() {
   const stack = yield* Stack;
   const isProduction = stack.stage === "prod";
@@ -60,9 +58,9 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
     main: "worker.ts",
     name: "mynameistito",
     observability: {
-      ...websiteIssues,
       enabled: true,
       headSamplingRate: 1,
+      issues: { enabled: true },
       logs: {
         enabled: true,
         headSamplingRate: 1,
