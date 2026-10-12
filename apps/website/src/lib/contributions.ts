@@ -59,6 +59,9 @@ const ContributionSnapshotSchema = Schema.Struct({
 
 const snapshotKey = "open-source:contributions:v2";
 const snapshotRefreshIntervalMs = 6 * 60 * 60 * 1000;
+const contributionLogSource = "open-source";
+const githubFetchPhase = "github-fetch";
+const snapshotPublishPhase = "snapshot-publish";
 // Set featured: true for a full GitHub slug, e.g. "owner/repo".
 const repositoryOverrides = new Map<
   string,
@@ -307,7 +310,12 @@ export const refreshContributions = Effect.fn("refreshContributions")(
       );
     }
 
-    console.info("[open-source] Contribution refresh GitHub fetch started.");
+    yield* Effect.logInfo("Contribution refresh GitHub fetch started.").pipe(
+      Effect.annotateLogs({
+        phase: githubFetchPhase,
+        source: contributionLogSource,
+      })
+    );
     const repositories = yield* fetchContributionRepositories.pipe(
       Effect.provide(
         githubLayer ??
@@ -316,30 +324,44 @@ export const refreshContributions = Effect.fn("refreshContributions")(
             token: env.GITHUB_TOKEN,
           })
       ),
-      Effect.catchTag("GitHubRequestError", (error) => {
-        console.error(
-          `[open-source] GitHub ${error.operation} failed: ${summarizeGitHubFailure(error.cause)}.`
-        );
-        return Effect.fail(error);
-      })
+      Effect.catchTag("GitHubRequestError", (error) =>
+        Effect.logError(
+          `GitHub ${error.operation} failed: ${summarizeGitHubFailure(error.cause)}.`
+        ).pipe(
+          Effect.annotateLogs({
+            operation: error.operation,
+            phase: githubFetchPhase,
+            source: contributionLogSource,
+          }),
+          Effect.flatMap(() => Effect.fail(error))
+        )
+      )
     );
     const pullRequestCount = repositories.reduce(
       (total, repository) => total + repository.pullRequests.length,
       0
     );
-    console.info("[open-source] Contribution refresh GitHub fetch completed.", {
-      repositoryCount: repositories.length,
-      pullRequestCount,
-    });
+    yield* Effect.logInfo("Contribution refresh GitHub fetch completed.").pipe(
+      Effect.annotateLogs({
+        phase: githubFetchPhase,
+        pullRequestCount,
+        repositoryCount: repositories.length,
+        source: contributionLogSource,
+      })
+    );
     const now = yield* DateTime.now;
     const snapshot: ContributionSnapshot = {
       refreshedAt: DateTime.formatIso(now),
       repositories,
     };
-    console.info("[open-source] Contribution snapshot publish started.", {
-      repositoryCount: repositories.length,
-      pullRequestCount,
-    });
+    yield* Effect.logInfo("Contribution snapshot publish started.").pipe(
+      Effect.annotateLogs({
+        phase: snapshotPublishPhase,
+        pullRequestCount,
+        repositoryCount: repositories.length,
+        source: contributionLogSource,
+      })
+    );
     yield* Effect.tryPromise({
       try: () => kv.put(snapshotKey, JSON.stringify(snapshot)),
       catch: (cause) =>
@@ -347,11 +369,15 @@ export const refreshContributions = Effect.fn("refreshContributions")(
           ? cause
           : new Error("Unable to write the open-source snapshot.", { cause }),
     });
-    console.info("[open-source] Contribution snapshot publish completed.", {
-      repositoryCount: repositories.length,
-      pullRequestCount,
-      refreshedAt: snapshot.refreshedAt,
-    });
+    yield* Effect.logInfo("Contribution snapshot publish completed.").pipe(
+      Effect.annotateLogs({
+        phase: snapshotPublishPhase,
+        pullRequestCount,
+        refreshedAt: snapshot.refreshedAt,
+        repositoryCount: repositories.length,
+        source: contributionLogSource,
+      })
+    );
     return {
       refreshedAt: snapshot.refreshedAt,
       repositoryCount: repositories.length,
