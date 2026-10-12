@@ -4,7 +4,7 @@ import { ExperienceSection } from "@/components/experience-section";
 import { ProjectList } from "@/components/project-list";
 import { HomeProfile, SiteHeader } from "@/components/site-header";
 import { profile } from "@/lib/profile";
-import { socialMeta } from "@/lib/social-meta";
+import { siteUrl, socialMeta } from "@/lib/social-meta";
 import { getProjects } from "@/server/functions/projects";
 
 const Home = () => (
@@ -87,6 +87,13 @@ export const Route = createFileRoute("/")({
   loader: () => getProjects(),
   component: Home,
   head: () => ({
+    links: [
+      {
+        href: new URL("/discord-embed.json", siteUrl).href,
+        rel: "discord:component-embed",
+        type: "application/json",
+      },
+    ],
     meta: [
       { title: "Tito — mynameistito.com" },
       {

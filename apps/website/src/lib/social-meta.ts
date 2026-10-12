@@ -1,4 +1,5 @@
-const siteUrl = "https://mynameistito.com";
+/** Canonical origin used for absolute social-preview URLs. */
+export const siteUrl = "https://mynameistito.com";
 
 /** Creates social-card metadata that points to a page-specific Takumi image.
  * @param title - The title shown in social previews.

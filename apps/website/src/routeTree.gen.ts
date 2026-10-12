@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as DiscordEmbedDotjsonRouteImport } from './routes/discord-embed[.]json'
 import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
 import { Route as LinksRouteImport } from './routes/links'
 import { Route as OgImageRouteImport } from './routes/og-image'
@@ -45,6 +46,11 @@ const AboutRoute = AboutRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscordEmbedDotjsonRoute = DiscordEmbedDotjsonRouteImport.update({
+  id: '/discord-embed.json',
+  path: '/discord-embed.json',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FeedDotxmlRoute = FeedDotxmlRouteImport.update({
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/discord-embed.json': typeof DiscordEmbedDotjsonRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/links': typeof LinksRoute
   '/og-image': typeof OgImageRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/discord-embed.json': typeof DiscordEmbedDotjsonRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/links': typeof LinksRoute
   '/og-image': typeof OgImageRoute
@@ -198,6 +206,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/discord-embed.json': typeof DiscordEmbedDotjsonRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/links': typeof LinksRoute
   '/og-image': typeof OgImageRoute
@@ -224,6 +233,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/discord-embed.json'
     | '/feed.xml'
     | '/links'
     | '/og-image'
@@ -248,6 +258,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/discord-embed.json'
     | '/feed.xml'
     | '/links'
     | '/og-image'
@@ -271,6 +282,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/discord-embed.json'
     | '/feed.xml'
     | '/links'
     | '/og-image'
@@ -296,6 +308,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
+  DiscordEmbedDotjsonRoute: typeof DiscordEmbedDotjsonRoute
   FeedDotxmlRoute: typeof FeedDotxmlRoute
   LinksRoute: typeof LinksRoute
   OgImageRoute: typeof OgImageRoute
@@ -336,6 +349,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discord-embed.json': {
+      id: '/discord-embed.json'
+      path: '/discord-embed.json'
+      fullPath: '/discord-embed.json'
+      preLoaderRoute: typeof DiscordEmbedDotjsonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feed.xml': {
@@ -492,6 +512,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
+  DiscordEmbedDotjsonRoute: DiscordEmbedDotjsonRoute,
   FeedDotxmlRoute: FeedDotxmlRoute,
   LinksRoute: LinksRoute,
   OgImageRoute: OgImageRoute,
