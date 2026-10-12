@@ -2,7 +2,7 @@ import { DateTime, Effect, Layer } from "effect";
 
 import { getAppEnv } from "@/env";
 import type { AppEnv } from "@/env";
-import { startOfUtcCalendarYear } from "@/lib/contribution-period";
+import { oneYearBeforeUtcInstant } from "@/lib/contribution-period";
 import { profile } from "@/lib/profile";
 import { GitHub } from "@/lib/provider/github/client";
 import type { Profile as GitHubProfile } from "@/lib/provider/github/client";
@@ -26,7 +26,7 @@ const loadFromProviders = (env: AppEnv) =>
     const mdfromx = yield* MDFromX;
     const now = yield* DateTime.now;
     const endDate = DateTime.formatIso(now);
-    const startDate = startOfUtcCalendarYear(new Date(now.epochMilliseconds));
+    const startDate = oneYearBeforeUtcInstant(new Date(now.epochMilliseconds));
 
     const [githubProfile, xProfile] = yield* Effect.all(
       [

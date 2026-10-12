@@ -1,6 +1,13 @@
-/** Returns the start of the UTC calendar year containing an instant.
- * @param instant - The instant to find the calendar year for.
- * @returns The UTC start of that calendar year as an ISO timestamp.
+/** Returns the UTC instant one calendar year before the supplied instant.
+ * @param instant - The end instant of the rolling-year window.
+ * @returns The UTC instant one calendar year earlier as an ISO timestamp.
  */
-export const startOfUtcCalendarYear = (instant: Date): string =>
-  new Date(Date.UTC(instant.getUTCFullYear(), 0, 1)).toISOString();
+export const oneYearBeforeUtcInstant = (instant: Date): string => {
+  const yearBefore = new Date(instant);
+  const dayOfMonth = yearBefore.getUTCDate();
+  yearBefore.setUTCFullYear(yearBefore.getUTCFullYear() - 1);
+  if (yearBefore.getUTCDate() !== dayOfMonth) {
+    yearBefore.setUTCDate(0);
+  }
+  return yearBefore.toISOString();
+};

@@ -20,17 +20,17 @@ const socialItems = [
 
 type SocialItem = (typeof socialItems)[number];
 
-// Public profile snapshots collected on 2026-10-12; refresh these with the graph data.
-const fallbackGitHubContributionCount = 15_575;
+// Public profile snapshots collected on 2026-10-13; refresh these with the graph data.
+const fallbackGitHubContributionCount = 15_486;
 const fallbackXProfileStats = { following: 1136, followers: 689 } as const;
 const githubContributionGrid = [
-  "00001131112111110113011422212211111011011101014111224",
-  "00012131111111311112011132111122221113211111112211114",
-  "00001121132111111112011322122122132114111211113111123",
-  "00111131021111211212111241221112111112111111021112122",
-  "01011121111111111121021231121121113113110111041111121",
-  "00112111121112311112111232222222103112111111132111120",
-  "00031110121112111121111321111111001112121110141111140",
+  "00021311121111101130114222122111110110111010141112242",
+  "00131311111114111230112331121222311142111111122211241",
+  "00011211322111111120113221221231321141122111131111231",
+  "11111310211112112121112412211121111121111110211121320",
+  "00111311211111111210212312211211131131101110421111210",
+  "01121111211123111121113323222221031122111111321111230",
+  "00311101211121111211113211111110011231211101421111320",
 ] as const;
 
 const fallbackGitHubOrganizations = [
@@ -70,7 +70,8 @@ const GitHubHoverCard = ({
         <span>
           <strong>{data?.handle ?? profile.github}</strong>
           <span className="social-hover-card-detail">
-            {contributionCount.toLocaleString()} contributions this year
+            {contributionCount.toLocaleString()} contributions in the last 12
+            months
           </span>
         </span>
       </span>
@@ -95,7 +96,7 @@ const GitHubHoverCard = ({
         </span>
       </span>
       <figure
-        aria-label={`GitHub contribution graph, ${contributionCount.toLocaleString()} contributions this year`}
+        aria-label={`GitHub contribution graph, ${contributionCount.toLocaleString()} contributions in the last 12 months`}
         className="social-hover-card-contribution-grid"
         style={
           // SAFETY: This object contains only the --week-count CSS custom property.
