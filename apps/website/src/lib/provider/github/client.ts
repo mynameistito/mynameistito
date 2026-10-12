@@ -60,7 +60,7 @@ export interface PullRequestSearchItem {
   readonly pull_request?: { readonly merged_at?: string | null };
 }
 
-/** GitHub profile and yearly contribution data used by the footer preview. */
+/** GitHub profile and rolling-year contribution data used by the footer preview. */
 export interface Profile {
   readonly name: string;
   readonly handle: string;

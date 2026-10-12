@@ -59,7 +59,7 @@ export class ContributionsRefreshWorkflow extends WorkflowEntrypoint<
     event: Readonly<WorkflowEvent<Record<string, never>>>,
     step: WorkflowStep
   ) {
-    const stepName = "refresh-and-publish-contributions";
+    const stepName = "refresh-github-contributions";
     console.info("[open-source] Contribution refresh workflow started.", {
       workflowId: event.instanceId,
       stepName,
