@@ -6,6 +6,7 @@ interface DiscordLinkButton {
   readonly style: 5;
   readonly url: string;
   readonly label: string;
+  readonly emoji?: { readonly id: string; readonly name: string };
 }
 
 interface DiscordComponentEmbed {
@@ -61,12 +62,14 @@ export const homepageDiscordEmbed = {
             style: 5,
             url: `https://discord.com/users/${profile.discord}`,
             label: "Discord",
+            emoji: { id: "1559262275552940144", name: "Discord" },
           },
           {
             type: 2,
             style: 5,
             url: `https://github.com/${profile.github}`,
             label: "Github",
+            emoji: { id: "1559262668471410789", name: "Github" },
           },
           {
             type: 2,
