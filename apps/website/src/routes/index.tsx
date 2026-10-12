@@ -95,13 +95,13 @@ export const Route = createFileRoute("/")({
       },
     ],
     meta: [
-      { title: "Tito — mynameistito.com" },
+      { title: "Tito - @mynameistito" },
       {
         content: `${profile.name} is a developer from New Zealand who likes messing with things and seeing where they go.`,
         name: "description",
       },
       ...socialMeta(
-        "Tito — mynameistito.com",
+        "Tito - @mynameistito",
         `${profile.name} is a developer from New Zealand who likes messing with things and seeing where they go.`
       ),
     ],
