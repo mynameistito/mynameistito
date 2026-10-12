@@ -20,8 +20,8 @@ const socialItems = [
 
 type SocialItem = (typeof socialItems)[number];
 
-// Public profile snapshots collected on 2026-10-08; refresh these with the graph data.
-const fallbackGitHubContributionCount = 14_911;
+// Public profile snapshots collected on 2026-10-12; refresh these with the graph data.
+const fallbackGitHubContributionCount = 15_575;
 const fallbackXProfileStats = { following: 1136, followers: 689 } as const;
 const githubContributionGrid = [
   "00001131112111110113011422212211111011011101014111224",
@@ -70,7 +70,7 @@ const GitHubHoverCard = ({
         <span>
           <strong>{data?.handle ?? profile.github}</strong>
           <span className="social-hover-card-detail">
-            {contributionCount.toLocaleString()} contributions in the last year
+            {contributionCount.toLocaleString()} contributions this year
           </span>
         </span>
       </span>
@@ -95,7 +95,7 @@ const GitHubHoverCard = ({
         </span>
       </span>
       <figure
-        aria-label={`GitHub contribution graph, ${contributionCount.toLocaleString()} contributions in the last year`}
+        aria-label={`GitHub contribution graph, ${contributionCount.toLocaleString()} contributions this year`}
         className="social-hover-card-contribution-grid"
         style={
           // SAFETY: This object contains only the --week-count CSS custom property.
