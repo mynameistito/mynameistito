@@ -21,6 +21,8 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TestEmojiRouteImport } from './routes/test-emoji'
+import { Route as TestEmojiEmbedDotjsonRouteImport } from './routes/test-emoji-embed[.]json'
 import { Route as DotwellKnownAtprotoDidRouteImport } from './routes/[.]well-known.atproto-did'
 import { Route as DotwellKnownHostMetaRouteImport } from './routes/[.]well-known.host-meta'
 import { Route as DotwellKnownHostMetaDotjsonRouteImport } from './routes/[.]well-known.host-meta[.]json'
@@ -91,6 +93,16 @@ const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestEmojiRoute = TestEmojiRouteImport.update({
+  id: '/test-emoji',
+  path: '/test-emoji',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestEmojiEmbedDotjsonRoute = TestEmojiEmbedDotjsonRouteImport.update({
+  id: '/test-emoji-embed.json',
+  path: '/test-emoji-embed.json',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DotwellKnownAtprotoDidRoute = DotwellKnownAtprotoDidRouteImport.update({
@@ -165,6 +177,8 @@ export interface FileRoutesByFullPath {
   '/projects': typeof ProjectsRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/test-emoji': typeof TestEmojiRoute
+  '/test-emoji-embed.json': typeof TestEmojiEmbedDotjsonRoute
   '/.well-known/atproto-did': typeof DotwellKnownAtprotoDidRoute
   '/.well-known/host-meta': typeof DotwellKnownHostMetaRoute
   '/.well-known/host-meta.json': typeof DotwellKnownHostMetaDotjsonRoute
@@ -189,6 +203,8 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/test-emoji': typeof TestEmojiRoute
+  '/test-emoji-embed.json': typeof TestEmojiEmbedDotjsonRoute
   '/.well-known/atproto-did': typeof DotwellKnownAtprotoDidRoute
   '/.well-known/host-meta': typeof DotwellKnownHostMetaRoute
   '/.well-known/host-meta.json': typeof DotwellKnownHostMetaDotjsonRoute
@@ -215,6 +231,8 @@ export interface FileRoutesById {
   '/projects': typeof ProjectsRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/test-emoji': typeof TestEmojiRoute
+  '/test-emoji-embed.json': typeof TestEmojiEmbedDotjsonRoute
   '/.well-known/atproto-did': typeof DotwellKnownAtprotoDidRoute
   '/.well-known/host-meta': typeof DotwellKnownHostMetaRoute
   '/.well-known/host-meta.json': typeof DotwellKnownHostMetaDotjsonRoute
@@ -242,6 +260,8 @@ export interface FileRouteTypes {
     | '/projects'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/test-emoji'
+    | '/test-emoji-embed.json'
     | '/.well-known/atproto-did'
     | '/.well-known/host-meta'
     | '/.well-known/host-meta.json'
@@ -266,6 +286,8 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/test-emoji'
+    | '/test-emoji-embed.json'
     | '/.well-known/atproto-did'
     | '/.well-known/host-meta'
     | '/.well-known/host-meta.json'
@@ -291,6 +313,8 @@ export interface FileRouteTypes {
     | '/projects'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/test-emoji'
+    | '/test-emoji-embed.json'
     | '/.well-known/atproto-did'
     | '/.well-known/host-meta'
     | '/.well-known/host-meta.json'
@@ -317,6 +341,8 @@ export interface RootRouteChildren {
   ProjectsRoute: typeof ProjectsRouteWithChildren
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TestEmojiRoute: typeof TestEmojiRoute
+  TestEmojiEmbedDotjsonRoute: typeof TestEmojiEmbedDotjsonRoute
   DotwellKnownAtprotoDidRoute: typeof DotwellKnownAtprotoDidRoute
   DotwellKnownHostMetaRoute: typeof DotwellKnownHostMetaRoute
   DotwellKnownHostMetaDotjsonRoute: typeof DotwellKnownHostMetaDotjsonRoute
@@ -412,6 +438,20 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test-emoji': {
+      id: '/test-emoji'
+      path: '/test-emoji'
+      fullPath: '/test-emoji'
+      preLoaderRoute: typeof TestEmojiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test-emoji-embed.json': {
+      id: '/test-emoji-embed.json'
+      path: '/test-emoji-embed.json'
+      fullPath: '/test-emoji-embed.json'
+      preLoaderRoute: typeof TestEmojiEmbedDotjsonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.well-known/atproto-did': {
@@ -521,6 +561,8 @@ const rootRouteChildren: RootRouteChildren = {
   ProjectsRoute: ProjectsRouteWithChildren,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TestEmojiRoute: TestEmojiRoute,
+  TestEmojiEmbedDotjsonRoute: TestEmojiEmbedDotjsonRoute,
   DotwellKnownAtprotoDidRoute: DotwellKnownAtprotoDidRoute,
   DotwellKnownHostMetaRoute: DotwellKnownHostMetaRoute,
   DotwellKnownHostMetaDotjsonRoute: DotwellKnownHostMetaDotjsonRoute,
