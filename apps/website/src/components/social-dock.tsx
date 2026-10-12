@@ -95,7 +95,7 @@ const GitHubHoverCard = ({
         </span>
       </span>
       <figure
-        aria-label={`GitHub contribution graph, ${contributionCount.toLocaleString()} contributions in the last year`}
+        aria-label={`GitHub contribution graph, ${contributionCount.toLocaleString()} contributions this year`}
         className="social-hover-card-contribution-grid"
         style={
           // SAFETY: This object contains only the --week-count CSS custom property.
