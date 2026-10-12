@@ -59,12 +59,14 @@ export class ContributionsRefreshWorkflow extends WorkflowEntrypoint<
     event: Readonly<WorkflowEvent<Record<string, never>>>,
     step: WorkflowStep
   ) {
+    const stepName = "refresh-and-publish-contributions";
     console.info("[open-source] Contribution refresh workflow started.", {
       workflowId: event.instanceId,
+      stepName,
     });
     try {
       const result = await step.do(
-        "refresh-and-publish-contributions",
+        stepName,
         {
           retries: { limit: 3, delay: "30 seconds", backoff: "exponential" },
         },
@@ -78,6 +80,8 @@ export class ContributionsRefreshWorkflow extends WorkflowEntrypoint<
     } catch (error) {
       console.error("[open-source] Contribution refresh workflow failed.", {
         workflowId: event.instanceId,
+        stepName,
+        errorName: error instanceof Error ? error.name : "UnknownError",
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;

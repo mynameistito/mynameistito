@@ -307,6 +307,7 @@ export const refreshContributions = Effect.fn("refreshContributions")(
       );
     }
 
+    console.info("[open-source] Contribution refresh GitHub fetch started.");
     const repositories = yield* fetchContributionRepositories.pipe(
       Effect.provide(
         githubLayer ??
@@ -322,17 +323,34 @@ export const refreshContributions = Effect.fn("refreshContributions")(
         return Effect.fail(error);
       })
     );
+    const pullRequestCount = repositories.reduce(
+      (total, repository) => total + repository.pullRequests.length,
+      0
+    );
+    console.info("[open-source] Contribution refresh GitHub fetch completed.", {
+      repositoryCount: repositories.length,
+      pullRequestCount,
+    });
     const now = yield* DateTime.now;
     const snapshot: ContributionSnapshot = {
       refreshedAt: DateTime.formatIso(now),
       repositories,
     };
+    console.info("[open-source] Contribution snapshot publish started.", {
+      repositoryCount: repositories.length,
+      pullRequestCount,
+    });
     yield* Effect.tryPromise({
       try: () => kv.put(snapshotKey, JSON.stringify(snapshot)),
       catch: (cause) =>
         cause instanceof Error
           ? cause
           : new Error("Unable to write the open-source snapshot.", { cause }),
+    });
+    console.info("[open-source] Contribution snapshot publish completed.", {
+      repositoryCount: repositories.length,
+      pullRequestCount,
+      refreshedAt: snapshot.refreshedAt,
     });
     return {
       refreshedAt: snapshot.refreshedAt,
