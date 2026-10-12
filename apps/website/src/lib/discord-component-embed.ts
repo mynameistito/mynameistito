@@ -45,7 +45,7 @@ export const homepageDiscordEmbed = {
           {
             type: 10,
             content:
-              "# [Tito](https://mynameistito.com)\nDeveloper from New Zealand building tools, services, and experiments.",
+              "# [Tito - @mynameistito](https://mynameistito.com)\nDeveloper from New Zealand building tools, services, and experiments.",
           },
         ],
         accessory: {
@@ -59,26 +59,20 @@ export const homepageDiscordEmbed = {
           {
             type: 2,
             style: 5,
-            url: new URL("/projects", siteUrl).href,
-            label: "Projects",
-          },
-          {
-            type: 2,
-            style: 5,
-            url: `https://github.com/${profile.github}`,
-            label: "GitHub",
-          },
-          {
-            type: 2,
-            style: 5,
             url: `https://discord.com/users/${profile.discord}`,
             label: "Discord",
           },
           {
             type: 2,
             style: 5,
-            url: new URL("/contact", siteUrl).href,
-            label: "Contact",
+            url: `https://github.com/${profile.github}`,
+            label: "Github",
+          },
+          {
+            type: 2,
+            style: 5,
+            url: new URL("/projects", siteUrl).href,
+            label: "Projects",
           },
         ],
       },
