@@ -62,7 +62,7 @@ export const homepageDiscordEmbed = {
             style: 5,
             url: `https://discord.com/users/${profile.discord}`,
             label: "Discord",
-            emoji: { id: "1559262275552940144", name: "Discord" },
+            emoji: { id: "1559457113418240040", name: "disclogo2x" },
           },
           {
             type: 2,
@@ -74,8 +74,9 @@ export const homepageDiscordEmbed = {
           {
             type: 2,
             style: 5,
-            url: new URL("/projects", siteUrl).href,
-            label: "Projects",
+            url: `https://x.com/${profile.x}`,
+            label: "X",
+            emoji: { id: "1559457139435634748", name: "xlogo2x" },
           },
         ],
       },
