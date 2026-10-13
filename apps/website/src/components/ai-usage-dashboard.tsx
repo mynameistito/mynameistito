@@ -24,6 +24,7 @@ import {
 import { profile } from "@/lib/profile";
 import {
   buildCalendar,
+  latestUsageDay,
   summarizeHarnesses,
   summarizeModels,
 } from "@/lib/providers/tokscale/analytics";
@@ -248,7 +249,7 @@ export const AiUsageDashboard = ({
   const { data } = snapshot;
   const harnesses = summarizeHarnesses(data.contributions);
   const models = summarizeModels(data.contributions);
-  const latestDay = data.contributions.at(-1);
+  const latestDay = latestUsageDay(data.contributions);
   const latestUpdate = new Date(snapshot.refreshedAt);
   return (
     <main className="page-shell pt-page-top-header pb-page-bottom">

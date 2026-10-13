@@ -26,6 +26,17 @@ export interface HarnessUsage {
 export const toHeatmapLevel = (intensity: number): number =>
   Math.max(0, Math.min(4, Math.round(intensity)));
 
+/** Selects the contribution with the greatest calendar date.
+ * @param contributions - Daily usage records from Tokscale.
+ * @returns The latest dated record, or `undefined` when no records exist.
+ */
+export const latestUsageDay = (
+  contributions: readonly DailyUsage[]
+): DailyUsage | undefined =>
+  contributions
+    .toSorted((left, right) => left.date.localeCompare(right.date))
+    .at(-1);
+
 /** Builds a Sunday-first 53-week grid from the supplied daily usage.
  * @param contributions - Daily usage records from Tokscale.
  * @returns Calendar weeks with gaps represented by null cells.
@@ -37,7 +48,11 @@ export const buildCalendar = (
     return [];
   }
   const usageByDate = new Map(contributions.map((day) => [day.date, day]));
-  const lastDate = new Date(`${contributions.at(-1)?.date}T00:00:00.000Z`);
+  const latestDay = latestUsageDay(contributions);
+  if (!latestDay) {
+    return [];
+  }
+  const lastDate = new Date(`${latestDay.date}T00:00:00.000Z`);
   const end = Date.UTC(
     lastDate.getUTCFullYear(),
     lastDate.getUTCMonth(),

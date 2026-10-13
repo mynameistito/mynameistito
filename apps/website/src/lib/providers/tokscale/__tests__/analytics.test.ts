@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildCalendar,
+  latestUsageDay,
   summarizeHarnesses,
   summarizeModels,
   toHeatmapLevel,
@@ -60,8 +61,8 @@ const createDay = (
 describe("Tokscale analytics", () => {
   it("builds a year calendar with Sunday-first weeks and empty-day gaps", () => {
     const calendar = buildCalendar([
-      createDay("2026-10-11", "codex", "gpt-6-luna", 40, 0.2, 8),
       createDay("2026-10-13", "opencode", "gpt-6-luna", 20, 0.1, 2),
+      createDay("2026-10-11", "codex", "gpt-6-luna", 40, 0.2, 8),
     ]);
     const cells = calendar.flat();
     const finalDay = cells.find((day) => day?.date === "2026-10-13");
@@ -71,6 +72,12 @@ describe("Tokscale analytics", () => {
     expect(calendar.every((week) => week.length === 7)).toBeTruthy();
     expect(finalDay).toMatchObject({ tokens: 20, intensity: 2 });
     expect(cells[indexBeforeGap + 1]).toBeNull();
+    expect(
+      latestUsageDay([
+        createDay("2026-10-13", "opencode", "gpt-6-luna", 20, 0.1, 2),
+        createDay("2026-10-11", "codex", "gpt-6-luna", 40, 0.2, 8),
+      ])?.date
+    ).toBe("2026-10-13");
   });
 
   it("clamps Tokscale intensity to the five contribution levels", () => {
