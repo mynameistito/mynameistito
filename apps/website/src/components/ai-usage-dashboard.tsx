@@ -21,6 +21,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { profile } from "@/lib/profile";
 import {
   buildCalendar,
   summarizeHarnesses,
@@ -267,7 +268,7 @@ export const AiUsageDashboard = ({
         </div>
         <a
           className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-text"
-          href="https://tokscale.ai"
+          href={`https://tokscale.ai/u/${encodeURIComponent(profile.tokscale)}`}
           rel="noreferrer"
           target="_blank"
         >
