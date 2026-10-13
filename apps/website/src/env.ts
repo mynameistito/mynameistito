@@ -17,10 +17,19 @@ export interface ContributionsRefreshBinding {
   }) => Promise<{ readonly id: string }>;
 }
 
+/** Workflow binding used to refresh the public Tokscale usage snapshot. */
+interface TokscaleRefreshBinding {
+  readonly create: (options: {
+    readonly id: string;
+    readonly params: Record<string, never>;
+  }) => Promise<{ readonly id: string }>;
+}
+
 /** Runtime bindings supplied by the platform or Alchemy local runtime. */
 export interface AppEnv {
   readonly CONTACT_RECIPIENT?: string;
   readonly CONTRIBUTIONS_REFRESH?: ContributionsRefreshBinding;
+  readonly TOKSCALE_REFRESH?: TokscaleRefreshBinding;
   readonly RESEND_API_KEY?: Redacted.Redacted<string>;
   readonly RESEND_FROM?: string;
   readonly TURNSTILE_SITEKEY?: string;
@@ -40,6 +49,7 @@ export interface AppEnv {
 export interface RuntimeBindings {
   readonly CONTACT_RECIPIENT?: string;
   readonly CONTRIBUTIONS_REFRESH?: ContributionsRefreshBinding;
+  readonly TOKSCALE_REFRESH?: TokscaleRefreshBinding;
   readonly RESEND_API_KEY?: string;
   readonly RESEND_FROM?: string;
   readonly TURNSTILE_SITEKEY?: string;

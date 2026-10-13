@@ -3,6 +3,7 @@ export const profile = {
   name: "Tito",
   avatar: "/assets/avatar.png",
   github: "mynameistito",
+  tokscale: "mynameistito",
   x: "mynameistito",
   discord: "611746802122620937",
   signal: "o10iMEWc_xFVfKybiNjvyWqfps8eFNbegYKeK29vgfFcfuSlm7RI6avAqtBAVp0M",

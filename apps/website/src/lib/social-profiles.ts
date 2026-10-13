@@ -8,6 +8,8 @@ import { GitHub } from "@/lib/provider/github/client";
 import type { Profile as GitHubProfile } from "@/lib/provider/github/client";
 import { MDFromX } from "@/lib/provider/mdfromx/profile";
 import type { Profile as XProfile } from "@/lib/provider/mdfromx/profile";
+import { loadTokscale } from "@/lib/tokscale";
+import type { TokscaleSnapshot } from "@/lib/tokscale";
 
 const cacheDuration = 30 * 60 * 1000;
 
@@ -15,6 +17,7 @@ const cacheDuration = 30 * 60 * 1000;
 export interface SocialProfileData {
   readonly github: GitHubProfile | null;
   readonly x: XProfile | null;
+  readonly tokscale: TokscaleSnapshot["data"] | null;
 }
 
 let cachedData: SocialProfileData | undefined;
@@ -28,7 +31,7 @@ const loadFromProviders = (env: AppEnv) =>
     const endDate = DateTime.formatIso(now);
     const startDate = oneYearBeforeUtcInstant(new Date(now.epochMilliseconds));
 
-    const [githubProfile, xProfile] = yield* Effect.all(
+    const [githubProfile, xProfile, tokscaleSnapshot] = yield* Effect.all(
       [
         github
           .profile(profile.github, startDate, endDate)
@@ -44,6 +47,7 @@ const loadFromProviders = (env: AppEnv) =>
               Effect.succeed(cachedData?.x ?? null)
             )
           ),
+        loadTokscale(),
       ],
       { concurrency: "unbounded" }
     );
@@ -51,8 +55,9 @@ const loadFromProviders = (env: AppEnv) =>
     const nextData: SocialProfileData = {
       github: githubProfile,
       x: xProfile,
+      tokscale: tokscaleSnapshot?.data ?? null,
     };
-    if (nextData.github || nextData.x) {
+    if (nextData.github || nextData.x || nextData.tokscale) {
       cachedData = nextData;
       cachedAt = now.epochMilliseconds;
     }
@@ -74,6 +79,12 @@ export const loadSocialProfiles = Effect.fn("loadSocialProfiles")(
   function* loadSocialProfiles() {
     const now = yield* DateTime.now;
     if (cachedData && now.epochMilliseconds - cachedAt < cacheDuration) {
+      if (!cachedData.tokscale) {
+        const tokscaleSnapshot = yield* loadTokscale();
+        if (tokscaleSnapshot) {
+          cachedData = { ...cachedData, tokscale: tokscaleSnapshot.data };
+        }
+      }
       return cachedData;
     }
     const env = yield* getAppEnv();
