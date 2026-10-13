@@ -36,7 +36,7 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
       date: "2026-09-25",
       flags: ["nodejs_compat"],
     },
-    crons: isProduction ? ["0 */6 * * *"] : [],
+    crons: isProduction ? ["0 */6 * * *", "0 4 * * *"] : [],
     domain: isProduction ? "mynameistito.com" : undefined,
     env: {
       CONTACT_RECIPIENT: ConfigString("CONTACT_RECIPIENT"),
@@ -48,6 +48,9 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
       OPEN_SOURCE_KV: openSourceKV,
       RESEND_API_KEY: ConfigRedacted("RESEND_API_KEY"),
       RESEND_FROM: ConfigString("RESEND_FROM"),
+      TOKSCALE_REFRESH: Workflow("TokscaleRefresh", {
+        className: "TokscaleRefreshWorkflow",
+      }),
       TURNSTILE_SECRET: contactTurnstile.secret,
       TURNSTILE_SITEKEY: contactTurnstile.sitekey,
       VISITOR_COUNTER: DurableObjectResource("VisitorCounter", {

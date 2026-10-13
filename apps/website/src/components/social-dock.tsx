@@ -1,11 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Effect } from "effect";
 import { catch as catchEffect } from "effect/Effect";
-import { ArrowUpRight, Github } from "lucide-react";
+import { ArrowUpRight, ChartColumnIncreasing, Github } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, FocusEvent, KeyboardEvent } from "react";
 
 import { profile } from "@/lib/profile";
+import { buildCalendar } from "@/lib/providers/tokscale/analytics";
 import type { SocialProfileData } from "@/lib/social-profiles";
 import { getSocialProfiles } from "@/server/functions/social-profiles";
 
@@ -16,6 +17,7 @@ const socialItems = [
     href: `https://github.com/${profile.github}`,
   },
   { label: "X", href: `https://x.com/${profile.x}`, mark: "𝕏" },
+  { label: "Tokscale", Icon: ChartColumnIncreasing, href: "/ai" },
 ] as const;
 
 type SocialItem = (typeof socialItems)[number];
@@ -174,6 +176,86 @@ const XHoverCard = ({ data }: { readonly data: SocialProfileData["x"] }) => (
   </>
 );
 
+const TokscaleHoverCard = ({
+  data,
+}: {
+  readonly data: SocialProfileData["tokscale"];
+}) => {
+  if (!data) {
+    return (
+      <span className="social-hover-card-empty">
+        <strong>AI usage</strong>
+        <span className="social-hover-card-detail">
+          Usage data is updating. Open the dashboard for the latest snapshot.
+        </span>
+        <span className="social-hover-card-link">
+          View AI dashboard <ArrowUpRight aria-hidden="true" size={13} />
+        </span>
+      </span>
+    );
+  }
+  const weeks = buildCalendar(data.contributions);
+  const count = data.stats.totalTokens;
+  return (
+    <>
+      <span className="social-hover-card-profile">
+        <img alt="" height={40} src={profile.avatar} width={40} />
+        <span>
+          <strong>{profile.name}</strong>
+          <span className="social-hover-card-detail">@{profile.tokscale}</span>
+        </span>
+      </span>
+      <span className="social-hover-card-detail">
+        {count.toLocaleString()} tokens · $
+        {data.stats.totalCost.toLocaleString("en-US", {
+          maximumFractionDigits: 2,
+        })}{" "}
+        estimated spend · {data.stats.activeDays.toLocaleString()} active days
+      </span>
+      <figure
+        aria-label="Tokscale token usage heatmap for the last year"
+        className="social-hover-card-contribution-grid"
+        // SAFETY: The CSS custom property is the calendar's computed week count.
+        style={{ "--week-count": weeks.length } as CSSProperties}
+      >
+        {weeks.map((week, weekIndex) => (
+          <span className="social-hover-card-contribution-week" key={weekIndex}>
+            {week.map((day, dayIndex) => (
+              <span
+                aria-hidden="true"
+                className="social-hover-card-contribution-day"
+                data-level={day?.intensity ?? 0}
+                key={`${weekIndex}-${dayIndex}`}
+              />
+            ))}
+          </span>
+        ))}
+      </figure>
+      <span className="social-hover-card-link">
+        View AI dashboard <ArrowUpRight aria-hidden="true" size={13} />
+      </span>
+    </>
+  );
+};
+
+/** Selects the hover-card content for a social provider.
+ * @param item - The active social link.
+ * @param data - The loaded public profile data.
+ * @returns The active provider's matching preview.
+ */
+const renderSocialPreview = (
+  item: SocialItem,
+  data: SocialProfileData | null
+) => {
+  if (item.label === "GitHub") {
+    return <GitHubHoverCard data={data?.github ?? null} />;
+  }
+  if (item.label === "X") {
+    return <XHoverCard data={data?.x ?? null} />;
+  }
+  return <TokscaleHoverCard data={data?.tokscale ?? null} />;
+};
+
 /** Renders the compact footer links on every route except the link hub.
  * @returns The social navigation, or nothing on the link hub.
  */
@@ -328,8 +410,8 @@ export const SocialDock = () => {
             }
           }}
           onPointerLeave={(event) => handlePointerLeave(event.pointerType)}
-          rel="noreferrer"
-          target="_blank"
+          rel={item.href.startsWith("/") ? undefined : "noreferrer"}
+          target={item.href.startsWith("/") ? undefined : "_blank"}
         >
           {"Icon" in item ? (
             <item.Icon aria-hidden="true" size={16} />
@@ -361,15 +443,11 @@ export const SocialDock = () => {
           onPointerEnter={cancelPendingClose}
           onPointerLeave={(event) => handlePointerLeave(event.pointerType)}
           ref={panelRef}
-          rel="noreferrer"
+          rel={activeItem.href.startsWith("/") ? undefined : "noreferrer"}
           tabIndex={panelLeft === null ? -1 : 0}
-          target="_blank"
+          target={activeItem.href.startsWith("/") ? undefined : "_blank"}
         >
-          {activeItem.label === "GitHub" ? (
-            <GitHubHoverCard data={profileData?.github ?? null} />
-          ) : (
-            <XHoverCard data={profileData?.x ?? null} />
-          )}
+          {renderSocialPreview(activeItem, profileData)}
         </a>
       )}
     </nav>
