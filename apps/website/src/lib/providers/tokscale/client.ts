@@ -198,7 +198,6 @@ export class Tokscale extends Context.Service<
       })
     );
 
-  /** Builds a complete fetch-backed Tokscale provider layer. */
   /** Builds a complete fetch-backed Tokscale provider layer.
    * @returns A Tokscale provider backed by the platform Fetch API.
    */
