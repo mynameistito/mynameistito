@@ -18,11 +18,17 @@ export interface ContributionsRefreshBinding {
 }
 
 /** Workflow binding used to refresh the public Tokscale usage snapshot. */
+interface TokscaleRefreshInstanceBinding {
+  readonly status: () => Promise<{ readonly status: string }>;
+  readonly restart: () => Promise<void>;
+}
+
 interface TokscaleRefreshBinding {
   readonly create: (options: {
     readonly id: string;
     readonly params: Record<string, never>;
   }) => Promise<{ readonly id: string }>;
+  readonly get: (id: string) => Promise<TokscaleRefreshInstanceBinding>;
 }
 
 /** Runtime bindings supplied by the platform or Alchemy local runtime. */

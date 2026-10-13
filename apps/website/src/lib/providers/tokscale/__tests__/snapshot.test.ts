@@ -74,6 +74,11 @@ describe("Tokscale snapshot refresh", () => {
         workflowIds.push(id);
         return Promise.resolve({ id });
       },
+      get: () =>
+        Promise.resolve({
+          status: () => Promise.resolve({ status: "running" }),
+          restart: () => Promise.resolve(),
+        }),
     };
 
     const snapshot = await Effect.runPromise(
@@ -88,6 +93,41 @@ describe("Tokscale snapshot refresh", () => {
     expect(snapshot).toBeNull();
     expect(workflowIds).toHaveLength(1);
     expect(workflowIds[0]).toMatch(
+      /^tokscale-refresh-on-demand-\d{4}-\d{2}-\d{2}-\d{2}$/u
+    );
+  });
+
+  it("restarts an errored on-demand workflow when its ID already exists", async () => {
+    const restartedIds: string[] = [];
+    const kv: OpenSourceKVBinding = {
+      get: () => Promise.resolve(null),
+      put: () => Promise.resolve(),
+    };
+    const tokscaleRefresh = {
+      create: ({ id }: { readonly id: string }) =>
+        Promise.reject(new Error(`Workflow ${id} already exists`)),
+      get: (id: string) =>
+        Promise.resolve({
+          status: () => Promise.resolve({ status: "errored" }),
+          restart: () => {
+            restartedIds.push(id);
+            return Promise.resolve();
+          },
+        }),
+    };
+
+    const snapshot = await Effect.runPromise(
+      loadTokscale(
+        createAppEnv({
+          OPEN_SOURCE_KV: kv,
+          TOKSCALE_REFRESH: tokscaleRefresh,
+        })
+      )
+    );
+
+    expect(snapshot).toBeNull();
+    expect(restartedIds).toHaveLength(1);
+    expect(restartedIds[0]).toMatch(
       /^tokscale-refresh-on-demand-\d{4}-\d{2}-\d{2}-\d{2}$/u
     );
   });

@@ -35,7 +35,7 @@ const startTokscaleRefresh = Effect.fn("startTokscaleRefresh")(
     const day = timestamp.slice(0, 10);
     const hour = timestamp.slice(11, 13);
     const workflowId = `tokscale-refresh-on-demand-${day}-${hour}`;
-    const result = yield* Effect.result(
+    const created = yield* Effect.result(
       Effect.tryPromise({
         try: () => refresh.create({ id: workflowId, params: {} }),
         catch: (cause) =>
@@ -44,12 +44,64 @@ const startTokscaleRefresh = Effect.fn("startTokscaleRefresh")(
             : new Error("Tokscale workflow start failed", { cause }),
       })
     );
-    if (result._tag === "Failure") {
+    if (created._tag === "Success") {
+      return;
+    }
+
+    const existing = yield* Effect.result(
+      Effect.tryPromise({
+        try: () => refresh.get(workflowId),
+        catch: (cause) =>
+          cause instanceof Error
+            ? cause
+            : new Error("Tokscale workflow lookup failed", { cause }),
+      })
+    );
+    if (existing._tag === "Failure") {
       console.warn("[ai] Unable to start Tokscale refresh.", {
         workflowId,
-        error: result.failure.message,
+        error: created.failure.message,
       });
+      return;
     }
+
+    const status = yield* Effect.result(
+      Effect.tryPromise({
+        try: () => existing.success.status(),
+        catch: (cause) =>
+          cause instanceof Error
+            ? cause
+            : new Error("Tokscale workflow status lookup failed", { cause }),
+      })
+    );
+    if (status._tag === "Failure") {
+      console.warn("[ai] Unable to inspect Tokscale refresh status.", {
+        workflowId,
+        error: status.failure.message,
+      });
+      return;
+    }
+    if (status.success.status !== "errored") {
+      return;
+    }
+
+    const restarted = yield* Effect.result(
+      Effect.tryPromise({
+        try: () => existing.success.restart(),
+        catch: (cause) =>
+          cause instanceof Error
+            ? cause
+            : new Error("Tokscale workflow restart failed", { cause }),
+      })
+    );
+    if (restarted._tag === "Failure") {
+      console.warn("[ai] Unable to restart failed Tokscale refresh.", {
+        workflowId,
+        error: restarted.failure.message,
+      });
+      return;
+    }
+    console.info("[ai] Restarted failed Tokscale refresh.", { workflowId });
   }
 );
 
