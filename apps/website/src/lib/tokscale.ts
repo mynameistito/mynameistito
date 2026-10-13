@@ -31,8 +31,10 @@ const startTokscaleRefresh = Effect.fn("startTokscaleRefresh")(
       return;
     }
     const now = yield* DateTime.now;
-    const day = DateTime.formatIso(now).slice(0, 10);
-    const workflowId = `tokscale-refresh-${day}`;
+    const timestamp = DateTime.formatIso(now);
+    const day = timestamp.slice(0, 10);
+    const hour = timestamp.slice(11, 13);
+    const workflowId = `tokscale-refresh-on-demand-${day}-${hour}`;
     const result = yield* Effect.result(
       Effect.tryPromise({
         try: () => refresh.create({ id: workflowId, params: {} }),

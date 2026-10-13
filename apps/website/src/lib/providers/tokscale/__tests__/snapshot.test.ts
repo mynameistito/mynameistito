@@ -5,7 +5,7 @@ import { createAppEnv } from "@/env";
 import type { OpenSourceKVBinding } from "@/env";
 import { Tokscale } from "@/lib/providers/tokscale/client";
 import type { TokscaleProfile } from "@/lib/providers/tokscale/client";
-import { refreshTokscale } from "@/lib/tokscale";
+import { loadTokscale, refreshTokscale } from "@/lib/tokscale";
 
 const snapshotKey = "ai:tokscale:v1";
 
@@ -61,5 +61,34 @@ describe("Tokscale snapshot refresh", () => {
     );
 
     expect(result._tag).toBe("Failure");
+  });
+
+  it("uses a separate hourly ID for on-demand refreshes", async () => {
+    const workflowIds: string[] = [];
+    const kv: OpenSourceKVBinding = {
+      get: () => Promise.resolve(null),
+      put: () => Promise.resolve(),
+    };
+    const tokscaleRefresh = {
+      create: ({ id }: { readonly id: string }) => {
+        workflowIds.push(id);
+        return Promise.resolve({ id });
+      },
+    };
+
+    const snapshot = await Effect.runPromise(
+      loadTokscale(
+        createAppEnv({
+          OPEN_SOURCE_KV: kv,
+          TOKSCALE_REFRESH: tokscaleRefresh,
+        })
+      )
+    );
+
+    expect(snapshot).toBeNull();
+    expect(workflowIds).toHaveLength(1);
+    expect(workflowIds[0]).toMatch(
+      /^tokscale-refresh-on-demand-\d{4}-\d{2}-\d{2}-\d{2}$/u
+    );
   });
 });
