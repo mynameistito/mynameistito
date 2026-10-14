@@ -34,6 +34,10 @@ const HomeContent = () => {
           <Link className="text-text underline" to="/open-source">
             open source
           </Link>
+          , browse my{" "}
+          <Link className="text-text underline" to="/packages">
+            npm packages
+          </Link>
           , or read the{" "}
           <Link className="text-text underline" to="/blog">
             blog

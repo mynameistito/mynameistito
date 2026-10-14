@@ -17,6 +17,14 @@ export interface ContributionsRefreshBinding {
   }) => Promise<{ readonly id: string }>;
 }
 
+/** Workflow binding used to refresh the public npm package snapshot. */
+export interface PackagesRefreshBinding {
+  readonly create: (options: {
+    readonly id: string;
+    readonly params: Record<string, never>;
+  }) => Promise<{ readonly id: string }>;
+}
+
 /** Workflow binding used to refresh the public Tokscale usage snapshot. */
 interface TokscaleRefreshInstanceBinding {
   readonly status: () => Promise<{ readonly status: string }>;
@@ -44,6 +52,7 @@ export interface AppEnv {
   readonly WORKER_GITHUB_TOKEN?: Redacted.Redacted<string>;
   readonly MDFROMX_API_KEY?: Redacted.Redacted<string>;
   readonly OPEN_SOURCE_KV?: OpenSourceKVBinding;
+  readonly PACKAGES_REFRESH?: PackagesRefreshBinding;
   readonly VISITOR_COUNTER?: {
     readonly getByName: (name: string) => {
       readonly getPostViews: (postSlug: string) => Promise<number>;
@@ -69,6 +78,7 @@ export interface RuntimeBindings {
   readonly WORKER_GITHUB_TOKEN?: string;
   readonly MDFROMX_API_KEY?: string;
   readonly OPEN_SOURCE_KV?: OpenSourceKVBinding;
+  readonly PACKAGES_REFRESH?: PackagesRefreshBinding;
   readonly VISITOR_COUNTER?: AppEnv["VISITOR_COUNTER"];
 }
 

@@ -18,6 +18,7 @@ import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
 import { Route as LinksRouteImport } from './routes/links'
 import { Route as OgImageRouteImport } from './routes/og-image'
 import { Route as OpenSourceRouteImport } from './routes/open-source'
+import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
@@ -80,6 +81,11 @@ const OgImageRoute = OgImageRouteImport.update({
 const OpenSourceRoute = OpenSourceRouteImport.update({
   id: '/open-source',
   path: '/open-source',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PackagesRoute = PackagesRouteImport.update({
+  id: '/packages',
+  path: '/packages',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -186,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/links': typeof LinksRoute
   '/og-image': typeof OgImageRoute
   '/open-source': typeof OpenSourceRoute
+  '/packages': typeof PackagesRoute
   '/privacy': typeof PrivacyRoute
   '/projects': typeof ProjectsRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
@@ -215,6 +222,7 @@ export interface FileRoutesByTo {
   '/links': typeof LinksRoute
   '/og-image': typeof OgImageRoute
   '/open-source': typeof OpenSourceRoute
+  '/packages': typeof PackagesRoute
   '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -244,6 +252,7 @@ export interface FileRoutesById {
   '/links': typeof LinksRoute
   '/og-image': typeof OgImageRoute
   '/open-source': typeof OpenSourceRoute
+  '/packages': typeof PackagesRoute
   '/privacy': typeof PrivacyRoute
   '/projects': typeof ProjectsRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
@@ -275,6 +284,7 @@ export interface FileRouteTypes {
     | '/links'
     | '/og-image'
     | '/open-source'
+    | '/packages'
     | '/privacy'
     | '/projects'
     | '/robots.txt'
@@ -304,6 +314,7 @@ export interface FileRouteTypes {
     | '/links'
     | '/og-image'
     | '/open-source'
+    | '/packages'
     | '/privacy'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -332,6 +343,7 @@ export interface FileRouteTypes {
     | '/links'
     | '/og-image'
     | '/open-source'
+    | '/packages'
     | '/privacy'
     | '/projects'
     | '/robots.txt'
@@ -362,6 +374,7 @@ export interface RootRouteChildren {
   LinksRoute: typeof LinksRoute
   OgImageRoute: typeof OgImageRoute
   OpenSourceRoute: typeof OpenSourceRoute
+  PackagesRoute: typeof PackagesRoute
   PrivacyRoute: typeof PrivacyRoute
   ProjectsRoute: typeof ProjectsRouteWithChildren
   RobotsDottxtRoute: typeof RobotsDottxtRoute
@@ -443,6 +456,13 @@ declare module '@tanstack/react-router' {
       path: '/open-source'
       fullPath: '/open-source'
       preLoaderRoute: typeof OpenSourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/packages': {
+      id: '/packages'
+      path: '/packages'
+      fullPath: '/packages'
+      preLoaderRoute: typeof PackagesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -598,6 +618,7 @@ const rootRouteChildren: RootRouteChildren = {
   LinksRoute: LinksRoute,
   OgImageRoute: OgImageRoute,
   OpenSourceRoute: OpenSourceRoute,
+  PackagesRoute: PackagesRoute,
   PrivacyRoute: PrivacyRoute,
   ProjectsRoute: ProjectsRouteWithChildren,
   RobotsDottxtRoute: RobotsDottxtRoute,

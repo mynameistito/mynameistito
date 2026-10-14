@@ -9,6 +9,7 @@ const publicPaths = [
   "/contact",
   "/links",
   "/open-source",
+  "/packages",
   "/projects",
 ];
 const escapeXml = (value: string) =>

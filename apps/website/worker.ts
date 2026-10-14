@@ -7,7 +7,12 @@ import server from "virtual:tanstack-start-server-entry";
 import { createAppEnv } from "./src/env";
 import type { RuntimeBindings } from "./src/env";
 import { refreshContributions } from "./src/lib/contributions";
+import { refreshPackages } from "./src/lib/packages";
 import { refreshTokscale } from "./src/lib/tokscale";
+
+const workflowRetryPolicy = {
+  retries: { limit: 3, delay: "30 seconds", backoff: "exponential" },
+} as const;
 
 export { VisitorCounter } from "./src/lib/visitor-counter";
 
@@ -70,6 +75,30 @@ export const scheduled = async (
     );
     throw error;
   }
+
+  const packagesRefresh = bindings.PACKAGES_REFRESH;
+  if (!packagesRefresh) {
+    console.warn(
+      "[packages] Scheduled package refresh skipped: Workflow binding is not configured."
+    );
+    return;
+  }
+  const packagesWorkflowId = `packages-refresh-${scheduledHour}`;
+  try {
+    const instance = await packagesRefresh.create({
+      id: packagesWorkflowId,
+      params: {},
+    });
+    console.info("[packages] Scheduled package refresh started.", {
+      workflowId: instance.id,
+    });
+  } catch (error) {
+    console.error("[packages] Unable to start scheduled package refresh.", {
+      workflowId: packagesWorkflowId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 };
 
 export default { ...server, scheduled };
@@ -94,12 +123,8 @@ export class ContributionsRefreshWorkflow extends WorkflowEntrypoint<
       stepName,
     });
     try {
-      const result = await step.do(
-        stepName,
-        {
-          retries: { limit: 3, delay: "30 seconds", backoff: "exponential" },
-        },
-        () => Effect.runPromise(refreshContributions(createAppEnv(this.env)))
+      const result = await step.do(stepName, workflowRetryPolicy, () =>
+        Effect.runPromise(refreshContributions(createAppEnv(this.env)))
       );
       console.info("[open-source] Contribution refresh workflow completed.", {
         workflowId: event.instanceId,
@@ -138,9 +163,7 @@ export class TokscaleRefreshWorkflow extends WorkflowEntrypoint<
     try {
       const result = await step.do(
         "refresh-and-publish-tokscale",
-        {
-          retries: { limit: 3, delay: "30 seconds", backoff: "exponential" },
-        },
+        workflowRetryPolicy,
         () => Effect.runPromise(refreshTokscale(createAppEnv(this.env)))
       );
       console.info("[ai] Tokscale refresh workflow completed.", {
@@ -151,6 +174,45 @@ export class TokscaleRefreshWorkflow extends WorkflowEntrypoint<
     } catch (error) {
       console.error("[ai] Tokscale refresh workflow failed.", {
         workflowId: event.instanceId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  }
+}
+
+/** Refreshes npm package metadata away from the website request path. */
+export class PackagesRefreshWorkflow extends WorkflowEntrypoint<
+  RuntimeBindings,
+  Record<string, never>
+> {
+  /** Executes and publishes one durable npm package refresh.
+   * @param event - The event that started this Workflow run.
+   * @param step - The durable step interface supplied by Cloudflare.
+   * @returns A summary of the published package data.
+   */
+  override async run(
+    event: Readonly<WorkflowEvent<Record<string, never>>>,
+    step: WorkflowStep
+  ) {
+    const stepName = "refresh-and-publish-npm-packages";
+    console.info("[packages] Package refresh workflow started.", {
+      workflowId: event.instanceId,
+      stepName,
+    });
+    try {
+      const result = await step.do(stepName, workflowRetryPolicy, () =>
+        Effect.runPromise(refreshPackages(createAppEnv(this.env)))
+      );
+      console.info("[packages] Package refresh workflow completed.", {
+        workflowId: event.instanceId,
+        ...result,
+      });
+      return result;
+    } catch (error) {
+      console.error("[packages] Package refresh workflow failed.", {
+        workflowId: event.instanceId,
+        stepName,
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
