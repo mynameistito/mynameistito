@@ -1,5 +1,6 @@
 import { Schema } from "effect";
 import { check, decodeUnknownSync, isPattern } from "effect/Schema";
+import { parse as parseYaml } from "yaml";
 
 const BlogMetadata = Schema.Struct({
   excerpt: Schema.String,
@@ -23,18 +24,11 @@ const markdownFiles = import.meta.glob<string>("../../content/blog/*.md", {
   query: "?raw",
 });
 
-const parseScalar = (value: string): string => {
-  if (value.startsWith('"')) {
-    const parsed: unknown = JSON.parse(value);
-    return decodeUnknownSync(Schema.String)(parsed);
-  }
-  if (value.startsWith("'") && value.endsWith("'")) {
-    return value.slice(1, -1).replaceAll("''", "'");
-  }
-  return value;
-};
-
-const parsePost = (source: string): BlogPost => {
+/** Parse and validate one Markdown post, including its YAML frontmatter.
+ * @param source - The Markdown file contents.
+ * @returns The parsed post and its validated metadata.
+ */
+export const parseBlogPost = (source: string): BlogPost => {
   const frontmatter = source.match(
     /^---\r?\n(?<metadata>[\s\S]*?)\r?\n---\r?\n?(?<body>[\s\S]*)$/u
   );
@@ -42,27 +36,7 @@ const parsePost = (source: string): BlogPost => {
     throw new Error("Blog post is missing YAML frontmatter.");
   }
   const { body, metadata: metadataSource } = frontmatter.groups;
-  const metadataEntries = metadataSource
-    .split(/\r?\n/u)
-    .filter((line) => line.trim().length > 0)
-    .map((line) => {
-      const separator = line.indexOf(":");
-      if (separator < 1) {
-        throw new Error(
-          "Blog frontmatter fields must be scalar key-value pairs."
-        );
-      }
-      return [
-        line.slice(0, separator).trim(),
-        parseScalar(line.slice(separator + 1).trim()),
-      ];
-    });
-  if (
-    new Set(metadataEntries.map(([key]) => key)).size !== metadataEntries.length
-  ) {
-    throw new Error("Blog frontmatter cannot contain duplicate fields.");
-  }
-  const data = Object.fromEntries(metadataEntries);
+  const data: unknown = parseYaml(metadataSource);
   const metadata = decodeUnknownSync(BlogMetadata)(data);
   return { ...metadata, body: body.trim() };
 };
@@ -81,7 +55,7 @@ const ensureUniqueSlugs = (posts: readonly BlogPost[]): readonly BlogPost[] => {
 /** Published Markdown posts, ordered newest first. */
 export const blogPosts = ensureUniqueSlugs(
   Object.values(markdownFiles)
-    .map(parsePost)
+    .map(parseBlogPost)
     .toSorted((left, right) =>
       right.publishedAt.localeCompare(left.publishedAt)
     )

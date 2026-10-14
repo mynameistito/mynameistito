@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { blogPosts, getBlogPost } from "@/lib/blog-posts";
+import { blogPosts, getBlogPost, parseBlogPost } from "@/lib/blog-posts";
 
 describe("blog posts", () => {
   it("loads post metadata and Markdown content from the blog directory", () => {
@@ -17,5 +17,19 @@ describe("blog posts", () => {
     expect(new Set(blogPosts.map((post) => post.slug)).size).toBe(
       blogPosts.length
     );
+  });
+
+  it("parses valid YAML inline comments in frontmatter", () => {
+    const post = parseBlogPost(`---
+slug: yaml-example
+title: "Introduction" # Heading shown in the index
+publishedAt: "2026-10-14"
+excerpt: Example post
+---
+
+Post body.
+`);
+
+    expect(post.title).toBe("Introduction");
   });
 });
