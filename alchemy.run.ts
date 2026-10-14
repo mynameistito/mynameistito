@@ -68,6 +68,7 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
     observability: {
       enabled: true,
       headSamplingRate: 1,
+      issues: { enabled: true },
       logs: {
         enabled: true,
         headSamplingRate: 1,
