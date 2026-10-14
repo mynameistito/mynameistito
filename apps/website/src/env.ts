@@ -46,6 +46,11 @@ export interface AppEnv {
   readonly OPEN_SOURCE_KV?: OpenSourceKVBinding;
   readonly VISITOR_COUNTER?: {
     readonly getByName: (name: string) => {
+      readonly getPostViews: (postSlug: string) => Promise<number>;
+      readonly recordPostView: (
+        postSlug: string,
+        visitorId: string
+      ) => Promise<number>;
       readonly track: (visitorId: string) => Promise<VisitorCounts>;
     };
   };

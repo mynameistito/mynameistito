@@ -84,7 +84,11 @@ export const VisitorTracker = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    if (!turnstileSitekey) {
+    if (
+      !turnstileSitekey ||
+      pathname === "/blog" ||
+      pathname.startsWith("/blog/")
+    ) {
       return;
     }
     let cancelled = false;
