@@ -7,8 +7,8 @@ import { profile } from "@/lib/profile";
 import {
   Tokscale,
   TokscaleProfileSchema,
-} from "@/lib/providers/tokscale/client";
-import type { TokscaleProfile } from "@/lib/providers/tokscale/client";
+} from "@/lib/provider/tokscale/client";
+import type { TokscaleProfile } from "@/lib/provider/tokscale/client";
 
 /** Validated Tokscale data published to the public portfolio. */
 export interface TokscaleSnapshot {

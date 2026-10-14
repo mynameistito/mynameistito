@@ -27,12 +27,12 @@ import {
   latestUsageDay,
   summarizeHarnesses,
   summarizeModels,
-} from "@/lib/providers/tokscale/analytics";
+} from "@/lib/provider/tokscale/analytics";
 import type {
   CalendarDay,
   CalendarWeek,
-} from "@/lib/providers/tokscale/analytics";
-import type { TokscaleSnapshot } from "@/lib/tokscale";
+} from "@/lib/provider/tokscale/analytics";
+import type { TokscaleSnapshot } from "@/lib/provider/tokscale/snapshot";
 
 const numberFormat = new Intl.NumberFormat("en-US");
 

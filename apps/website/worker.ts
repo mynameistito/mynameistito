@@ -8,7 +8,7 @@ import { createAppEnv } from "./src/env";
 import type { RuntimeBindings } from "./src/env";
 import { refreshContributions } from "./src/lib/contributions";
 import { refreshPackages } from "./src/lib/packages";
-import { refreshTokscale } from "./src/lib/tokscale";
+import { refreshTokscale } from "./src/lib/provider/tokscale/snapshot";
 
 const workflowRetryPolicy = {
   retries: { limit: 3, delay: "30 seconds", backoff: "exponential" },

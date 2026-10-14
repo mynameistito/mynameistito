@@ -6,7 +6,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, FocusEvent, KeyboardEvent, SVGProps } from "react";
 
 import { profile } from "@/lib/profile";
-import { buildCalendar } from "@/lib/providers/tokscale/analytics";
+import { buildCalendar } from "@/lib/provider/tokscale/analytics";
 import type { SocialProfileData } from "@/lib/social-profiles";
 import { getSocialProfiles } from "@/server/functions/social-profiles";
 

@@ -3,9 +3,12 @@ import { describe, expect, it } from "vitest";
 
 import { createAppEnv } from "@/env";
 import type { OpenSourceKVBinding } from "@/env";
-import { Tokscale } from "@/lib/providers/tokscale/client";
-import type { TokscaleProfile } from "@/lib/providers/tokscale/client";
-import { loadTokscale, refreshTokscale } from "@/lib/tokscale";
+import { Tokscale } from "@/lib/provider/tokscale/client";
+import type { TokscaleProfile } from "@/lib/provider/tokscale/client";
+import {
+  loadTokscale,
+  refreshTokscale,
+} from "@/lib/provider/tokscale/snapshot";
 
 const snapshotKey = "ai:tokscale:v1";
 
