@@ -30,7 +30,7 @@
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
 
-💙 **[skills](https://github.com/mynameistito/skills)** ⭐1 — skills
+🔷 **[discord-announcement-email-bridge](https://github.com/mynameistito/discord-announcement-email-bridge)** ⭐1 — discord-announcement-email-bridge
 <!-- AUTO-PROJECTS:END -->
 
 ---
