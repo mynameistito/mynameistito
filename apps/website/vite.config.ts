@@ -10,8 +10,10 @@ import { defineConfig } from "vite";
 import type { Plugin } from "vite";
 
 const cloudflareWorkersModule = "cloudflare:workers";
+
 const isAlchemyCloudflareBuild =
   process.env.ALCHEMY_CLOUDFLARE_VITE_INJECTED === "1";
+
 const require = createRequire(import.meta.url);
 const takumiWasmPath = require.resolve("@takumi-rs/wasm/takumi_wasm_bg.wasm");
 
@@ -23,12 +25,11 @@ const standaloneTakumiWasmPlugin: Plugin = {
     command === "build" && !isAlchemyCloudflareBuild,
   resolveId(source, importer) {
     const normalizedImporter = importer?.replaceAll("\\", "/");
-    if (
-      source === "../pkg/takumi_wasm_bg.wasm" &&
+
+    return source === "../pkg/takumi_wasm_bg.wasm" &&
       normalizedImporter?.endsWith("/bundlers/workerd.js")
-    ) {
-      return { external: true, id: "./takumi_wasm_bg.wasm" };
-    }
+      ? { external: true, id: "./takumi_wasm_bg.wasm" }
+      : undefined;
   },
   writeBundle(outputOptions) {
     if (path.basename(outputOptions.dir ?? "") !== "server") {

@@ -30,6 +30,7 @@ const isCalendarDate = (value: string): boolean => {
   const month = Number(monthText);
   const day = Number(dayText);
   const isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+
   const daysInMonth = [
     31,
     isLeapYear ? 29 : 28,
@@ -44,7 +45,9 @@ const isCalendarDate = (value: string): boolean => {
     30,
     31,
   ];
+
   const maximumDay = daysInMonth[month - 1];
+
   return year > 0 && day > 0 && maximumDay !== undefined && day <= maximumDay;
 };
 
@@ -56,26 +59,33 @@ export const parseBlogPost = (source: string): BlogPost => {
   const frontmatter = source.match(
     /^---\r?\n(?<metadata>[\s\S]*?)\r?\n---\r?\n?(?<body>[\s\S]*)$/u
   );
+
   if (!frontmatter?.groups) {
     throw new Error("Blog post is missing YAML frontmatter.");
   }
+
   const { body, metadata: metadataSource } = frontmatter.groups;
   const data: unknown = parseYaml(metadataSource);
   const metadata = decodeUnknownSync(BlogMetadata)(data);
+
   if (!isCalendarDate(metadata.publishedAt)) {
     throw new Error("Blog publishedAt must be a real YYYY-MM-DD date.");
   }
+
   return { ...metadata, body: body.trim() };
 };
 
 const ensureUniqueSlugs = (posts: readonly BlogPost[]): readonly BlogPost[] => {
   const seenSlugs = new Set<string>();
+
   for (const post of posts) {
     if (seenSlugs.has(post.slug)) {
       throw new Error(`Duplicate blog post slug: ${post.slug}`);
     }
+
     seenSlugs.add(post.slug);
   }
+
   return posts;
 };
 

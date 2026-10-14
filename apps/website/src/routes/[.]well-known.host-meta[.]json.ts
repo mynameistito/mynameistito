@@ -11,10 +11,12 @@ const hostMeta = {
     },
   ],
 };
+
 const getHostMetaJson = () =>
   Response.json(hostMeta, {
     headers: { "Content-Type": "application/json", ...CORS_HEADERS },
   });
+
 const options = () => new Response(null, { headers: CORS_HEADERS });
 
 export const Route = createFileRoute("/.well-known/host-meta.json")({

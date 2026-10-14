@@ -5,6 +5,7 @@ import { webfingerResponse } from "@/server/functions/webfinger-response";
 
 const getWebfinger = ({ request }: { request: Request }): Promise<Response> =>
   webfingerResponse(request, webfinger);
+
 const options = () => new Response(null, { headers: CORS_HEADERS });
 
 export const Route = createFileRoute("/.well-known/webfinger")({

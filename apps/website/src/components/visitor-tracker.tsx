@@ -15,6 +15,7 @@ const VisitorCountsContext = createContext<VisitorCounts | undefined>(
 );
 
 const heartbeatIntervalMs = 30 * 1000;
+
 const runWithHeartbeatGuard = async <A,>(
   guard: { active: boolean },
   task: () => Promise<A>
@@ -22,7 +23,9 @@ const runWithHeartbeatGuard = async <A,>(
   if (guard.active) {
     return null;
   }
+
   guard.active = true;
+
   try {
     return await task();
   } catch {
@@ -37,6 +40,7 @@ const loadVisitorCounts = (pathname: string, sitekey: string) =>
     const token = yield* Effect.tryPromise(() =>
       getTurnstileToken(sitekey, "visitor")
     );
+
     const response = yield* Effect.tryPromise(() =>
       fetch("/api/visitors", {
         body: JSON.stringify({ path: pathname, turnstileToken: token }),
@@ -44,10 +48,13 @@ const loadVisitorCounts = (pathname: string, sitekey: string) =>
         method: "POST",
       })
     );
+
     if (!response.ok) {
       return null;
     }
+
     const payload = yield* Effect.tryPromise(() => response.json());
+
     return yield* decodeUnknownEffect(VisitorCountsSchema)(payload);
   }).pipe(catchEffect(() => Effect.succeed(null)));
 
@@ -59,15 +66,20 @@ export const VisitorTracker = ({ children }: { children: React.ReactNode }) => {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
+
   const [counts, setCounts] = useState<VisitorCounts>();
+
   const [turnstileSitekey, setTurnstileSitekey] = useState<
     string | null | undefined
   >();
+
   useEffect(() => {
     let cancelled = false;
+
     const loadSitekey = async () => {
       try {
         const sitekey = await getTurnstileSitekey();
+
         if (!cancelled) {
           setTurnstileSitekey(sitekey);
         }
@@ -77,40 +89,58 @@ export const VisitorTracker = ({ children }: { children: React.ReactNode }) => {
         }
       }
     };
+
     void loadSitekey();
+
     return () => {
       cancelled = true;
     };
   }, []);
 
   useEffect(() => {
-    if (
-      !turnstileSitekey ||
-      pathname === "/blog" ||
-      pathname.startsWith("/blog/")
-    ) {
-      return;
-    }
+    const sitekey = turnstileSitekey;
+
+    const shouldTrack =
+      Boolean(sitekey) &&
+      pathname !== "/blog" &&
+      !pathname.startsWith("/blog/");
+
     let cancelled = false;
+
     const heartbeatGuard = { active: false };
+
     const trackHeartbeat = async () => {
+      if (!sitekey) {
+        return;
+      }
+
       const value = await runWithHeartbeatGuard(heartbeatGuard, () =>
-        Effect.runPromise(loadVisitorCounts(pathname, turnstileSitekey))
+        Effect.runPromise(loadVisitorCounts(pathname, sitekey))
       );
+
       if (!cancelled && value) {
         setCounts(value satisfies VisitorCounts);
       }
     };
 
-    void trackHeartbeat();
-    const interval = window.setInterval(() => {
-      if (document.visibilityState === "visible") {
-        void trackHeartbeat();
-      }
-    }, heartbeatIntervalMs);
+    const interval = shouldTrack
+      ? window.setInterval(() => {
+          if (document.visibilityState === "visible") {
+            void trackHeartbeat();
+          }
+        }, heartbeatIntervalMs)
+      : undefined;
+
+    if (shouldTrack) {
+      void trackHeartbeat();
+    }
+
     return () => {
       cancelled = true;
-      window.clearInterval(interval);
+
+      if (interval !== undefined) {
+        window.clearInterval(interval);
+      }
     };
   }, [pathname, turnstileSitekey]);
 

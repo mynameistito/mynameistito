@@ -47,25 +47,33 @@ export const buildCalendar = (
   if (contributions.length === 0) {
     return [];
   }
+
   const usageByDate = new Map(contributions.map((day) => [day.date, day]));
   const latestDay = latestUsageDay(contributions);
+
   if (!latestDay) {
     return [];
   }
+
   const lastDate = new Date(`${latestDay.date}T00:00:00.000Z`);
+
   const end = Date.UTC(
     lastDate.getUTCFullYear(),
     lastDate.getUTCMonth(),
     lastDate.getUTCDate()
   );
+
   const start = end - 364 * 24 * 60 * 60 * 1000;
   const firstDay = new Date(start).getUTCDay();
   const alignedStart = start - firstDay * 24 * 60 * 60 * 1000;
+
   const days = Array.from({ length: 371 }, (_, index) => {
     const date = new Date(alignedStart + index * 24 * 60 * 60 * 1000)
       .toISOString()
       .slice(0, 10);
+
     const usage = usageByDate.get(date);
+
     return usage
       ? {
           date,
@@ -75,6 +83,7 @@ export const buildCalendar = (
         }
       : null;
   });
+
   return Array.from({ length: 53 }, (_, week) =>
     days.slice(week * 7, (week + 1) * 7)
   );
@@ -88,13 +97,16 @@ export const summarizeHarnesses = (
   contributions: readonly DailyUsage[]
 ): readonly HarnessUsage[] => {
   const totals = new Map<string, HarnessUsage>();
+
   for (const day of contributions) {
     for (const client of day.clients) {
       const current = totals.get(client.client);
+
       const tokens = Object.values(client.models).reduce(
         (total, model) => total + model.tokens,
         0
       );
+
       totals.set(client.client, {
         client: client.client,
         tokens: (current?.tokens ?? 0) + tokens,
@@ -103,6 +115,7 @@ export const summarizeHarnesses = (
       });
     }
   }
+
   return [...totals.values()].toSorted(
     (left, right) => right.tokens - left.tokens
   );
@@ -120,6 +133,7 @@ export const summarizeModels = (
   readonly cost: number;
 }[] => {
   const totals = new Map<string, { tokens: number; cost: number }>();
+
   for (const day of contributions) {
     for (const client of day.clients) {
       for (const [model, usage] of Object.entries(client.models)) {
@@ -131,6 +145,7 @@ export const summarizeModels = (
       }
     }
   }
+
   return [...totals.entries()]
     .map(([model, usage]) => ({ model, ...usage }))
     .toSorted((left, right) => right.tokens - left.tokens);

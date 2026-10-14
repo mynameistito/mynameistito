@@ -7,6 +7,7 @@ import { loadPackages, NpmRegistry, refreshPackages } from "@/lib/packages";
 import type { NpmPackage } from "@/lib/packages";
 
 const snapshotKey = "npm:packages:v1";
+
 const npmPackage: NpmPackage = {
   name: "useful-package",
   description: "A useful package.",
@@ -18,16 +19,20 @@ const npmPackage: NpmPackage = {
 
 const createKV = (initial?: string) => {
   const values = new Map<string, string>();
+
   if (initial !== undefined) {
     values.set(snapshotKey, initial);
   }
+
   const binding: OpenSourceKVBinding = {
     get: (key) => Promise.resolve(values.get(key) ?? null),
     put: (key, value) => {
       values.set(key, value);
+
       return Promise.resolve();
     },
   };
+
   return { binding, values };
 };
 
@@ -49,6 +54,7 @@ describe("npm package snapshots", () => {
         packages: [npmPackage],
       })
     );
+
     const create = vi
       .fn<PackagesRefreshBinding["create"]>()
       .mockResolvedValue({ id: "should-not-run" });
@@ -68,6 +74,7 @@ describe("npm package snapshots", () => {
 
   it("returns promptly and starts one refresh Workflow when no snapshot exists", async () => {
     const { binding } = createKV();
+
     const create = vi
       .fn<PackagesRefreshBinding["create"]>()
       .mockImplementation(({ id }) => Promise.resolve({ id }));
@@ -95,6 +102,7 @@ describe("npm package snapshots", () => {
         packages: [npmPackage],
       })
     );
+
     const create = vi
       .fn<PackagesRefreshBinding["create"]>()
       .mockImplementation(({ id }) => Promise.resolve({ id }));
@@ -114,6 +122,7 @@ describe("npm package snapshots", () => {
 
   it("publishes a complete snapshot after a successful registry fetch", async () => {
     const { binding, values } = createKV();
+
     const result = await Effect.runPromise(
       refreshPackages(
         createAppEnv({ OPEN_SOURCE_KV: binding }),

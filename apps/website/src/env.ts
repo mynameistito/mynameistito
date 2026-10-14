@@ -112,6 +112,7 @@ export const getAppEnv = Effect.fn("getAppEnv")(() =>
   Effect.sync(() => {
     // SAFETY: Alchemy's Worker config supplies bindings matching RuntimeBindings.
     const bindings = env as RuntimeBindings;
+
     return createAppEnv(bindings);
   })
 );

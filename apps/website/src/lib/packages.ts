@@ -56,19 +56,23 @@ export class NpmRegistry extends Context.Service<
     NpmRegistry,
     Effect.gen(function* createNpmRegistry() {
       const client = yield* HttpClient.HttpClient;
+
       const search = Effect.fn("NpmRegistry.search")(function* search() {
         const url = new URL("https://registry.npmjs.org/-/v1/search");
         url.searchParams.set("text", `maintainer:${profile.npm}`);
         url.searchParams.set("size", "250");
+
         const response = yield* client
           .pipe(HttpClient.filterStatusOk)
           .get(url.toString())
           .pipe(Effect.mapError((cause) => new NpmRegistryError({ cause })));
+
         const result = yield* HttpClientResponse.schemaBodyJson(
           SearchResponseSchema
         )(response).pipe(
           Effect.mapError((cause) => new NpmRegistryError({ cause }))
         );
+
         const packages = result.objects.map(
           ({ downloads, package: registryPackage }): NpmPackage => {
             const item: NpmPackage = {
@@ -81,19 +85,24 @@ export class NpmRegistry extends Context.Service<
                 registryPackage.links?.npm ??
                 `https://www.npmjs.com/package/${encodeURIComponent(registryPackage.name)}`,
             };
+
             if (registryPackage.links?.repository) {
               const repositoryUrl = registryPackage.links.repository
                 .replace(/^git\+https:/u, "https:")
                 .replace(/\.git$/u, "");
+
               return { ...item, repositoryUrl };
             }
+
             return item;
           }
         );
+
         return packages.toSorted(
           (first, second) => second.weeklyDownloads - first.weeklyDownloads
         );
       })();
+
       return NpmRegistry.of({ search });
     })
   ).pipe(Layer.provide(FetchHttpClient.layer));
@@ -115,16 +124,21 @@ const refreshIntervalMs = 6 * 60 * 60 * 1000;
 const startPackagesRefresh = Effect.fn("startPackagesRefresh")(
   function* startPackagesRefresh(env: AppEnv) {
     const refresh = env.PACKAGES_REFRESH;
+
     if (!refresh) {
       console.warn(
         "[packages] Unable to start package refresh: Workflow binding is not configured."
       );
+
       return;
     }
+
     const now = yield* DateTime.now;
+
     const workflowId = `packages-refresh-${Math.floor(
       now.epochMilliseconds / 3_600_000
     )}`;
+
     const created = yield* Effect.result(
       Effect.tryPromise({
         try: () => refresh.create({ id: workflowId, params: {} }),
@@ -134,6 +148,7 @@ const startPackagesRefresh = Effect.fn("startPackagesRefresh")(
             : new Error("Package refresh workflow start failed", { cause }),
       })
     );
+
     if (created._tag === "Failure") {
       console.warn("[packages] Unable to start package refresh.", {
         workflowId,
@@ -149,8 +164,10 @@ export const loadPackages = Effect.fn("loadPackages")(function* loadPackages(
 ) {
   const env = bindings ?? (yield* getAppEnv());
   const kv = env.OPEN_SOURCE_KV;
+
   if (!kv) {
     console.error("[packages] The KV snapshot binding is not configured.");
+
     return [];
   }
 
@@ -161,13 +178,18 @@ export const loadPackages = Effect.fn("loadPackages")(function* loadPackages(
         cause instanceof Error ? cause : new Error("KV read failed", { cause }),
     })
   );
+
   if (stored._tag === "Failure") {
     console.error("[packages] Unable to read the package snapshot.");
+
     return [];
   }
+
   const storedText = stored.success;
+
   if (storedText === null) {
     yield* startPackagesRefresh(env);
+
     return [];
   }
 
@@ -180,20 +202,24 @@ export const loadPackages = Effect.fn("loadPackages")(function* loadPackages(
           : new Error("Invalid package snapshot JSON", { cause }),
     }).pipe(Effect.flatMap(Schema.decodeUnknownEffect(PackagesSnapshotSchema)))
   );
+
   if (decoded._tag === "Failure") {
     console.error("[packages] The package snapshot is invalid.");
     yield* startPackagesRefresh(env);
+
     return [];
   }
 
   const refreshedAt = Date.parse(decoded.success.refreshedAt);
   const now = yield* DateTime.now;
+
   if (
     !Number.isFinite(refreshedAt) ||
     now.epochMilliseconds - refreshedAt >= refreshIntervalMs
   ) {
     yield* startPackagesRefresh(env);
   }
+
   return decoded.success.packages;
 });
 
@@ -204,6 +230,7 @@ export const refreshPackages = Effect.fn("refreshPackages")(
     npmRegistryLayer: Layer.Layer<NpmRegistry> = NpmRegistry.layer
   ) {
     const kv = env.OPEN_SOURCE_KV;
+
     if (!kv) {
       return yield* Effect.fail(
         new Error("The package KV snapshot binding is not configured.")
@@ -212,6 +239,7 @@ export const refreshPackages = Effect.fn("refreshPackages")(
 
     const packages = yield* Effect.gen(function* fetchPackages() {
       const registry = yield* NpmRegistry;
+
       return yield* registry.search;
     }).pipe(
       Effect.provide(npmRegistryLayer),
@@ -219,14 +247,18 @@ export const refreshPackages = Effect.fn("refreshPackages")(
         console.error("[packages] npm registry request failed.", {
           cause: error.cause,
         });
+
         return Effect.fail(error);
       })
     );
+
     const now = yield* DateTime.now;
+
     const snapshot: PackagesSnapshot = {
       refreshedAt: DateTime.formatIso(now),
       packages,
     };
+
     yield* Effect.tryPromise({
       try: () => kv.put(snapshotKey, JSON.stringify(snapshot)),
       catch: (cause) =>
@@ -234,6 +266,7 @@ export const refreshPackages = Effect.fn("refreshPackages")(
           ? cause
           : new Error("Unable to publish the package snapshot.", { cause }),
     });
+
     return {
       refreshedAt: snapshot.refreshedAt,
       packageCount: packages.length,

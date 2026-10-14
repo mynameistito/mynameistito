@@ -12,16 +12,20 @@ const snapshotKey = "open-source:contributions:v2";
 
 const createKV = (initial?: string) => {
   const values = new Map<string, string>();
+
   if (initial !== undefined) {
     values.set(snapshotKey, initial);
   }
+
   const binding: OpenSourceKVBinding = {
     get: (key) => Promise.resolve(values.get(key) ?? null),
     put: (key, value) => {
       values.set(key, value);
+
       return Promise.resolve();
     },
   };
+
   return { binding, values };
 };
 
@@ -93,9 +97,11 @@ describe("open-source contribution snapshots", () => {
         ],
       })
     );
+
     const create = vi
       .fn<ContributionsRefreshBinding["create"]>()
       .mockResolvedValue({ id: "should-not-run" });
+
     const env = createAppEnv({
       OPEN_SOURCE_KV: binding,
       CONTRIBUTIONS_REFRESH: { create },
@@ -109,9 +115,11 @@ describe("open-source contribution snapshots", () => {
 
   it("returns promptly and starts one deterministic refresh Workflow on a cache miss", async () => {
     const { binding } = createKV();
+
     const create = vi
       .fn<ContributionsRefreshBinding["create"]>()
       .mockImplementation(({ id }) => Promise.resolve({ id }));
+
     const env = createAppEnv({
       OPEN_SOURCE_KV: binding,
       CONTRIBUTIONS_REFRESH: { create },
@@ -133,9 +141,11 @@ describe("open-source contribution snapshots", () => {
         repositories: [repository],
       })
     );
+
     const create = vi
       .fn<ContributionsRefreshBinding["create"]>()
       .mockImplementation(({ id }) => Promise.resolve({ id }));
+
     const env = createAppEnv({
       OPEN_SOURCE_KV: binding,
       CONTRIBUTIONS_REFRESH: { create },
@@ -152,9 +162,11 @@ describe("open-source contribution snapshots", () => {
 
   it("ignores a malformed snapshot instead of failing the page loader", async () => {
     const { binding } = createKV("not-json");
+
     const create = vi
       .fn<ContributionsRefreshBinding["create"]>()
       .mockImplementation(({ id }) => Promise.resolve({ id }));
+
     vi.spyOn(console, "error").mockImplementation(() => {});
 
     await expect(
@@ -172,6 +184,7 @@ describe("open-source contribution snapshots", () => {
 
   it("publishes a complete snapshot after successful GitHub fetches", async () => {
     const { binding, values } = createKV();
+
     const githubLayer = createGitHubLayer([pullRequest], () =>
       Effect.succeed({
         full_name: repository.repo,
@@ -196,10 +209,12 @@ describe("open-source contribution snapshots", () => {
   it("features OpenTechCheck instead of opencode", async () => {
     const { binding, values } = createKV();
     const repositories = ["PGHQdev/OpenTechCheck", "anomalyco/opencode"];
+
     const searchResults = repositories.map((repo) => ({
       ...pullRequest,
       repository_url: `https://api.github.com/repos/${repo}`,
     }));
+
     const githubLayer = createGitHubLayer(searchResults, (owner, name) =>
       Effect.succeed({
         full_name: `${owner}/${name}`,
@@ -234,6 +249,7 @@ describe("open-source contribution snapshots", () => {
 
   it("omits explicitly ignored repositories, ignored organizations, and own repos", async () => {
     const { binding, values } = createKV();
+
     const repositoryNames = [
       "kus/csgo-modded-server-assets",
       "R44VC0RP/opencode-cloudflare",
@@ -261,14 +277,18 @@ describe("open-source contribution snapshots", () => {
       "mynameistito/personal-project",
       "keep/visible-repo",
     ];
+
     const searchResults = repositoryNames.map((repo) => ({
       ...pullRequest,
       html_url: `https://github.com/${repo}/pull/42`,
       repository_url: `https://api.github.com/repos/${repo}`,
     }));
+
     const repositoryLookups: string[] = [];
+
     const githubLayer = createGitHubLayer(searchResults, (owner, name) => {
       repositoryLookups.push(`${owner}/${name}`);
+
       return Effect.succeed({
         full_name: `${owner}/${name}`,
         stargazers_count: 1,
@@ -292,6 +312,7 @@ describe("open-source contribution snapshots", () => {
 
   it("includes contributions from repositories with fewer than 1,000 stars", async () => {
     const { binding, values } = createKV();
+
     const smallRepository = {
       ...repository,
       name: "small-repo",
@@ -305,6 +326,7 @@ describe("open-source contribution snapshots", () => {
       stars: 12,
       url: "https://github.com/owner/small-repo",
     };
+
     const githubLayer = createGitHubLayer([pullRequest], () =>
       Effect.succeed({
         full_name: smallRepository.repo,
@@ -330,10 +352,12 @@ describe("open-source contribution snapshots", () => {
 
   it("keeps the old snapshot when publishing the refreshed data fails", async () => {
     const { binding, values } = createKV("previous snapshot");
+
     const failingBinding: OpenSourceKVBinding = {
       ...binding,
       put: () => Promise.reject(new Error("KV unavailable")),
     };
+
     const githubLayer = createGitHubLayer([], () =>
       Effect.succeed({
         full_name: repository.repo,
@@ -355,10 +379,12 @@ describe("open-source contribution snapshots", () => {
 
   it("keeps the old snapshot when a repository lookup fails", async () => {
     const { binding, values } = createKV("previous snapshot");
+
     const githubError = new GitHubRequestError({
       operation: "repository",
       cause: new Error("GitHub unavailable"),
     });
+
     const githubLayer = createGitHubLayer([pullRequest], () =>
       Effect.fail(githubError)
     );

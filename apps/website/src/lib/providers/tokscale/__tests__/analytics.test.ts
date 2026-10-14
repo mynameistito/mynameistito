@@ -64,6 +64,7 @@ describe("Tokscale analytics", () => {
       createDay("2026-10-13", "opencode", "gpt-6-luna", 20, 0.1, 2),
       createDay("2026-10-11", "codex", "gpt-6-luna", 40, 0.2, 8),
     ]);
+
     const cells = calendar.flat();
     const finalDay = cells.find((day) => day?.date === "2026-10-13");
     const indexBeforeGap = cells.findIndex((day) => day?.date === "2026-10-11");

@@ -52,7 +52,9 @@ export const decodeProfileResponse = Effect.fn("MDFromX.decodeProfileResponse")(
         (cause) => new MDFromXRequestError({ operation: "profile", cause })
       )
     );
+
     const { profile } = response;
+
     return {
       name: profile.name,
       handle: profile.screen_name,
@@ -89,12 +91,14 @@ export class MDFromX extends Context.Service<
         const httpClient = (yield* HttpClient.HttpClient).pipe(
           HttpClient.filterStatusOk
         );
+
         const profile = Effect.fn("MDFromX.profile")(function* profile(
           handle: string
         ) {
           let request = HttpClientRequest.get(
             `https://mdfromx.com/api/v1/profiles/${encodeURIComponent(handle)}?full=true&format=json`
           ).pipe(HttpClientRequest.setHeader("Accept", "application/json"));
+
           if (apiKey) {
             request = HttpClientRequest.setHeader(
               request,
@@ -102,6 +106,7 @@ export class MDFromX extends Context.Service<
               `Bearer ${Redacted.value(apiKey)}`
             );
           }
+
           const payload = yield* httpClient.execute(request).pipe(
             Effect.flatMap(HttpClientResponse.schemaBodyJson(Schema.Unknown)),
             Effect.mapError(
@@ -109,8 +114,10 @@ export class MDFromX extends Context.Service<
                 new MDFromXRequestError({ operation: "profile", cause })
             )
           );
+
           return yield* decodeProfileResponse(payload);
         });
+
         return MDFromX.of({ profile });
       })
     );

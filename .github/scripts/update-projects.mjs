@@ -44,7 +44,9 @@ const pinnedResult = execSync(
   `gh api graphql -f query='{ user(login: "${username}") { pinnedItems(first: 6, types: REPOSITORY) { nodes { ... on Repository { name description url stargazerCount primaryLanguage { name } } } } } }'`,
   { env: { ...process.env } }
 );
+
 const pinnedData = JSON.parse(pinnedResult.toString());
+
 const pinnedRepos = pinnedData.data.user.pinnedItems.nodes.map((r) => ({
   desc: r.description ?? r.name,
   emoji: LANG_EMOJI[r.primaryLanguage?.name] ?? "📦",
@@ -52,6 +54,7 @@ const pinnedRepos = pinnedData.data.user.pinnedItems.nodes.map((r) => ({
   stars: r.stargazerCount,
   url: r.url,
 }));
+
 const pinnedNames = new Set(pinnedRepos.map((r) => r.name));
 
 // Fetch all public non-fork repos for auto-discovery padding
@@ -59,6 +62,7 @@ const reposResult = execSync(
   `gh api --paginate --slurp "users/${username}/repos?per_page=100"`,
   { env: { ...process.env } }
 );
+
 const repos = JSON.parse(reposResult.toString())
   .flat()
   .filter((r) => !r.fork && !r.private);
@@ -70,6 +74,7 @@ const autoRepos = repos
     if (b.stargazers_count !== a.stargazers_count) {
       return b.stargazers_count - a.stargazers_count;
     }
+
     return new Date(b.updated_at) - new Date(a.updated_at);
   })
   // Pad with up to 3 auto-discovered repos.
@@ -90,17 +95,20 @@ const lines = sorted
   .slice(0, 12)
   .map(({ name, url, emoji, desc, stars }) => {
     const starBadge = stars > 0 ? ` ⭐${stars}` : "";
+
     return `${emoji} **[${name}](${url})**${starBadge} — ${desc}`;
   })
   .join("\n\n");
 
 const readme = readFileSync("README.md", "utf-8");
+
 const updated = readme.replace(
   /<!-- AUTO-PROJECTS:START -->[\s\S]*?<!-- AUTO-PROJECTS:END -->/u,
   `<!-- AUTO-PROJECTS:START -->\n${lines}\n<!-- AUTO-PROJECTS:END -->`
 );
 
 writeFileSync("README.md", updated);
+
 console.log(
   `README updated: ${pinnedRepos.length} pinned + ${autoRepos.length} auto-discovered = ${sorted.slice(0, 12).length} total.`
 );

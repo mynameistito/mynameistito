@@ -3,7 +3,7 @@ import {
   fromApiKey,
   ResendProtocol,
 } from "@distilled.cloud/resend";
-import { Effect, Option, Redacted } from "effect";
+import { Effect, Option } from "effect";
 import { layer as fetchHttpClientLayer } from "effect/http/FetchHttpClient";
 import { mergeAll } from "effect/Layer";
 
@@ -21,21 +21,24 @@ export const sendContactMessage = Effect.fn("sendContactMessage")(
     }
 
     const loadedEnv = yield* getAppEnv().pipe(Effect.option);
+
     if (Option.isNone(loadedEnv)) {
       return { _tag: "NotConfigured", missing: [] } as const;
     }
+
     const env = loadedEnv.value;
     const { RESEND_API_KEY, CONTACT_RECIPIENT, RESEND_FROM } = env;
+
     const missing = [
       { name: "RESEND_API_KEY", value: RESEND_API_KEY },
       { name: "CONTACT_RECIPIENT", value: CONTACT_RECIPIENT },
       { name: "RESEND_FROM", value: RESEND_FROM },
-    ]
-      .filter(({ value }) => !value)
-      .map(({ name }) => name);
+    ].flatMap(({ name, value }) => (value ? [] : [name]));
+
     if (missing.length > 0) {
       return { _tag: "NotConfigured", missing } as const;
     }
+
     if (!(RESEND_API_KEY && CONTACT_RECIPIENT && RESEND_FROM)) {
       return { _tag: "NotConfigured", missing: [] } as const;
     }
@@ -47,18 +50,22 @@ export const sendContactMessage = Effect.fn("sendContactMessage")(
       text: `${message.message}\n\n— ${message.name} <${message.email}>`,
       to: CONTACT_RECIPIENT,
     });
+
     const services = mergeAll(
       fetchHttpClientLayer,
-      fromApiKey({ apiKey: Redacted.value(RESEND_API_KEY) }),
+      fromApiKey({ apiKey: RESEND_API_KEY }),
       ResendProtocol
     );
+
     const sent = yield* Effect.match(Effect.provide(email, services), {
       onFailure: (error) => {
         console.error("Contact email delivery failed.", error);
+
         return false;
       },
       onSuccess: () => true,
     });
+
     return sent
       ? ({ _tag: "Sent" } as const)
       : ({ _tag: "DeliveryFailed" } as const);

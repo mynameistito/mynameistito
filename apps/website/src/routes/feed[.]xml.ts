@@ -10,6 +10,7 @@ const feed = `<?xml version="1.0" encoding="utf-8"?>
   <id>https://mynameistito.com/</id>
   <author><name>Tito</name></author>
 </feed>`;
+
 const getFeed = () =>
   new Response(feed, {
     headers: {

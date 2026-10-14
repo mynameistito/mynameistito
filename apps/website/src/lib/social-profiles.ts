@@ -69,9 +69,11 @@ const loadFromProviders = (
       x: xProfile,
       tokscale: tokscaleSnapshot?.data ?? null,
     };
+
     if (nextData.github || nextData.x || nextData.tokscale) {
       yield* Ref.set(lastKnown, nextData);
     }
+
     return nextData;
   }).pipe(
     Effect.provide(
@@ -108,6 +110,7 @@ export const makeSocialProfilesLayer = ({
     SocialProfiles,
     Effect.gen(function* makeSocialProfiles() {
       const lastKnown = yield* Ref.make<SocialProfileData | null>(null);
+
       const cache = yield* Cache.makeWith(
         (_key: "social-profiles") =>
           loadProviders(lastKnown).pipe(
@@ -127,15 +130,20 @@ export const makeSocialProfilesLayer = ({
 
       const load = Effect.fn("SocialProfiles.load")(function* load() {
         const cached = yield* Cache.get(cache, "social-profiles");
+
         if (cached.data.tokscale) {
           return cached.data;
         }
+
         const snapshot = yield* loadTokscaleSnapshot();
+
         if (!snapshot) {
           return cached.data;
         }
+
         const data = { ...cached.data, tokscale: snapshot.data };
         yield* Ref.set(lastKnown, data);
+
         return data;
       });
 
@@ -159,6 +167,7 @@ export const loadSocialProfiles = () =>
   socialProfilesRuntime.runPromise(
     Effect.gen(function* loadSocialProfilesProgram() {
       const service = yield* SocialProfiles;
+
       return yield* service.load();
     })
   );

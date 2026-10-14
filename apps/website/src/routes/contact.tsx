@@ -26,12 +26,14 @@ const ContactPage = () => {
 
   const sendMessage = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
     if (submissionInProgress.current) {
       return;
     }
 
     if (!turnstileSitekey) {
       setStatus("error");
+
       return;
     }
 
@@ -43,6 +45,7 @@ const ContactPage = () => {
     const submission = Effect.tryPromise({
       try: async () => {
         const token = await getTurnstileToken(turnstileSitekey, "contact");
+
         return fetch("/api/contact", {
           body: JSON.stringify({
             message: values,
@@ -57,9 +60,11 @@ const ContactPage = () => {
       Effect.map((response) => response.ok),
       catchEffect(() => Effect.succeed(false))
     );
+
     const submit = async () => {
       const sent = await Effect.runPromise(submission);
       submissionInProgress.current = false;
+
       if (sent) {
         form.reset();
         setStatus("success");
@@ -67,6 +72,7 @@ const ContactPage = () => {
         setStatus("error");
       }
     };
+
     void submit();
   };
 
@@ -87,6 +93,7 @@ const ContactPage = () => {
       detail: "Send me a message",
     },
   ] as const;
+
   const submitLabel = {
     idle: "Send message",
     submitting: "Sending",

@@ -26,16 +26,21 @@ export const scheduled = async (
 ): Promise<void> => {
   if (controller.cron === "0 4 * * *") {
     const refresh = bindings.TOKSCALE_REFRESH;
+
     if (!refresh) {
       console.warn(
         "[ai] Scheduled Tokscale refresh skipped: Workflow binding is not configured."
       );
+
       return;
     }
+
     const scheduledDay = new Date(controller.scheduledTime)
       .toISOString()
       .slice(0, 10);
+
     const id = `tokscale-refresh-${scheduledDay}`;
+
     try {
       const instance = await refresh.create({ id, params: {} });
       console.info("[ai] Scheduled Tokscale refresh started.", {
@@ -48,18 +53,23 @@ export const scheduled = async (
       });
       throw error;
     }
+
     return;
   }
 
   const refresh = bindings.CONTRIBUTIONS_REFRESH;
+
   if (!refresh) {
     console.warn(
       "[open-source] Scheduled contribution refresh skipped: Workflow binding is not configured."
     );
+
     return;
   }
+
   const scheduledHour = Math.floor(controller.scheduledTime / 3_600_000);
   const id = `contributions-refresh-${scheduledHour}`;
+
   try {
     const instance = await refresh.create({ id, params: {} });
     console.info("[open-source] Scheduled contribution refresh started.", {
@@ -77,18 +87,23 @@ export const scheduled = async (
   }
 
   const packagesRefresh = bindings.PACKAGES_REFRESH;
+
   if (!packagesRefresh) {
     console.warn(
       "[packages] Scheduled package refresh skipped: Workflow binding is not configured."
     );
+
     return;
   }
+
   const packagesWorkflowId = `packages-refresh-${scheduledHour}`;
+
   try {
     const instance = await packagesRefresh.create({
       id: packagesWorkflowId,
       params: {},
     });
+
     console.info("[packages] Scheduled package refresh started.", {
       workflowId: instance.id,
     });
@@ -122,14 +137,17 @@ export class ContributionsRefreshWorkflow extends WorkflowEntrypoint<
       workflowId: event.instanceId,
       stepName,
     });
+
     try {
       const result = await step.do(stepName, workflowRetryPolicy, () =>
         Effect.runPromise(refreshContributions(createAppEnv(this.env)))
       );
+
       console.info("[open-source] Contribution refresh workflow completed.", {
         workflowId: event.instanceId,
         ...result,
       });
+
       return result;
     } catch (error) {
       console.error("[open-source] Contribution refresh workflow failed.", {
@@ -160,16 +178,19 @@ export class TokscaleRefreshWorkflow extends WorkflowEntrypoint<
     console.info("[ai] Tokscale refresh workflow started.", {
       workflowId: event.instanceId,
     });
+
     try {
       const result = await step.do(
         "refresh-and-publish-tokscale",
         workflowRetryPolicy,
         () => Effect.runPromise(refreshTokscale(createAppEnv(this.env)))
       );
+
       console.info("[ai] Tokscale refresh workflow completed.", {
         workflowId: event.instanceId,
         ...result,
       });
+
       return result;
     } catch (error) {
       console.error("[ai] Tokscale refresh workflow failed.", {
@@ -200,14 +221,17 @@ export class PackagesRefreshWorkflow extends WorkflowEntrypoint<
       workflowId: event.instanceId,
       stepName,
     });
+
     try {
       const result = await step.do(stepName, workflowRetryPolicy, () =>
         Effect.runPromise(refreshPackages(createAppEnv(this.env)))
       );
+
       console.info("[packages] Package refresh workflow completed.", {
         workflowId: event.instanceId,
         ...result,
       });
+
       return result;
     } catch (error) {
       console.error("[packages] Package refresh workflow failed.", {

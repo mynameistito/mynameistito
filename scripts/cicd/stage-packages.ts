@@ -15,6 +15,7 @@ type DependencyField =
   | "devDependencies"
   | "optionalDependencies"
   | "peerDependencies";
+
 type DependencyMap = Record<string, string>;
 
 interface PackageManifest {
@@ -32,6 +33,7 @@ interface RootManifest {
 }
 
 const manifestFilename = "package.json";
+
 // SAFETY: The repository root package.json is validated by the workspace tooling.
 const rootManifest = JSON.parse(
   readFileSync(manifestFilename, "utf-8")
@@ -45,9 +47,11 @@ const resolveCatalog = (dependencies: DependencyMap): DependencyMap =>
       }
 
       const catalogName = value.slice("catalog:".length);
+
       const catalog = catalogName
         ? rootManifest.catalogs?.[catalogName]
         : rootManifest.catalog;
+
       const version = catalog?.[name];
 
       if (!version) {
@@ -70,6 +74,7 @@ const resolveManifestCatalog = (manifest: PackageManifest): void => {
 
   for (const field of dependencyFields) {
     const dependencies = manifest[field];
+
     if (dependencies) {
       manifest[field] = resolveCatalog(dependencies);
     }
@@ -84,6 +89,7 @@ const hasPendingChangesets = readdirSync(".changeset").some((file) => {
   }
 
   const content = readFileSync(path.join(".changeset", file), "utf-8");
+
   return /^['"][^'"]+['"]\s*:\s*(?:patch|minor|major)$/mu.test(content);
 });
 
@@ -94,10 +100,12 @@ if (hasPendingChangesets) {
 
 const stagePackage = (directory: { name: string }): void => {
   const packageDirectory = path.join("packages", directory.name);
+
   // SAFETY: Each packages/* directory is expected to contain a package manifest.
   const manifest = JSON.parse(
     readFileSync(path.join(packageDirectory, manifestFilename), "utf-8")
   ) as PackageManifest;
+
   const packageSpec = `${manifest.name}@${manifest.version}`;
 
   try {
@@ -113,6 +121,7 @@ const stagePackage = (directory: { name: string }): void => {
       { stdio: "ignore" }
     );
     console.log(`${packageSpec} is already published`);
+
     return;
   } catch {
     console.log(`Staging ${packageSpec} with npm latest`);
@@ -123,10 +132,12 @@ const stagePackage = (directory: { name: string }): void => {
   try {
     cpSync(packageDirectory, stagedDirectory, { recursive: true });
     const packageManifestPath = path.join(stagedDirectory, manifestFilename);
+
     // SAFETY: The staged directory was copied from a validated packages/* directory.
     const packageManifest = JSON.parse(
       readFileSync(packageManifestPath, "utf-8")
     ) as PackageManifest;
+
     resolveManifestCatalog(packageManifest);
     writeFileSync(
       packageManifestPath,
@@ -150,6 +161,7 @@ const stagePackage = (directory: { name: string }): void => {
   } catch (error) {
     const details =
       error instanceof Error && "stderr" in error ? String(error.stderr) : "";
+
     process.stderr.write(details);
     const message = `${error instanceof Error ? error.message : String(error)} ${details}`;
 

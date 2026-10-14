@@ -14,6 +14,7 @@ const ProjectPage = () => {
   const { slug } = Route.useParams();
   const projects = Route.useLoaderData();
   const project = projects.find((item) => projectSlug(item.name) === slug);
+
   if (!project) {
     throw notFound();
   }
@@ -128,15 +129,19 @@ const ProjectPage = () => {
 export const Route = createFileRoute("/projects/$slug")({
   loader: async ({ params }) => {
     const projects = await getProjects();
+
     const project = projects.find(
       (item) => projectSlug(item.name) === params.slug
     );
+
     if (!project) {
       throw notFound();
     }
+
     if (!project.hasDetailPage) {
       throw redirect({ href: project.source });
     }
+
     return projects;
   },
   component: ProjectPage,
@@ -144,6 +149,7 @@ export const Route = createFileRoute("/projects/$slug")({
     const project = loaderData?.find(
       (item) => projectSlug(item.name) === params.slug
     );
+
     const title = `${project?.name ?? params.slug.replaceAll("-", " ")} | Tito`;
     const description = project?.description ?? "A project built by Tito.";
 

@@ -17,6 +17,7 @@ interface OpenSourceBrowserProps {
 }
 
 const pullRequestStates = ["All", "Open", "Merged", "Closed"] as const;
+
 const pullRequestStatus = {
   Open: { Icon: GitPullRequest, color: "text-pr-open" },
   Merged: { Icon: GitMerge, color: "text-pr-merged" },
@@ -106,6 +107,7 @@ const RepositoryList = ({
             </div>
             {repository.pullRequests.map((pullRequest) => {
               const { Icon, color } = pullRequestStatus[pullRequest.state];
+
               return (
                 <article
                   className="-ml-10 grid min-h-10 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 border-b border-line py-2 last:border-0"
@@ -147,9 +149,12 @@ const RepositoryList = ({
  */
 export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
   const [query, setQuery] = useState("");
+
   const [stateFilter, setStateFilter] =
     useState<(typeof pullRequestStates)[number]>("All");
+
   const normalizedQuery = query.trim().toLowerCase();
+
   const filteredRepositories = useMemo(
     () =>
       repositories
@@ -158,25 +163,30 @@ export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
           pullRequests: repository.pullRequests.filter((pullRequest) => {
             const matchesState =
               stateFilter === "All" || pullRequest.state === stateFilter;
+
             const matchesQuery =
               !normalizedQuery ||
               `${repository.name} ${repository.repo} ${pullRequest.title} ${pullRequest.number}`
                 .toLowerCase()
                 .includes(normalizedQuery);
+
             return matchesState && matchesQuery;
           }),
         }))
         .filter((repository) => repository.pullRequests.length > 0),
     [normalizedQuery, repositories, stateFilter]
   );
+
   const pullRequestCount = repositories.reduce(
     (total, repository) => total + repository.pullRequests.length,
     0
   );
+
   const visiblePullRequestCount = filteredRepositories.reduce(
     (total, repository) => total + repository.pullRequests.length,
     0
   );
+
   const stateCount = (state: (typeof pullRequestStates)[number]) =>
     repositories.reduce(
       (total, repository) =>
@@ -186,9 +196,11 @@ export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
         ).length,
       0
     );
+
   const featuredRepositories = filteredRepositories.filter(
     (repository) => repository.featured
   );
+
   const otherRepositories = filteredRepositories.filter(
     (repository) => !repository.featured
   );

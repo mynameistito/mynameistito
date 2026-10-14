@@ -1,19 +1,34 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Effect } from "effect";
 import { catch as catchEffect } from "effect/Effect";
-import { ArrowUpRight, ChartColumnIncreasing, Github } from "lucide-react";
+import { ArrowUpRight, ChartColumnIncreasing } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import type { CSSProperties, FocusEvent, KeyboardEvent } from "react";
+import type { CSSProperties, FocusEvent, KeyboardEvent, SVGProps } from "react";
 
 import { profile } from "@/lib/profile";
 import { buildCalendar } from "@/lib/providers/tokscale/analytics";
 import type { SocialProfileData } from "@/lib/social-profiles";
 import { getSocialProfiles } from "@/server/functions/social-profiles";
 
+type GithubMarkProps = SVGProps<SVGSVGElement> & { readonly size?: number };
+
+const GithubMark = ({ size = 16, ...props }: GithubMarkProps) => (
+  <svg
+    aria-hidden="true"
+    fill="currentColor"
+    height={size}
+    viewBox="0 0 24 24"
+    width={size}
+    {...props}
+  >
+    <path d="M12 .297a12 12 0 0 0-3.79 23.4c.6.111.82-.26.82-.577v-2.234c-3.338.726-4.043-1.416-4.043-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.73.083-.73 1.205.084 1.84 1.237 1.84 1.237 1.07 1.835 2.807 1.305 3.492.998.108-.776.418-1.305.762-1.605-2.665-.3-5.467-1.332-5.467-5.93 0-1.31.468-2.38 1.235-3.22-.123-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.3 1.23a11.5 11.5 0 0 1 6.003 0c2.29-1.552 3.296-1.23 3.296-1.23.653 1.653.242 2.873.12 3.176.77.84 1.233 1.91 1.233 3.22 0 4.61-2.807 5.625-5.48 5.92.43.37.823 1.102.823 2.222v3.293c0 .32.216.694.825.576A12.003 12.003 0 0 0 12 .297" />
+  </svg>
+);
+
 const socialItems = [
   {
     label: "GitHub",
-    Icon: Github,
+    Icon: GithubMark,
     href: `https://github.com/${profile.github}`,
   },
   { label: "X", href: `https://x.com/${profile.x}`, mark: "𝕏" },
@@ -25,6 +40,7 @@ type SocialItem = (typeof socialItems)[number];
 // Public profile snapshots collected on 2026-10-13; refresh these with the graph data.
 const fallbackGitHubContributionCount = 15_486;
 const fallbackXProfileStats = { following: 1136, followers: 689 } as const;
+
 const githubContributionGrid = [
   "00021311121111101130114222122111110110111010141112242",
   "00131311111114111230112331121222311142111111122211241",
@@ -56,8 +72,10 @@ const GitHubHoverCard = ({
     Array.from({ length: 53 }, (_, week) =>
       githubContributionGrid.map((row) => Number(row[week] ?? 0))
     );
+
   const contributionCount =
     data?.totalContributions ?? fallbackGitHubContributionCount;
+
   const organizations = data?.organizations ?? fallbackGitHubOrganizations;
 
   return (
@@ -194,8 +212,10 @@ const TokscaleHoverCard = ({
       </span>
     );
   }
+
   const weeks = buildCalendar(data.contributions);
   const count = data.stats.totalTokens;
+
   return (
     <>
       <span className="social-hover-card-profile">
@@ -250,9 +270,11 @@ const renderSocialPreview = (
   if (item.label === "GitHub") {
     return <GitHubHoverCard data={data?.github ?? null} />;
   }
+
   if (item.label === "X") {
     return <XHoverCard data={data?.x ?? null} />;
   }
+
   return <TokscaleHoverCard data={data?.tokscale ?? null} />;
 };
 
@@ -261,9 +283,11 @@ const renderSocialPreview = (
  */
 export const SocialDock = () => {
   const [activeItem, setActiveItem] = useState<SocialItem | null>(null);
+
   const [profileData, setProfileData] = useState<SocialProfileData | null>(
     null
   );
+
   const [panelLeft, setPanelLeft] = useState<number | null>(null);
   const dockRef = useRef<HTMLElement | null>(null);
   const panelRef = useRef<HTMLAnchorElement | null>(null);
@@ -271,28 +295,36 @@ export const SocialDock = () => {
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchActivationRef = useRef(false);
   const touchWasOpenRef = useRef(false);
+
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
 
   useEffect(() => {
     let isMounted = true;
+
     const profiles = Effect.tryPromise(() => getSocialProfiles()).pipe(
       catchEffect(() => Effect.succeed(null))
     );
+
     const loadProfiles = async () => {
       const data = await Effect.runPromise(profiles);
+
       if (isMounted && data) {
         setProfileData(data);
       }
     };
+
     void loadProfiles();
+
     return () => {
       isMounted = false;
     };
   }, []);
 
   useLayoutEffect(() => {
+    let observer: ResizeObserver | undefined;
+
     if (
       !activeItem ||
       !dockRef.current ||
@@ -300,38 +332,43 @@ export const SocialDock = () => {
       !triggerRef.current
     ) {
       setPanelLeft(null);
-      return;
+    } else {
+      const updatePanelPosition = () => {
+        const panel = panelRef.current;
+        const trigger = triggerRef.current;
+        const dock = dockRef.current;
+
+        if (!panel || !trigger || !dock) {
+          return;
+        }
+
+        const panelWidth = panel.getBoundingClientRect().width;
+
+        const triggerCenter =
+          trigger.getBoundingClientRect().left + trigger.offsetWidth / 2;
+
+        const minCenter = panelWidth / 2 + 12;
+        const maxCenter = window.innerWidth - minCenter;
+
+        const viewportCenter = Math.max(
+          minCenter,
+          Math.min(triggerCenter, maxCenter)
+        );
+
+        const position = viewportCenter - dock.getBoundingClientRect().left;
+        panel.style.setProperty("--panel-left", `${position}px`);
+        setPanelLeft(position);
+      };
+
+      updatePanelPosition();
+      observer = new ResizeObserver(updatePanelPosition);
+      observer.observe(document.documentElement);
+      observer.observe(dockRef.current);
+      observer.observe(panelRef.current);
+      observer.observe(triggerRef.current);
     }
 
-    const updatePanelPosition = () => {
-      const panel = panelRef.current;
-      const trigger = triggerRef.current;
-      const dock = dockRef.current;
-      if (!panel || !trigger || !dock) {
-        return;
-      }
-
-      const panelWidth = panel.getBoundingClientRect().width;
-      const triggerCenter =
-        trigger.getBoundingClientRect().left + trigger.offsetWidth / 2;
-      const minCenter = panelWidth / 2 + 12;
-      const maxCenter = window.innerWidth - minCenter;
-      const viewportCenter = Math.max(
-        minCenter,
-        Math.min(triggerCenter, maxCenter)
-      );
-      const position = viewportCenter - dock.getBoundingClientRect().left;
-      panel.style.setProperty("--panel-left", `${position}px`);
-      setPanelLeft(position);
-    };
-
-    updatePanelPosition();
-    const observer = new ResizeObserver(updatePanelPosition);
-    observer.observe(document.documentElement);
-    observer.observe(dockRef.current);
-    observer.observe(panelRef.current);
-    observer.observe(triggerRef.current);
-    return () => observer.disconnect();
+    return () => observer?.disconnect();
   }, [activeItem]);
 
   if (pathname === "/links") {
@@ -390,6 +427,7 @@ export const SocialDock = () => {
               setActiveItem(item);
               triggerRef.current = event.currentTarget;
             }
+
             touchActivationRef.current = false;
             touchWasOpenRef.current = false;
           }}
@@ -404,6 +442,7 @@ export const SocialDock = () => {
           }}
           onPointerEnter={(event) => {
             cancelPendingClose();
+
             if (event.pointerType === "mouse") {
               setActiveItem(item);
               triggerRef.current = event.currentTarget;

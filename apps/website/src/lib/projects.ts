@@ -52,13 +52,16 @@ const overrides = new Map<string, Partial<Project>>([
 
 const fetchProjects = Effect.gen(function* fetchProjects() {
   const github = yield* GitHub;
+
   const [html, repositories] = yield* Effect.all([
     github.profilePage,
     collectRepositoryPages<Repository, GitHubRequestError, never>(
       (page, perPage) => github.listRepositories(page, perPage)
     ),
   ]);
+
   const pinnedNames = readPinnedRepositoryNames(html, profile.github);
+
   if (!pinnedNames) {
     return yield* new GitHubRequestError({
       operation: "readPinnedRepositories",
@@ -70,8 +73,10 @@ const fetchProjects = Effect.gen(function* fetchProjects() {
     repositories,
     pinnedNames
   );
+
   return orderedRepositories.map(({ repository, featured }) => {
     const override = overrides.get(repository.name);
+
     const project: Project = {
       name: repository.name,
       description: repository.description ?? `${repository.name} on GitHub.`,
@@ -82,12 +87,15 @@ const fetchProjects = Effect.gen(function* fetchProjects() {
       source: repository.html_url,
       ...override,
     };
+
     const projectWithPreview = override?.image
       ? { ...project, previewImage: override.image }
       : project;
+
     if (repository.homepage && !override?.demo) {
       return { ...projectWithPreview, demo: repository.homepage };
     }
+
     return projectWithPreview;
   });
 });
@@ -95,10 +103,13 @@ const fetchProjects = Effect.gen(function* fetchProjects() {
 /** Loads cached public, non-fork projects using GitHub as the source. */
 export const loadProjects = Effect.fn("loadProjects")(function* loadProjects() {
   const now = yield* DateTime.now;
+
   if (cachedProjects && now.epochMilliseconds - cachedAt < cacheDuration) {
     return cachedProjects;
   }
+
   const env = yield* getAppEnv();
+
   return yield* fetchProjects.pipe(
     Effect.provide(
       GitHub.layer({
@@ -114,6 +125,7 @@ export const loadProjects = Effect.fn("loadProjects")(function* loadProjects() {
     ),
     Effect.catchTag("GitHubRequestError", (error) => {
       console.error("Failed to load GitHub projects.", error._tag);
+
       return Effect.succeed(cachedProjects ?? []);
     })
   );

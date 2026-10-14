@@ -13,7 +13,9 @@ if (!type || !types.has(type) || !summary) {
 }
 
 const changesetDirectory = path.resolve(".changeset");
+
 await mkdir(changesetDirectory, { recursive: true });
+
 const changeset = `---\n"${packageName}": ${type}\n---\n\n${summary}\n`;
 
 const createChangeset = async (filename: string): Promise<string> => {
@@ -22,6 +24,7 @@ const createChangeset = async (filename: string): Promise<string> => {
       encoding: "utf-8",
       flag: "wx",
     });
+
     return filename;
   } catch (error) {
     if (
@@ -39,4 +42,5 @@ const createChangeset = async (filename: string): Promise<string> => {
 const createdFilename = await createChangeset(
   `${randomBytes(4).toString("hex")}.md`
 );
+
 console.log(`Created .changeset/${createdFilename} for ${packageName}`);

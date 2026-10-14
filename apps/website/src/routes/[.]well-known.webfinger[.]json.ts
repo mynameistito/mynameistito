@@ -8,6 +8,7 @@ const getWebfingerJson = ({
 }: {
   request: Request;
 }): Promise<Response> => webfingerResponse(request, webfingerJson);
+
 const options = () => new Response(null, { headers: CORS_HEADERS });
 
 export const Route = createFileRoute("/.well-known/webfinger.json")({

@@ -23,6 +23,7 @@ const profileData: SocialProfileData = {
 
 const loadSocialProfiles = Effect.gen(function* loadSocialProfilesProgram() {
   const service = yield* SocialProfiles;
+
   return yield* service.load();
 });
 
@@ -30,16 +31,19 @@ describe("social profile cache", () => {
   it("shares cached provider data across calls while checking missing Tokscale data", async () => {
     let providerCalls = 0;
     let tokscaleCalls = 0;
+
     const runtime = ManagedRuntime.make(
       makeSocialProfilesLayer({
         loadProviders: () =>
           Effect.sync(() => {
             providerCalls += 1;
+
             return profileData;
           }),
         loadTokscale: () =>
           Effect.sync(() => {
             tokscaleCalls += 1;
+
             return null;
           }),
       })
@@ -51,6 +55,7 @@ describe("social profile cache", () => {
           concurrency: "unbounded",
         })
       );
+
       await runtime.runPromise(loadSocialProfiles);
 
       expect(results).toStrictEqual([profileData, profileData]);
@@ -63,16 +68,19 @@ describe("social profile cache", () => {
 
   it("does not cache a result when no provider returns profile data", async () => {
     let providerCalls = 0;
+
     const emptyData: SocialProfileData = {
       github: null,
       x: null,
       tokscale: null,
     };
+
     const runtime = ManagedRuntime.make(
       makeSocialProfilesLayer({
         loadProviders: () =>
           Effect.sync(() => {
             providerCalls += 1;
+
             return emptyData;
           }),
         loadTokscale: () => Effect.succeed(null),
@@ -91,10 +99,12 @@ describe("social profile cache", () => {
 
   it("expires provider data after thirty minutes", async () => {
     let providerCalls = 0;
+
     const layer = makeSocialProfilesLayer({
       loadProviders: () =>
         Effect.sync(() => {
           providerCalls += 1;
+
           return profileData;
         }),
       loadTokscale: () => Effect.succeed(null),

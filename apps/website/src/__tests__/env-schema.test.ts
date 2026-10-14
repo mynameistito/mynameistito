@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 
 const websiteDirectory = fileURLToPath(new URL("../../", import.meta.url));
 const secret = "test-secret-value-not-for-production";
+
 const productionConfig = {
   ...process.env,
   OP_SERVICE_ACCOUNT_TOKEN: "",
