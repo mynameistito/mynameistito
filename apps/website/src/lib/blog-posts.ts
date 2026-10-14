@@ -24,6 +24,30 @@ const markdownFiles = import.meta.glob<string>("../../content/blog/*.md", {
   query: "?raw",
 });
 
+const isCalendarDate = (value: string): boolean => {
+  const [yearText, monthText, dayText] = value.split("-");
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysInMonth = [
+    31,
+    isLeapYear ? 29 : 28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
+  ];
+  const maximumDay = daysInMonth[month - 1];
+  return year > 0 && day > 0 && maximumDay !== undefined && day <= maximumDay;
+};
+
 /** Parse and validate one Markdown post, including its YAML frontmatter.
  * @param source - The Markdown file contents.
  * @returns The parsed post and its validated metadata.
@@ -38,6 +62,9 @@ export const parseBlogPost = (source: string): BlogPost => {
   const { body, metadata: metadataSource } = frontmatter.groups;
   const data: unknown = parseYaml(metadataSource);
   const metadata = decodeUnknownSync(BlogMetadata)(data);
+  if (!isCalendarDate(metadata.publishedAt)) {
+    throw new Error("Blog publishedAt must be a real YYYY-MM-DD date.");
+  }
   return { ...metadata, body: body.trim() };
 };
 
