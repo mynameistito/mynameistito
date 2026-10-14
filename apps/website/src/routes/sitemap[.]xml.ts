@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { blogPosts } from "@/lib/blog-posts";
+
 const publicPaths = [
   "/",
   "/about",
+  "/blog",
   "/contact",
   "/links",
   "/open-source",
@@ -17,7 +20,10 @@ const escapeXml = (value: string) =>
     .replaceAll("'", "&apos;");
 
 const getSitemap = () => {
-  const entries = publicPaths
+  const entries = [
+    ...publicPaths,
+    ...blogPosts.map((post) => `/blog/${post.slug}`),
+  ]
     .map((path) => {
       const url = `https://mynameistito.com${path}`;
       return `  <url><loc>${escapeXml(url)}</loc></url>`;

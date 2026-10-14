@@ -7,12 +7,42 @@ import {
   heartbeatMs,
   keysForVisitor,
   liveCountAfterVisit,
+  postViewCountAfterVisit,
   totalCountAfterVisit,
 } from "./visitor-counting";
 import type { VisitorCounts } from "./visitor-counting";
 
 /** Persistent visitor counter hosted by the website Worker. */
 export class VisitorCounter extends DurableObject {
+  /** Read the unique view total for a post without recording a view.
+   * @param postSlug - The published post's URL slug.
+   * @returns The post's unique view count.
+   */
+  async getPostViews(postSlug: string): Promise<number> {
+    return (await this.ctx.storage.get<number>(`post:${postSlug}:views`)) ?? 0;
+  }
+
+  /** Count one post view per persistent visitor and return its unique total.
+   * @param postSlug - The published post's URL slug.
+   * @param visitorId - The stable visitor identifier.
+   * @returns The post's unique view count.
+   */
+  recordPostView(postSlug: string, visitorId: string): Promise<number> {
+    const viewKey = `post:${postSlug}:visitor:${visitorId}`;
+    const countKey = `post:${postSlug}:views`;
+
+    return this.ctx.storage.transaction(async (transaction) => {
+      const alreadyViewed = await transaction.get<boolean>(viewKey);
+      const current = (await transaction.get<number>(countKey)) ?? 0;
+      const next = postViewCountAfterVisit(current, alreadyViewed ?? false);
+      if (!alreadyViewed) {
+        await transaction.put(viewKey, true);
+        await transaction.put(countKey, next);
+      }
+      return next;
+    });
+  }
+
   /**
    * Record a heartbeat for a visitor and return current counts.
    * @param visitorId - The stable visitor identifier.

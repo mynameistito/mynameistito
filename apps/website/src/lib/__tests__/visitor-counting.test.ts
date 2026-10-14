@@ -8,6 +8,7 @@ import {
   keysForVisitor,
   liveCountAfterVisit,
   liveWindowMs,
+  postViewCountAfterVisit,
   totalCountAfterVisit,
 } from "@/lib/visitor-counting";
 
@@ -33,6 +34,11 @@ describe("visitor counting rules", () => {
   it("counts each visitor once toward the lifetime total", () => {
     expect(totalCountAfterVisit(12, false)).toBe(13);
     expect(totalCountAfterVisit(12, true)).toBe(12);
+  });
+
+  it("counts each visitor once per post", () => {
+    expect(postViewCountAfterVisit(3, false)).toBe(4);
+    expect(postViewCountAfterVisit(3, true)).toBe(3);
   });
 
   it("expires only prior-day data and visitors past the live window", () => {

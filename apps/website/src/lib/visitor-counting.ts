@@ -95,3 +95,13 @@ export const totalCountAfterVisit = (
   current: number,
   alreadyJoined: boolean
 ): number => (alreadyJoined ? current : current + 1);
+
+/** Computes a post's unique view total without recounting a returning reader.
+ * @param current - The persisted total for this post.
+ * @param alreadyViewed - Whether this visitor has already viewed this post.
+ * @returns The next unique view total.
+ */
+export const postViewCountAfterVisit = (
+  current: number,
+  alreadyViewed: boolean
+): number => (alreadyViewed ? current : current + 1);

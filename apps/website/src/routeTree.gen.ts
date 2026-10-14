@@ -28,8 +28,11 @@ import { Route as DotwellKnownHostMetaDotjsonRouteImport } from './routes/[.]wel
 import { Route as DotwellKnownNostrDotjsonRouteImport } from './routes/[.]well-known.nostr[.]json'
 import { Route as DotwellKnownWebfingerRouteImport } from './routes/[.]well-known.webfinger'
 import { Route as DotwellKnownWebfingerDotjsonRouteImport } from './routes/[.]well-known.webfinger[.]json'
+import { Route as ApiBlogViewsRouteImport } from './routes/api.blog-views'
 import { Route as ApiContactRouteImport } from './routes/api.contact'
 import { Route as ApiVisitorsRouteImport } from './routes/api.visitors'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
 import { Route as ProjectsSlugRouteImport } from './routes/projects.$slug'
 import { Route as RRefRouteImport } from './routes/r.$ref'
@@ -132,6 +135,11 @@ const DotwellKnownWebfingerDotjsonRoute =
     path: '/.well-known/webfinger.json',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiBlogViewsRoute = ApiBlogViewsRouteImport.update({
+  id: '/api/blog-views',
+  path: '/api/blog-views',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiContactRoute = ApiContactRouteImport.update({
   id: '/api/contact',
   path: '/api/contact',
@@ -140,6 +148,16 @@ const ApiContactRoute = ApiContactRouteImport.update({
 const ApiVisitorsRoute = ApiVisitorsRouteImport.update({
   id: '/api/visitors',
   path: '/api/visitors',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
@@ -178,10 +196,13 @@ export interface FileRoutesByFullPath {
   '/.well-known/nostr.json': typeof DotwellKnownNostrDotjsonRoute
   '/.well-known/webfinger': typeof DotwellKnownWebfingerRoute
   '/.well-known/webfinger.json': typeof DotwellKnownWebfingerDotjsonRoute
+  '/api/blog-views': typeof ApiBlogViewsRoute
   '/api/contact': typeof ApiContactRoute
   '/api/visitors': typeof ApiVisitorsRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/projects/$slug': typeof ProjectsSlugRoute
   '/r/$ref': typeof RRefRoute
+  '/blog/': typeof BlogIndexRoute
   '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -203,10 +224,13 @@ export interface FileRoutesByTo {
   '/.well-known/nostr.json': typeof DotwellKnownNostrDotjsonRoute
   '/.well-known/webfinger': typeof DotwellKnownWebfingerRoute
   '/.well-known/webfinger.json': typeof DotwellKnownWebfingerDotjsonRoute
+  '/api/blog-views': typeof ApiBlogViewsRoute
   '/api/contact': typeof ApiContactRoute
   '/api/visitors': typeof ApiVisitorsRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/projects/$slug': typeof ProjectsSlugRoute
   '/r/$ref': typeof RRefRoute
+  '/blog': typeof BlogIndexRoute
   '/projects': typeof ProjectsIndexRoute
 }
 export interface FileRoutesById {
@@ -230,10 +254,13 @@ export interface FileRoutesById {
   '/.well-known/nostr.json': typeof DotwellKnownNostrDotjsonRoute
   '/.well-known/webfinger': typeof DotwellKnownWebfingerRoute
   '/.well-known/webfinger.json': typeof DotwellKnownWebfingerDotjsonRoute
+  '/api/blog-views': typeof ApiBlogViewsRoute
   '/api/contact': typeof ApiContactRoute
   '/api/visitors': typeof ApiVisitorsRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/projects/$slug': typeof ProjectsSlugRoute
   '/r/$ref': typeof RRefRoute
+  '/blog/': typeof BlogIndexRoute
   '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRouteTypes {
@@ -258,10 +285,13 @@ export interface FileRouteTypes {
     | '/.well-known/nostr.json'
     | '/.well-known/webfinger'
     | '/.well-known/webfinger.json'
+    | '/api/blog-views'
     | '/api/contact'
     | '/api/visitors'
+    | '/blog/$slug'
     | '/projects/$slug'
     | '/r/$ref'
+    | '/blog/'
     | '/projects/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -283,10 +313,13 @@ export interface FileRouteTypes {
     | '/.well-known/nostr.json'
     | '/.well-known/webfinger'
     | '/.well-known/webfinger.json'
+    | '/api/blog-views'
     | '/api/contact'
     | '/api/visitors'
+    | '/blog/$slug'
     | '/projects/$slug'
     | '/r/$ref'
+    | '/blog'
     | '/projects'
   id:
     | '__root__'
@@ -309,10 +342,13 @@ export interface FileRouteTypes {
     | '/.well-known/nostr.json'
     | '/.well-known/webfinger'
     | '/.well-known/webfinger.json'
+    | '/api/blog-views'
     | '/api/contact'
     | '/api/visitors'
+    | '/blog/$slug'
     | '/projects/$slug'
     | '/r/$ref'
+    | '/blog/'
     | '/projects/'
   fileRoutesById: FileRoutesById
 }
@@ -336,9 +372,12 @@ export interface RootRouteChildren {
   DotwellKnownNostrDotjsonRoute: typeof DotwellKnownNostrDotjsonRoute
   DotwellKnownWebfingerRoute: typeof DotwellKnownWebfingerRoute
   DotwellKnownWebfingerDotjsonRoute: typeof DotwellKnownWebfingerDotjsonRoute
+  ApiBlogViewsRoute: typeof ApiBlogViewsRoute
   ApiContactRoute: typeof ApiContactRoute
   ApiVisitorsRoute: typeof ApiVisitorsRoute
+  BlogSlugRoute: typeof BlogSlugRoute
   RRefRoute: typeof RRefRoute
+  BlogIndexRoute: typeof BlogIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -476,6 +515,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotwellKnownWebfingerDotjsonRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/blog-views': {
+      id: '/api/blog-views'
+      path: '/api/blog-views'
+      fullPath: '/api/blog-views'
+      preLoaderRoute: typeof ApiBlogViewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/contact': {
       id: '/api/contact'
       path: '/api/contact'
@@ -488,6 +534,20 @@ declare module '@tanstack/react-router' {
       path: '/api/visitors'
       fullPath: '/api/visitors'
       preLoaderRoute: typeof ApiVisitorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/projects/': {
@@ -548,9 +608,12 @@ const rootRouteChildren: RootRouteChildren = {
   DotwellKnownNostrDotjsonRoute: DotwellKnownNostrDotjsonRoute,
   DotwellKnownWebfingerRoute: DotwellKnownWebfingerRoute,
   DotwellKnownWebfingerDotjsonRoute: DotwellKnownWebfingerDotjsonRoute,
+  ApiBlogViewsRoute: ApiBlogViewsRoute,
   ApiContactRoute: ApiContactRoute,
   ApiVisitorsRoute: ApiVisitorsRoute,
+  BlogSlugRoute: BlogSlugRoute,
   RRefRoute: RRefRoute,
+  BlogIndexRoute: BlogIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
