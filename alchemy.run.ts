@@ -46,6 +46,9 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
       GITHUB_TOKEN: ConfigRedacted("WORKER_GITHUB_TOKEN"),
       MDFROMX_API_KEY: ConfigRedacted("MDFROMX_API_KEY"),
       OPEN_SOURCE_KV: openSourceKV,
+      PACKAGES_REFRESH: Workflow("PackagesRefresh", {
+        className: "PackagesRefreshWorkflow",
+      }),
       RESEND_API_KEY: ConfigRedacted("RESEND_API_KEY"),
       RESEND_FROM: ConfigString("RESEND_FROM"),
       TOKSCALE_REFRESH: Workflow("TokscaleRefresh", {
