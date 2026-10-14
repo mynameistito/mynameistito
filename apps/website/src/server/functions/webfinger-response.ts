@@ -25,6 +25,7 @@ export const webfingerResponse = (
   document: WebfingerDocument
 ): Promise<Response> => {
   const resources = new URL(request.url).searchParams.getAll("resource");
+
   const resource =
     resources.length === 1 && resources[0] !== undefined
       ? decodeWebfingerResource({ value: resources[0] })
@@ -38,7 +39,9 @@ export const webfingerResponse = (
       })
     );
   }
+
   const lookup = resolveWebfingerResource(resource.value);
+
   if (lookup._tag === "NotFound") {
     return Promise.resolve(
       Response.json(noMatchError, {

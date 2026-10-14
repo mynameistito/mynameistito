@@ -21,6 +21,7 @@ export type VisitorCounts = Schema.Schema.Type<typeof VisitorCountsSchema>;
  */
 export const keysForVisitor = (timestamp: number, visitorId: string) => {
   const today = new Date(timestamp).toISOString().slice(0, 10);
+
   return {
     daily: `daily:${today}`,
     joined: `joined:${visitorId}`,
@@ -39,9 +40,9 @@ export const expiredLiveVisitorKeys = (
   liveEntries: Iterable<readonly [string, number]>,
   now: number
 ): readonly string[] =>
-  [...liveEntries]
-    .filter(([, lastSeen]) => now - lastSeen > liveWindowMs)
-    .map(([key]) => key);
+  [...liveEntries].flatMap(([key, lastSeen]) =>
+    now - lastSeen > liveWindowMs ? [key] : []
+  );
 
 /** Counts active visitors after expiring leases and recording this heartbeat.
  * @param activeCount - Number of stored live visitor leases before cleanup.
@@ -69,10 +70,13 @@ export const expiredVisitorKeys = (input: {
   const daily = [...input.dailyKeys].filter(
     (key) => !key.endsWith(input.today)
   );
+
   const seen = [...input.seenKeys].filter(
     (key) => !key.startsWith(`seen:${input.today}:`)
   );
+
   const live = expiredLiveVisitorKeys(input.liveEntries, input.now);
+
   return [...daily, ...seen, ...live];
 };
 

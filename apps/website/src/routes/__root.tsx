@@ -15,13 +15,18 @@ import { socialMeta } from "@/lib/social-meta";
 import appCss from "@/styles.css?url";
 
 if (import.meta.env.DEV && typeof window !== "undefined") {
-  void import("react-grab");
+  try {
+    await import("react-grab");
+  } catch (error) {
+    console.error("Unable to load the React Grab development helper.", error);
+  }
 }
 
 const RootDocument = ({ children }: { children: React.ReactNode }) => {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
+
   const isHome = pathname === "/" || pathname === "/links";
   const isProjectIndex = pathname === "/projects" || pathname === "/projects/";
   const isProjectDetail = pathname.startsWith("/projects/") && !isProjectIndex;

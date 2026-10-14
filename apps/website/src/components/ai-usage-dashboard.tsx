@@ -35,6 +35,7 @@ import type {
 import type { TokscaleSnapshot } from "@/lib/tokscale";
 
 const numberFormat = new Intl.NumberFormat("en-US");
+
 const currencyFormat = new Intl.NumberFormat("en-US", {
   currency: "USD",
   maximumFractionDigits: 2,
@@ -57,8 +58,10 @@ const formatDate = (value: string): string =>
 
 const monthLabels = (weeks: readonly CalendarWeek[]) => {
   const labels: { label: string; week: number }[] = [];
+
   for (const [weekIndex, week] of weeks.entries()) {
     const firstDayOfMonth = week.find((day) => day?.date.endsWith("-01"));
+
     if (firstDayOfMonth) {
       labels.push({
         label: new Intl.DateTimeFormat("en", {
@@ -69,6 +72,7 @@ const monthLabels = (weeks: readonly CalendarWeek[]) => {
       });
     }
   }
+
   return labels;
 };
 
@@ -79,9 +83,11 @@ const ActivityCalendar = ({
 }) => {
   const weeks = buildCalendar(contributions);
   const labels = monthLabels(weeks);
+
   const calendarDays = weeks
     .flat()
     .filter((day): day is CalendarDay => day !== null);
+
   const count = calendarDays.reduce((total, day) => total + day.tokens, 0);
   const activeDays = calendarDays.filter((day) => day.tokens > 0).length;
 
@@ -167,6 +173,7 @@ const UsageRanking = ({
 }) => {
   const maxTokens = Math.max(...rows.map((row) => row.tokens), 1);
   const Icon = icon === "harness" ? Cpu : Sparkles;
+
   return (
     <Card>
       <CardHeader>
@@ -251,6 +258,7 @@ export const AiUsageDashboard = ({
   const models = summarizeModels(data.contributions);
   const latestDay = latestUsageDay(data.contributions);
   const latestUpdate = new Date(snapshot.refreshedAt);
+
   return (
     <main className="page-shell pt-page-top-header pb-page-bottom">
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">

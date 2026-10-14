@@ -27,7 +27,7 @@ const runGitHubSdk = <A, E>(
     operation,
     Layer.mergeAll(
       FetchHttpClient.layer,
-      credentials({ token, userAgent: githubUserAgent }),
+      credentials({ token: Redacted.make(token), userAgent: githubUserAgent }),
       GithubProtocol
     )
   ).pipe(
@@ -164,6 +164,7 @@ type GitHubUser = Exclude<
 
 const toProfile = (user: GitHubUser): Profile => {
   const calendar = user.contributionsCollection.contributionCalendar;
+
   return {
     name: user.name ?? user.login,
     handle: user.login,
@@ -224,6 +225,7 @@ export class GitHub extends Context.Service<
       GitHub,
       Effect.gen(function* layerWithoutDependencies() {
         const baseHttpClient = yield* HttpClient.HttpClient;
+
         const apiClient = baseHttpClient.pipe(
           HttpClient.mapRequest((request) => {
             let withHeaders = HttpClientRequest.setHeader(
@@ -231,6 +233,7 @@ export class GitHub extends Context.Service<
               "User-Agent",
               githubUserAgent
             );
+
             if (token) {
               withHeaders = HttpClientRequest.setHeader(
                 withHeaders,
@@ -238,10 +241,12 @@ export class GitHub extends Context.Service<
                 `Bearer ${Redacted.value(token)}`
               );
             }
+
             return withHeaders;
           }),
           HttpClient.filterStatusOk
         );
+
         const profilePageClient = baseHttpClient.pipe(
           HttpClient.mapRequest((request) =>
             HttpClientRequest.setHeader(request, "User-Agent", githubUserAgent)
@@ -277,6 +282,7 @@ export class GitHub extends Context.Service<
           searchUrl.searchParams.set("per_page", "100");
           searchUrl.searchParams.set("page", String(page));
           searchUrl.searchParams.set("sort", "updated");
+
           return readJson(
             "searchPullRequests",
             SearchResponseSchema,
@@ -296,6 +302,7 @@ export class GitHub extends Context.Service<
                   page,
                 })
               );
+
               return repositories.map((repository) => ({
                 name: repository.name,
                 full_name: repository.full_name,
@@ -309,6 +316,7 @@ export class GitHub extends Context.Service<
                 owner_avatar_url: repository.owner.avatar_url,
               }));
             }
+
             const repositories = yield* readJson(
               "listRepositories",
               Schema.Array(RepositorySchema),
@@ -316,12 +324,14 @@ export class GitHub extends Context.Service<
                 `https://api.github.com/users/${encodeURIComponent(username)}/repos?per_page=${perPage}&page=${page}&type=owner`
               )
             );
+
             return repositories.map(({ owner, ...repository }) => ({
               ...repository,
               owner_avatar_url: owner.avatar_url,
             }));
           }
         );
+
         const profilePage = profilePageClient
           .get(`https://github.com/${encodeURIComponent(username)}`)
           .pipe(
@@ -331,6 +341,7 @@ export class GitHub extends Context.Service<
                 new GitHubRequestError({ operation: "profilePage", cause })
             )
           );
+
         const searchPullRequests = Effect.fn("GitHub.searchPullRequests")(
           function* searchPullRequests() {
             const fetchDatePartitions = Effect.fnUntraced(
@@ -343,9 +354,11 @@ export class GitHub extends Context.Service<
               > {
                 const query = `author:${username} type:pr created:${startDate}..${endDate}`;
                 const firstPage = yield* fetchPullRequestSearchPage(query, 1);
+
                 if (firstPage.total_count > 1000) {
                   const start = Date.parse(`${startDate}T00:00:00Z`);
                   const end = Date.parse(`${endDate}T00:00:00Z`);
+
                   if (start >= end) {
                     return yield* new GitHubRequestError({
                       operation: "searchPullRequests",
@@ -354,14 +367,17 @@ export class GitHub extends Context.Service<
                       ),
                     });
                   }
+
                   const middle = new Date(Math.floor((start + end) / 2))
                     .toISOString()
                     .slice(0, 10);
+
                   const nextDate = new Date(
                     Date.parse(`${middle}T00:00:00Z`) + 86_400_000
                   )
                     .toISOString()
                     .slice(0, 10);
+
                   return [
                     ...(yield* fetchDatePartitions(startDate, middle)),
                     ...(yield* fetchDatePartitions(nextDate, endDate)),
@@ -370,30 +386,38 @@ export class GitHub extends Context.Service<
 
                 const items = [...firstPage.items];
                 const totalPages = Math.ceil(firstPage.total_count / 100);
+
                 for (let page = 2; page <= totalPages; page += 1) {
                   const result = yield* fetchPullRequestSearchPage(query, page);
                   items.push(...result.items);
                 }
+
                 return items;
               }
             );
+
             const query = `author:${username} type:pr`;
             const firstPage = yield* fetchPullRequestSearchPage(query, 1);
+
             if (firstPage.total_count > 1000) {
               return yield* fetchDatePartitions(
                 "2008-01-01",
                 new Date().toISOString().slice(0, 10)
               );
             }
+
             const items = [...firstPage.items];
             const totalPages = Math.ceil(firstPage.total_count / 100);
+
             for (let page = 2; page <= totalPages; page += 1) {
               const result = yield* fetchPullRequestSearchPage(query, page);
               items.push(...result.items);
             }
+
             return items;
           }
         )();
+
         const repository = Effect.fn("GitHub.repository")(function* repository(
           owner: string,
           name: string
@@ -403,12 +427,14 @@ export class GitHub extends Context.Service<
               Redacted.value(token),
               repos.get({ owner, repo: name })
             );
+
             return {
               full_name: response.full_name,
               stargazers_count: response.stargazers_count,
               owner_avatar_url: response.owner.avatar_url,
             };
           }
+
           const response = yield* readJson(
             "repository",
             RepositoryDetailSchema,
@@ -416,12 +442,14 @@ export class GitHub extends Context.Service<
               `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(name)}`
             )
           );
+
           return {
             full_name: response.full_name,
             stargazers_count: response.stargazers_count,
             owner_avatar_url: response.owner.avatar_url,
           };
         });
+
         const profile = Effect.fn("GitHub.profile")(function* profile(
           login: string,
           from: string,
@@ -453,13 +481,16 @@ export class GitHub extends Context.Service<
               })
             )
           );
+
           const { user } = response.data;
+
           if (!user) {
             return yield* new GitHubRequestError({
               operation: "profile",
               cause: new Error("GitHub profile was not found."),
             });
           }
+
           return toProfile(user);
         });
 

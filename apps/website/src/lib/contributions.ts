@@ -62,6 +62,7 @@ const snapshotRefreshIntervalMs = 6 * 60 * 60 * 1000;
 const contributionLogSource = "open-source";
 const githubFetchPhase = "github-fetch";
 const snapshotPublishPhase = "snapshot-publish";
+
 // Set featured: true for a full GitHub slug, e.g. "owner/repo".
 const repositoryOverrides = new Map<
   string,
@@ -102,6 +103,7 @@ const repositoryOverrides = new Map<
 const isRepositoryIgnored = (repo: string): boolean => {
   const normalizedRepo = repo.toLowerCase();
   const [owner] = normalizedRepo.split("/");
+
   return (
     repositoryOverrides.get(normalizedRepo)?.ignored ??
     (owner ? repositoryOverrides.get(`${owner}/*`)?.ignored : undefined) ??
@@ -115,11 +117,14 @@ const summarizeGitHubFailure = (cause: unknown): string => {
       "response" in cause.reason
         ? `HTTP ${cause.reason.response.status}: `
         : "";
+
     return `${responseStatus}${cause.message}`;
   }
+
   if (cause instanceof Error) {
     return `${cause.name}: ${cause.message}`;
   }
+
   return String(cause);
 };
 
@@ -133,12 +138,14 @@ const fetchContributionRepositories = Effect.gen(
     const github = yield* GitHub;
     const searchResults = yield* github.searchPullRequests;
     const groups = new Map<string, typeof searchResults>();
+
     for (const item of searchResults) {
       const group = groups.get(item.repository_url) ?? [];
       groups.set(item.repository_url, [...group, item]);
     }
 
     const results = [...groups.entries()];
+
     const contributionData = yield* Effect.all(
       results.map(([repositoryUrl, items]) =>
         Effect.gen(function* loadContributionRepository() {
@@ -146,12 +153,15 @@ const fetchContributionRepositories = Effect.gen(
             .split("/")
             .filter(Boolean)
             .slice(-2);
+
           if (!(owner && name)) {
             return null;
           }
+
           if (isRepositoryIgnored(`${owner}/${name}`)) {
             return null;
           }
+
           const repository = yield* github
             .repository(owner, name)
             .pipe(
@@ -161,16 +171,20 @@ const fetchContributionRepositories = Effect.gen(
                   : Effect.fail(error)
               )
             );
+
           if (!repository) {
             return null;
           }
+
           const pullRequests = items.map((item): ContributionPullRequest => {
             let state: PullRequestState = "Closed";
+
             if (item.pull_request?.merged_at) {
               state = "Merged";
             } else if (item.state === "open") {
               state = "Open";
             }
+
             return {
               title: item.title,
               state,
@@ -178,6 +192,7 @@ const fetchContributionRepositories = Effect.gen(
               url: item.html_url,
             };
           });
+
           return {
             featured:
               repositoryOverrides.get(repository.full_name.toLowerCase())
@@ -194,12 +209,15 @@ const fetchContributionRepositories = Effect.gen(
       ),
       { concurrency: 10 }
     );
+
     const repositories = contributionData.flatMap((repository) => {
       if (repository === null) {
         return [];
       }
+
       return [repository];
     });
+
     return repositories.toSorted((first, second) => second.stars - first.stars);
   }
 );
@@ -207,15 +225,19 @@ const fetchContributionRepositories = Effect.gen(
 const startContributionsRefresh = Effect.fn("startContributionsRefresh")(
   function* startContributionsRefresh(env: AppEnv) {
     const refresh = env.CONTRIBUTIONS_REFRESH;
+
     if (!refresh) {
       console.warn(
         "[open-source] Unable to start contribution refresh: Workflow binding is not configured."
       );
+
       return;
     }
+
     const now = yield* DateTime.now;
     const hour = Math.floor(now.epochMilliseconds / 3_600_000);
     const workflowId = `contributions-refresh-${hour}`;
+
     const result = yield* Effect.result(
       Effect.tryPromise({
         try: () =>
@@ -229,6 +251,7 @@ const startContributionsRefresh = Effect.fn("startContributionsRefresh")(
             : new Error("Workflow start failed", { cause }),
       })
     );
+
     if (result._tag === "Failure") {
       console.warn("[open-source] Unable to start contribution refresh.", {
         workflowId,
@@ -243,8 +266,10 @@ export const loadContributions = Effect.fn("loadContributions")(
   function* loadContributions(bindings?: AppEnv) {
     const env = bindings ?? (yield* getAppEnv());
     const kv = env.OPEN_SOURCE_KV;
+
     if (!kv) {
       console.error("[open-source] The KV snapshot binding is not configured.");
+
       return [];
     }
 
@@ -257,13 +282,18 @@ export const loadContributions = Effect.fn("loadContributions")(
             : new Error("KV read failed", { cause }),
       })
     );
+
     if (stored._tag === "Failure") {
       console.error("[open-source] Unable to read the contribution snapshot.");
+
       return [];
     }
+
     const snapshotText = stored.success;
+
     if (snapshotText === null) {
       yield* startContributionsRefresh(env);
+
       return [];
     }
 
@@ -278,19 +308,24 @@ export const loadContributions = Effect.fn("loadContributions")(
         Effect.flatMap(Schema.decodeUnknownEffect(ContributionSnapshotSchema))
       )
     );
+
     if (decoded._tag === "Failure") {
       console.error("[open-source] The contribution snapshot is invalid.");
       yield* startContributionsRefresh(env);
+
       return [];
     }
+
     const refreshedAt = Date.parse(decoded.success.refreshedAt);
     const now = yield* DateTime.now;
+
     if (
       !Number.isFinite(refreshedAt) ||
       now.epochMilliseconds - refreshedAt >= snapshotRefreshIntervalMs
     ) {
       yield* startContributionsRefresh(env);
     }
+
     return decoded.success.repositories.filter(
       (repository) => !isRepositoryIgnored(repository.repo)
     );
@@ -304,6 +339,7 @@ export const refreshContributions = Effect.fn("refreshContributions")(
     githubLayer?: Layer.Layer<GitHub>
   ) {
     const kv = env.OPEN_SOURCE_KV;
+
     if (!kv) {
       return yield* Effect.fail(
         new Error("The open-source KV binding is not configured.")
@@ -316,6 +352,7 @@ export const refreshContributions = Effect.fn("refreshContributions")(
         source: contributionLogSource,
       })
     );
+
     const repositories = yield* fetchContributionRepositories.pipe(
       Effect.provide(
         githubLayer ??
@@ -337,10 +374,12 @@ export const refreshContributions = Effect.fn("refreshContributions")(
         )
       )
     );
+
     const pullRequestCount = repositories.reduce(
       (total, repository) => total + repository.pullRequests.length,
       0
     );
+
     yield* Effect.logInfo("Contribution refresh GitHub fetch completed.").pipe(
       Effect.annotateLogs({
         phase: githubFetchPhase,
@@ -350,10 +389,12 @@ export const refreshContributions = Effect.fn("refreshContributions")(
       })
     );
     const now = yield* DateTime.now;
+
     const snapshot: ContributionSnapshot = {
       refreshedAt: DateTime.formatIso(now),
       repositories,
     };
+
     yield* Effect.logInfo("Contribution snapshot publish started.").pipe(
       Effect.annotateLogs({
         phase: snapshotPublishPhase,
@@ -378,6 +419,7 @@ export const refreshContributions = Effect.fn("refreshContributions")(
         source: contributionLogSource,
       })
     );
+
     return {
       refreshedAt: snapshot.refreshedAt,
       repositoryCount: repositories.length,

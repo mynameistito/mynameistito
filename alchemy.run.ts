@@ -17,9 +17,11 @@ import { gen } from "effect/Effect";
 const WebsiteResource = gen(function* deployWebsiteResource() {
   const stack = yield* Stack;
   const isProduction = stack.stage === "prod";
+
   const openSourceKV = yield* KV.Namespace("OpenSourceContributions", {
     title: `mynameistito-${stack.stage}-open-source-contributions`,
   });
+
   const turnstileDomains = ["localhost", "127.0.0.1", "mynameistito.com"];
 
   if (!isProduction) {
@@ -93,6 +95,7 @@ export default Stack(
   },
   gen(function* deployWebsite() {
     const website = yield* WebsiteResource;
+
     return { url: website.url };
   })
 );

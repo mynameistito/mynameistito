@@ -7,6 +7,7 @@ import { getPackages } from "@/server/functions/packages";
 
 const PackagesPage = () => {
   const packages = Route.useLoaderData();
+
   const weeklyDownloads = packages.reduce(
     (total, item) => total + item.weeklyDownloads,
     0

@@ -15,8 +15,10 @@ const redirects = new Map<string, string>([
   ["warp", "https://app.warp.dev/referral/3PGX4L"],
   ["wisprflow", "https://wisprflow.ai/r/MY71"],
 ]);
+
 const redirectRef = ({ params }: { params: { ref: string } }) => {
   const destination = redirects.get(params.ref);
+
   return destination
     ? new Response(null, { headers: { Location: destination }, status: 302 })
     : new Response("Not Found", { status: 404 });

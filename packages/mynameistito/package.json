@@ -46,7 +46,7 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "@typescript/native": "catalog:",
-    "tsdown": "^0.23.0",
+    "tsdown": "^0.23.1",
     "typescript": "catalog:"
   },
   "engines": {

@@ -142,9 +142,11 @@ const isWebfingerUri = (
   if (resource.trim() !== resource || /%(?![\da-f]{2})/iu.test(resource)) {
     return false;
   }
+
   if (/^acct:/iu.test(resource)) {
     return /^acct:[^@\s]+@[^@\s]+$/iu.test(resource);
   }
+
   return URL.canParse(resource);
 };
 
@@ -168,6 +170,7 @@ const normalizePercentEncoding = (value: string): string =>
     const character = String.fromCodePoint(
       Number.parseInt(encoded.slice(1), 16)
     );
+
     return /^[a-z\d._~-]$/iu.test(character)
       ? character
       : encoded.toUpperCase();
@@ -175,16 +178,20 @@ const normalizePercentEncoding = (value: string): string =>
 
 const normalizeResource = (resource: WebfingerResource): string => {
   const { value } = resource;
+
   if (/^acct:/iu.test(value)) {
     const account = value.slice(value.indexOf(":") + 1);
     const separator = account.indexOf("@");
     const username = normalizePercentEncoding(account.slice(0, separator));
     const host = normalizePercentEncoding(account.slice(separator + 1));
+
     return `acct:${username}@${host.toLowerCase()}`;
   }
+
   if (/^https?:/iu.test(value)) {
     return new URL(value).href;
   }
+
   return value;
 };
 

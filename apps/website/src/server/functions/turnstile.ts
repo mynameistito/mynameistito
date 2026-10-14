@@ -39,6 +39,7 @@ export const verifyTurnstile = Effect.fn("Turnstile.verify")(
       response: input.token,
       secret: Redacted.value(input.secret),
     });
+
     if (input.remoteIp) {
       body.set("remoteip", input.remoteIp);
     }
@@ -53,6 +54,7 @@ export const verifyTurnstile = Effect.fn("Turnstile.verify")(
         }),
       catch: () => new Error("Turnstile Siteverify request failed"),
     }).pipe(Effect.option);
+
     if (Option.isNone(response) || !response.value.ok) {
       return false;
     }
@@ -61,6 +63,7 @@ export const verifyTurnstile = Effect.fn("Turnstile.verify")(
       try: () => response.value.json(),
       catch: () => new Error("Turnstile Siteverify response was not JSON"),
     }).pipe(Effect.option);
+
     if (Option.isNone(responseBody)) {
       return false;
     }
@@ -68,6 +71,7 @@ export const verifyTurnstile = Effect.fn("Turnstile.verify")(
     const result = yield* decodeUnknownEffect(SiteverifyResponseSchema)(
       responseBody.value
     ).pipe(Effect.option);
+
     if (Option.isNone(result)) {
       return false;
     }
@@ -91,9 +95,11 @@ export const verifyConfiguredTurnstile = Effect.fn(
   "Turnstile.verifyConfigured"
 )(function* verifyConfiguredTurnstile(input: VerifyConfiguredTurnstileInput) {
   const loadedEnv = yield* getAppEnv().pipe(Effect.option);
+
   if (Option.isNone(loadedEnv) || !loadedEnv.value.TURNSTILE_SECRET) {
     return false;
   }
+
   return yield* verifyTurnstile({
     ...input,
     secret: loadedEnv.value.TURNSTILE_SECRET,

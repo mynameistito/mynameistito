@@ -7,6 +7,7 @@ import { getAppEnv } from "@/env";
 import { getBlogPost } from "@/lib/blog-posts";
 
 const BlogViewRequest = Schema.Struct({ slug: Schema.String });
+
 const unavailable = () =>
   Response.json({ error: "Post views are unavailable." }, { status: 503 });
 
@@ -14,6 +15,7 @@ const postHandler = ({ request }: { request: Request }) =>
   Effect.runPromise(
     Effect.gen(function* recordBlogView() {
       const origin = request.headers.get("origin");
+
       if (origin !== new URL(request.url).origin) {
         return Response.json(
           { error: "Invalid request origin." },
@@ -25,19 +27,25 @@ const postHandler = ({ request }: { request: Request }) =>
         Effect.flatMap(decodeUnknownEffect(BlogViewRequest)),
         catchEffect(() => Effect.succeed(null))
       );
+
       const publishedPost = decoded && getBlogPost(decoded.slug);
+
       if (!publishedPost) {
         return Response.json({ error: "Post not found." }, { status: 404 });
       }
 
       const cookie = request.headers.get("cookie") ?? "";
+
       const existingId = cookie.match(
         /(?:^|;\s*)site_visitor=(?<visitorId>[\da-f-]{36})/iu
       )?.groups?.visitorId;
+
       const visitorId =
         existingId ?? (yield* Effect.sync(() => crypto.randomUUID()));
+
       const env = Option.getOrUndefined(yield* getAppEnv().pipe(Effect.option));
       const counter = env?.VISITOR_COUNTER?.getByName("site");
+
       if (!counter) {
         return unavailable();
       }
@@ -45,6 +53,7 @@ const postHandler = ({ request }: { request: Request }) =>
       const views = yield* Effect.tryPromise(() =>
         counter.recordPostView(publishedPost.slug, visitorId)
       ).pipe(Effect.option);
+
       if (Option.isNone(views)) {
         return unavailable();
       }
@@ -66,21 +75,26 @@ const get = ({ request }: { request: Request }) =>
     Effect.gen(function* getBlogViews() {
       const slug = new URL(request.url).searchParams.get("slug");
       const publishedPost = slug ? getBlogPost(slug) : undefined;
+
       if (!publishedPost) {
         return Response.json({ error: "Post not found." }, { status: 404 });
       }
 
       const env = Option.getOrUndefined(yield* getAppEnv().pipe(Effect.option));
       const counter = env?.VISITOR_COUNTER?.getByName("site");
+
       if (!counter) {
         return unavailable();
       }
+
       const views = yield* Effect.tryPromise(() =>
         counter.getPostViews(publishedPost.slug)
       ).pipe(Effect.option);
+
       if (Option.isNone(views)) {
         return unavailable();
       }
+
       return Response.json(
         { views: views.value },
         { headers: { "cache-control": "no-store" } }

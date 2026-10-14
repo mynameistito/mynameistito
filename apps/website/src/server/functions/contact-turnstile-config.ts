@@ -10,9 +10,11 @@ export const getTurnstileSitekey = createServerFn({
   Effect.runPromise(
     Effect.gen(function* loadSitekey() {
       const loadedEnv = yield* getAppEnv().pipe(Effect.option);
+
       if (Option.isNone(loadedEnv)) {
         return null;
       }
+
       return loadedEnv.value.TURNSTILE_SITEKEY ?? null;
     })
   )

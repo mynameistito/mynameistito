@@ -179,12 +179,14 @@ export class Tokscale extends Context.Service<
         const httpClient = (yield* HttpClient.HttpClient).pipe(
           HttpClient.filterStatusOk
         );
+
         const profile = Effect.fn("Tokscale.profile")(function* profile(
           username: string
         ) {
           const request = HttpClientRequest.get(
             `https://tokscale.ai/api/users/${encodeURIComponent(username)}`
           ).pipe(HttpClientRequest.setHeader("Accept", "application/json"));
+
           const payload = yield* httpClient.execute(request).pipe(
             Effect.flatMap(HttpClientResponse.schemaBodyJson(Schema.Unknown)),
             Effect.mapError(
@@ -192,8 +194,10 @@ export class Tokscale extends Context.Service<
                 new TokscaleRequestError({ operation: "profile", cause })
             )
           );
+
           return yield* decodeTokscaleResponse(payload);
         });
+
         return Tokscale.of({ profile });
       })
     );

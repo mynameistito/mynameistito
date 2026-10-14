@@ -14,6 +14,7 @@ const Home = () => (
 
 const HomeContent = () => {
   const projects = Route.useLoaderData();
+
   return (
     <main className="page-shell pt-page-top pb-page-bottom">
       <SiteHeader />

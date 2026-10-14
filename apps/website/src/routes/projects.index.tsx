@@ -9,6 +9,7 @@ const ProjectsPage = () => {
   const projects = Route.useLoaderData().filter(isProjectVisible);
   const featuredProjects = projects.filter((project) => project.featured);
   const otherProjects = projects.filter((project) => !project.featured);
+
   return (
     <main className="page-shell pt-page-top-header pb-page-bottom">
       <section className="mt-section">

@@ -32,13 +32,16 @@ const profile: TokscaleProfile = {
 describe("Tokscale snapshot refresh", () => {
   it("publishes a fully validated profile to the shared KV namespace", async () => {
     const values = new Map<string, string>();
+
     const kv: OpenSourceKVBinding = {
       get: (key) => Promise.resolve(values.get(key) ?? null),
       put: (key, value) => {
         values.set(key, value);
+
         return Promise.resolve();
       },
     };
+
     const tokscaleLayer = Layer.succeed(
       Tokscale,
       Tokscale.of({ profile: () => Effect.succeed(profile) })
@@ -47,6 +50,7 @@ describe("Tokscale snapshot refresh", () => {
     const result = await Effect.runPromise(
       refreshTokscale(createAppEnv({ OPEN_SOURCE_KV: kv }), tokscaleLayer)
     );
+
     const saved = values.get(snapshotKey);
 
     expect(result.contributionDays).toBe(0);
@@ -65,13 +69,16 @@ describe("Tokscale snapshot refresh", () => {
 
   it("uses a separate hourly ID for on-demand refreshes", async () => {
     const workflowIds: string[] = [];
+
     const kv: OpenSourceKVBinding = {
       get: () => Promise.resolve(null),
       put: () => Promise.resolve(),
     };
+
     const tokscaleRefresh = {
       create: ({ id }: { readonly id: string }) => {
         workflowIds.push(id);
+
         return Promise.resolve({ id });
       },
       get: () =>
@@ -99,10 +106,12 @@ describe("Tokscale snapshot refresh", () => {
 
   it("restarts an errored on-demand workflow when its ID already exists", async () => {
     const restartedIds: string[] = [];
+
     const kv: OpenSourceKVBinding = {
       get: () => Promise.resolve(null),
       put: () => Promise.resolve(),
     };
+
     const tokscaleRefresh = {
       create: ({ id }: { readonly id: string }) =>
         Promise.reject(new Error(`Workflow ${id} already exists`)),
@@ -111,6 +120,7 @@ describe("Tokscale snapshot refresh", () => {
           status: () => Promise.resolve({ status: "errored" }),
           restart: () => {
             restartedIds.push(id);
+
             return Promise.resolve();
           },
         }),

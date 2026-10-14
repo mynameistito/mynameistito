@@ -15,6 +15,7 @@ describe("project catalog", () => {
     const repositories = await Effect.runPromise(
       collectRepositoryPages((page, perPage) => {
         calls.push({ page, perPage });
+
         return Effect.succeed(page === 1 ? firstPage : [100]);
       })
     );

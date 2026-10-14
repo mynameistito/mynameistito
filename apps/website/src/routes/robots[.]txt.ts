@@ -6,6 +6,7 @@ Disallow: /api/
 
 Sitemap: https://mynameistito.com/sitemap.xml
 `;
+
 const getRobots = () =>
   new Response(robots, { headers: { "Content-Type": "text/plain" } });
 

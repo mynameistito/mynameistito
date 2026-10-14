@@ -11,6 +11,7 @@ export const Route = createFileRoute("/og-image")({
       GET({ request }) {
         const url = new URL(request.url);
         const title = truncate(url.searchParams.get("title"), "Tito", 100);
+
         const description = truncate(
           url.searchParams.get("description"),
           "A developer from New Zealand who likes messing with things and seeing where they go.",

@@ -5,9 +5,11 @@ import { webfingerResponse } from "@/server/functions/webfinger-response";
 
 const responseFor = (resource?: string) => {
   const url = new URL("https://mynameistito.com/.well-known/webfinger");
+
   if (resource !== undefined) {
     url.searchParams.set("resource", resource);
   }
+
   return webfingerResponse(new Request(url), webfinger);
 };
 
@@ -23,6 +25,7 @@ describe("WebFinger response", () => {
   it("returns a bad request when the resource is missing or malformed", async () => {
     const missingResponse = await responseFor();
     const malformedResponse = await responseFor("not a URI");
+
     const malformedAccountResponse = await responseFor(
       "acct:contact%ZZ@mynameistito.com"
     );
@@ -47,9 +50,11 @@ describe("WebFinger response", () => {
 
   it("normalizes acct URI hosts and unreserved escapes, preserving username case", async () => {
     const normalizedHost = await responseFor("ACCT:contact@MYNAMEISTITO.COM");
+
     const normalizedEscape = await responseFor(
       "acct:cont%61ct@mynameistito.com"
     );
+
     const differentUsernameCase = await responseFor(
       "acct:Contact@mynameistito.com"
     );

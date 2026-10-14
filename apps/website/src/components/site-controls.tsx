@@ -2,11 +2,13 @@ import { Moon, Sun, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useSyncExternalStore } from "react";
 
 type Theme = "dark" | "light";
+
 const settingsEvent = "site-settings-change";
 
 const subscribeToSettings = (onChange: () => void) => {
   window.addEventListener("storage", onChange);
   window.addEventListener(settingsEvent, onChange);
+
   return () => {
     window.removeEventListener("storage", onChange);
     window.removeEventListener(settingsEvent, onChange);
@@ -15,6 +17,7 @@ const subscribeToSettings = (onChange: () => void) => {
 
 const getTheme = (): Theme =>
   window.localStorage.getItem("theme") === "light" ? "light" : "dark";
+
 const getSound = () => window.localStorage.getItem("sound") === "on";
 const getServerTheme = (): Theme => "dark";
 const getServerSound = () => false;
@@ -50,6 +53,7 @@ export const SiteControls = () => {
     getTheme,
     getServerTheme
   );
+
   const soundOn = useSyncExternalStore(
     subscribeToSettings,
     getSound,
@@ -61,19 +65,25 @@ export const SiteControls = () => {
   }, [theme]);
 
   useEffect(() => {
-    if (!soundOn) {
-      return;
-    }
     const handleClick = (event: MouseEvent) => {
       if (
+        soundOn &&
         event.target instanceof Element &&
         event.target.closest("a, button")
       ) {
         playClickSound();
       }
     };
-    document.addEventListener("click", handleClick);
-    return () => document.removeEventListener("click", handleClick);
+
+    if (soundOn) {
+      document.addEventListener("click", handleClick);
+    }
+
+    return () => {
+      if (soundOn) {
+        document.removeEventListener("click", handleClick);
+      }
+    };
   }, [soundOn]);
 
   return (

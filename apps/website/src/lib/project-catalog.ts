@@ -21,23 +21,28 @@ export const readPinnedRepositoryNames = (
   username: string
 ): readonly string[] | null => {
   const escapedUsername = username.replaceAll(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+
   const repositoryHref = new RegExp(
     `href="/${escapedUsername}/(?<name>[^"/]+)"`,
     "u"
   );
+
   const matches = html.matchAll(
     /<li\b[^>]*\bpinned-item-list-item\b[^>]*>(?<item>[\s\S]*?)<\/li>/gu
   );
+
   const names: string[] = [];
   const seen = new Set<string>();
 
   for (const match of matches) {
     const item = match.groups?.item;
     const name = item?.match(repositoryHref)?.groups?.name;
+
     if (name && !seen.has(name)) {
       names.push(name);
       seen.add(name);
     }
+
     if (names.length === 6) {
       break;
     }
@@ -59,14 +64,17 @@ export const orderProjectRepositories = <T extends RepositoryVisibility>(
   const publicRepositories = repositories.filter(
     (repository) => !repository.fork && !repository.private
   );
+
   const repositoriesByName = new Map(
     publicRepositories.map((repository) => [repository.name, repository])
   );
+
   const pinnedRepositories: T[] = [];
   const includedNames = new Set<string>();
 
   for (const name of pinnedNames) {
     const repository = repositoriesByName.get(name);
+
     if (repository && !includedNames.has(name)) {
       pinnedRepositories.push(repository);
       includedNames.add(name);
@@ -78,8 +86,10 @@ export const orderProjectRepositories = <T extends RepositoryVisibility>(
       featured: index < 3,
       repository,
     })),
-    ...publicRepositories
-      .filter((repository) => !includedNames.has(repository.name))
-      .map((repository) => ({ featured: false, repository })),
+    ...publicRepositories.flatMap((repository) =>
+      includedNames.has(repository.name)
+        ? []
+        : [{ featured: false, repository }]
+    ),
   ];
 };

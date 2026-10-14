@@ -6,8 +6,10 @@ export const oneYearBeforeUtcInstant = (instant: Date): string => {
   const yearBefore = new Date(instant);
   const dayOfMonth = yearBefore.getUTCDate();
   yearBefore.setUTCFullYear(yearBefore.getUTCFullYear() - 1);
+
   if (yearBefore.getUTCDate() !== dayOfMonth) {
     yearBefore.setUTCDate(0);
   }
+
   return yearBefore.toISOString();
 };

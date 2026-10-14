@@ -30,6 +30,7 @@ const PostViewCount = ({ slug }: { slug: string }) => {
   // oxlint-disable-next-line react-doctor/tanstack-start-no-useeffect-fetch -- Recording a view is a post-hydration mutation and must not run during SSR.
   useEffect(() => {
     let cancelled = false;
+
     const recordView = async () => {
       try {
         const response = await fetch("/api/blog-views", {
@@ -37,15 +38,19 @@ const PostViewCount = ({ slug }: { slug: string }) => {
           headers: { "content-type": "application/json" },
           method: "POST",
         });
+
         if (!response.ok) {
           return;
         }
+
         const payload: unknown = await response.json();
+
         const result = await Effect.runPromise(
           Schema.decodeUnknownEffect(Schema.Struct({ views: Schema.Number }))(
             payload
           )
         );
+
         if (!cancelled) {
           setViews(result.views);
         }
@@ -53,7 +58,9 @@ const PostViewCount = ({ slug }: { slug: string }) => {
         // View totals are optional UI; a failed request should not block the post.
       }
     };
+
     void recordView();
+
     return () => {
       cancelled = true;
     };
@@ -73,6 +80,7 @@ const PostViewCount = ({ slug }: { slug: string }) => {
 const BlogPostPage = () => {
   const { slug } = Route.useParams();
   const post = getBlogPost(slug);
+
   if (!post) {
     throw notFound();
   }
@@ -120,9 +128,11 @@ export const Route = createFileRoute("/blog/$slug")({
   },
   head: ({ params }) => {
     const post = getBlogPost(params.slug);
+
     if (!post) {
       return { meta: [{ title: "Post not found | Tito" }] };
     }
+
     return {
       meta: [
         { title: `${post.title} | Tito` },

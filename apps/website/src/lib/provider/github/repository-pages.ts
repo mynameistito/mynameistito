@@ -18,9 +18,11 @@ export const collectRepositoryPages = <T, E, R>(
     page: number
   ): Effect.fn.Return<readonly T[], E, R> {
     const results = yield* fetchPage(page, repositoriesPerPage);
+
     if (results.length < repositoriesPerPage) {
       return results;
     }
+
     return [...results, ...(yield* collectPage(page + 1))];
   });
 

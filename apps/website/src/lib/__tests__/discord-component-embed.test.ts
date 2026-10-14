@@ -13,6 +13,7 @@ describe("homepage Discord component embed", () => {
     const [, actionRow] = homepageDiscordEmbed.component.components;
 
     expect(actionRow.type).toBe(1);
+
     for (const button of actionRow.components) {
       expect(button.style).toBe(5);
       expect(new URL(button.url).protocol).toBe("https:");

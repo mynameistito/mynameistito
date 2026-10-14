@@ -12,20 +12,25 @@ const PostViews = ({ slug }: { slug: string }) => {
   // oxlint-disable-next-line react-doctor/tanstack-start-no-useeffect-fetch -- Counts are fetched after hydration so the post list stays available during storage outages.
   useEffect(() => {
     let cancelled = false;
+
     const loadViews = async () => {
       try {
         const response = await fetch(
           `/api/blog-views?slug=${encodeURIComponent(slug)}`
         );
+
         if (!response.ok) {
           return;
         }
+
         const payload: unknown = await response.json();
+
         const result = await Effect.runPromise(
           Schema.decodeUnknownEffect(Schema.Struct({ views: Schema.Number }))(
             payload
           )
         );
+
         if (!cancelled) {
           setViews(result.views);
         }
@@ -33,7 +38,9 @@ const PostViews = ({ slug }: { slug: string }) => {
         // View totals are optional UI; a failed request should not block the post list.
       }
     };
+
     void loadViews();
+
     return () => {
       cancelled = true;
     };

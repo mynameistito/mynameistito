@@ -14,6 +14,7 @@ interface ChangesetsOutputEvent {
 }
 
 const outputPath = process.env.CHANGESETS_OUTPUT;
+
 if (!outputPath) {
   throw new Error("CHANGESETS_OUTPUT is required by the Changesets action");
 }
@@ -35,6 +36,7 @@ execFileSync(bunxCommand, ["changeset", "git-tag"], {
 });
 
 const events: ChangesetsOutputEvent[] = [];
+
 for (const directory of readdirSync("packages", { withFileTypes: true })) {
   if (!directory.isDirectory()) {
     continue;
@@ -44,6 +46,7 @@ for (const directory of readdirSync("packages", { withFileTypes: true })) {
   const manifest = JSON.parse(
     readFileSync(path.join("packages", directory.name, "package.json"), "utf-8")
   ) as PackageManifest;
+
   const tag = `${manifest.name}@${manifest.version}`;
 
   if (!existingTags.has(tag)) {

@@ -32,6 +32,7 @@ const loadTurnstileApi = (): Promise<TurnstileApi> => {
   if (window.turnstile) {
     return Promise.resolve(window.turnstile);
   }
+
   if (apiPromise !== null) {
     return apiPromise;
   }
@@ -39,9 +40,11 @@ const loadTurnstileApi = (): Promise<TurnstileApi> => {
   const script = document.querySelector<HTMLScriptElement>(
     'script[src^="https://challenges.cloudflare.com/turnstile/v0/api.js"]'
   );
+
   if (!script) {
     return Promise.reject(new Error("Turnstile script is not configured."));
   }
+
   if (document.readyState === "complete") {
     return Promise.reject(new Error("Turnstile did not initialize."));
   }
@@ -49,8 +52,10 @@ const loadTurnstileApi = (): Promise<TurnstileApi> => {
   // eslint-disable-next-line promise/avoid-new -- Bridge the script's load events.
   const pending = new Promise<TurnstileApi>((resolve, reject) => {
     let timeout = 0;
+
     const onLoad = () => {
       window.clearTimeout(timeout);
+
       if (window.turnstile) {
         resolve(window.turnstile);
       } else {
@@ -58,11 +63,13 @@ const loadTurnstileApi = (): Promise<TurnstileApi> => {
         reject(new Error("Turnstile did not initialize."));
       }
     };
+
     const onError = () => {
       window.clearTimeout(timeout);
       apiPromise = null;
       reject(new Error("Turnstile failed to load."));
     };
+
     timeout = window.setTimeout(() => {
       script.removeEventListener("load", onLoad);
       script.removeEventListener("error", onError);
@@ -72,7 +79,9 @@ const loadTurnstileApi = (): Promise<TurnstileApi> => {
     script.addEventListener("load", onLoad, { once: true });
     script.addEventListener("error", onError, { once: true });
   });
+
   apiPromise = pending;
+
   return pending;
 };
 
@@ -98,17 +107,22 @@ export const getTurnstileToken = async (
 
     const cleanup = () => {
       window.clearTimeout(timeout.id);
+
       if (widget.id) {
         turnstile.remove(widget.id);
       }
+
       container.remove();
     };
+
     const settle = (result: string | Error) => {
       if (settled) {
         return;
       }
+
       settled = true;
       cleanup();
+
       if (result instanceof Error) {
         reject(result);
       } else {
