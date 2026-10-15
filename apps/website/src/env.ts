@@ -51,6 +51,8 @@ export interface AppEnv {
   readonly GITHUB_TOKEN?: Redacted.Redacted<string>;
   readonly WORKER_GITHUB_TOKEN?: Redacted.Redacted<string>;
   readonly MDFROMX_API_KEY?: Redacted.Redacted<string>;
+  readonly LASTFM_API_KEY?: Redacted.Redacted<string>;
+  readonly LASTFM_USERNAME?: string;
   readonly OPEN_SOURCE_KV?: OpenSourceKVBinding;
   readonly PACKAGES_REFRESH?: PackagesRefreshBinding;
   readonly VISITOR_COUNTER?: {
@@ -77,6 +79,8 @@ export interface RuntimeBindings {
   readonly GITHUB_TOKEN?: string;
   readonly WORKER_GITHUB_TOKEN?: string;
   readonly MDFROMX_API_KEY?: string;
+  readonly LASTFM_API_KEY?: string;
+  readonly LASTFM_USERNAME?: string;
   readonly OPEN_SOURCE_KV?: OpenSourceKVBinding;
   readonly PACKAGES_REFRESH?: PackagesRefreshBinding;
   readonly VISITOR_COUNTER?: AppEnv["VISITOR_COUNTER"];
@@ -102,6 +106,9 @@ export const createAppEnv = (bindings: RuntimeBindings): AppEnv => ({
     : undefined,
   MDFROMX_API_KEY: bindings.MDFROMX_API_KEY
     ? Redacted.make(bindings.MDFROMX_API_KEY)
+    : undefined,
+  LASTFM_API_KEY: bindings.LASTFM_API_KEY
+    ? Redacted.make(bindings.LASTFM_API_KEY)
     : undefined,
 });
 

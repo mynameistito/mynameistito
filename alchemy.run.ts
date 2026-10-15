@@ -46,6 +46,8 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
         className: "ContributionsRefreshWorkflow",
       }),
       GITHUB_TOKEN: ConfigRedacted("WORKER_GITHUB_TOKEN"),
+      LASTFM_API_KEY: ConfigRedacted("LASTFM_API_KEY"),
+      LASTFM_USERNAME: ConfigString("LASTFM_USERNAME"),
       MDFROMX_API_KEY: ConfigRedacted("MDFROMX_API_KEY"),
       OPEN_SOURCE_KV: openSourceKV,
       PACKAGES_REFRESH: Workflow("PackagesRefresh", {

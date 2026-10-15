@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
 import { SiteControls } from "@/components/site-controls";
+import { SpotifyNowPlaying } from "@/components/spotify-now-playing";
 import { VisitorActivity } from "@/components/visitor-tracker";
 import { profile } from "@/lib/profile";
 
@@ -40,7 +41,7 @@ export { siteHeader as SiteHeader };
  * @returns The home-page profile row.
  */
 export const HomeProfile = () => (
-  <div className="mt-4 flex items-center justify-between gap-4">
+  <div className="mt-4 flex items-center gap-3">
     <div className="flex min-w-0 items-center gap-3">
       <img
         alt=""
@@ -57,6 +58,9 @@ export const HomeProfile = () => (
           @{profile.x}
         </p>
       </div>
+    </div>
+    <div className="min-w-0 flex-1">
+      <SpotifyNowPlaying />
     </div>
     <div className="flex shrink-0 items-center gap-1">
       <VisitorActivity />

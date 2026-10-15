@@ -37,6 +37,7 @@ import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
 import { Route as ProjectsSlugRouteImport } from './routes/projects.$slug'
 import { Route as RRefRouteImport } from './routes/r.$ref'
+import { Route as ApiSpotifyNowPlayingRouteImport } from './routes/api.spotify.now-playing'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -181,6 +182,11 @@ const RRefRoute = RRefRouteImport.update({
   path: '/r/$ref',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSpotifyNowPlayingRoute = ApiSpotifyNowPlayingRouteImport.update({
+  id: '/api/spotify/now-playing',
+  path: '/api/spotify/now-playing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/r/$ref': typeof RRefRoute
   '/blog/': typeof BlogIndexRoute
   '/projects/': typeof ProjectsIndexRoute
+  '/api/spotify/now-playing': typeof ApiSpotifyNowPlayingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -240,6 +247,7 @@ export interface FileRoutesByTo {
   '/r/$ref': typeof RRefRoute
   '/blog': typeof BlogIndexRoute
   '/projects': typeof ProjectsIndexRoute
+  '/api/spotify/now-playing': typeof ApiSpotifyNowPlayingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -271,6 +279,7 @@ export interface FileRoutesById {
   '/r/$ref': typeof RRefRoute
   '/blog/': typeof BlogIndexRoute
   '/projects/': typeof ProjectsIndexRoute
+  '/api/spotify/now-playing': typeof ApiSpotifyNowPlayingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -303,6 +312,7 @@ export interface FileRouteTypes {
     | '/r/$ref'
     | '/blog/'
     | '/projects/'
+    | '/api/spotify/now-playing'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -332,6 +342,7 @@ export interface FileRouteTypes {
     | '/r/$ref'
     | '/blog'
     | '/projects'
+    | '/api/spotify/now-playing'
   id:
     | '__root__'
     | '/'
@@ -362,6 +373,7 @@ export interface FileRouteTypes {
     | '/r/$ref'
     | '/blog/'
     | '/projects/'
+    | '/api/spotify/now-playing'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -391,6 +403,7 @@ export interface RootRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
   RRefRoute: typeof RRefRoute
   BlogIndexRoute: typeof BlogIndexRoute
+  ApiSpotifyNowPlayingRoute: typeof ApiSpotifyNowPlayingRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -591,6 +604,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RRefRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/spotify/now-playing': {
+      id: '/api/spotify/now-playing'
+      path: '/api/spotify/now-playing'
+      fullPath: '/api/spotify/now-playing'
+      preLoaderRoute: typeof ApiSpotifyNowPlayingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -635,6 +655,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogSlugRoute: BlogSlugRoute,
   RRefRoute: RRefRoute,
   BlogIndexRoute: BlogIndexRoute,
+  ApiSpotifyNowPlayingRoute: ApiSpotifyNowPlayingRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
