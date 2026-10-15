@@ -49,7 +49,7 @@ jobs:
           WORKER_GITHUB_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/WORKER_GITHUB_TOKEN
 
       - name: Run Alchemy deployment
-        uses: mynameistito/alchemy-deploy@b20fd626080d4db521884f96d70b15471de493ab # v3.1.4
+        uses: mynameistito/alchemy-deploy@68f577f3032660bd4919dfcc5725db21d5b64f9d # v3.1.5
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ steps.onepassword.outputs.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ steps.onepassword.outputs.CLOUDFLARE_API_TOKEN }}
@@ -87,7 +87,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CLOUDFLARE_API_TOKEN
 
       - name: Reconcile preview deployments
-        uses: mynameistito/alchemy-deploy@b20fd626080d4db521884f96d70b15471de493ab # v3.1.4
+        uses: mynameistito/alchemy-deploy@68f577f3032660bd4919dfcc5725db21d5b64f9d # v3.1.5
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ steps.onepassword.outputs.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ steps.onepassword.outputs.CLOUDFLARE_API_TOKEN }}
