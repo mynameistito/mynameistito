@@ -18,8 +18,8 @@ import { GitHub } from "@/lib/provider/github/client";
 import type { Profile as GitHubProfile } from "@/lib/provider/github/client";
 import { MDFromX } from "@/lib/provider/mdfromx/profile";
 import type { Profile as XProfile } from "@/lib/provider/mdfromx/profile";
-import { loadTokscale } from "@/lib/tokscale";
-import type { TokscaleSnapshot } from "@/lib/tokscale";
+import { loadTokscale } from "@/lib/provider/tokscale/snapshot";
+import type { TokscaleSnapshot } from "@/lib/provider/tokscale/snapshot";
 
 const cacheDuration = "30 minutes";
 

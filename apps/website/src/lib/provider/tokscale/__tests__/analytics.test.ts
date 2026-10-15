@@ -7,9 +7,9 @@ import {
   summarizeHarnesses,
   summarizeModels,
   toHeatmapLevel,
-} from "@/lib/providers/tokscale/analytics";
-import { decodeTokscaleResponse } from "@/lib/providers/tokscale/client";
-import type { DailyUsage } from "@/lib/providers/tokscale/client";
+} from "@/lib/provider/tokscale/analytics";
+import { decodeTokscaleResponse } from "@/lib/provider/tokscale/client";
+import type { DailyUsage } from "@/lib/provider/tokscale/client";
 
 const createDay = (
   date: string,
