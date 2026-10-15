@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 
 const websiteDirectory = fileURLToPath(new URL("../../", import.meta.url));
 const secret = "test-secret-value-not-for-production";
+const lastFmApiKey = "test-lastfm-api-key";
 
 const productionConfig = {
   ...process.env,
@@ -17,6 +18,8 @@ const productionConfig = {
   RESEND_API_KEY: secret,
   RESEND_FROM: "noreply@example.invalid",
   WORKER_GITHUB_TOKEN: secret,
+  LASTFM_API_KEY: lastFmApiKey,
+  LASTFM_USERNAME: "test-listener",
 };
 
 const loadConfig = (env: NodeJS.ProcessEnv) =>
@@ -34,6 +37,7 @@ describe("Varlock website schema", () => {
     expect(result.error).toBeUndefined();
     expect(result.status).toBe(0);
     expect(result.stdout).not.toContain(secret);
+    expect(result.stdout).not.toContain(lastFmApiKey);
   });
 
   it("allows development without production credentials", () => {
@@ -47,6 +51,8 @@ describe("Varlock website schema", () => {
       RESEND_API_KEY: "",
       RESEND_FROM: "",
       WORKER_GITHUB_TOKEN: "",
+      LASTFM_API_KEY: "",
+      LASTFM_USERNAME: "",
     });
 
     expect(result.error).toBeUndefined();

@@ -46,7 +46,6 @@ const HomeContent = () => {
           .
         </p>
       </section>
-
       <ExperienceSection />
 
       <section
