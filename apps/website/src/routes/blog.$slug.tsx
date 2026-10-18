@@ -1,5 +1,6 @@
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import { Eye } from "lucide-react";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import type { Components } from "react-markdown";
 
@@ -25,8 +26,33 @@ const markdownComponents: Components = {
 
 const BlogPostPage = () => {
   const { slug } = Route.useParams();
-  const views = Route.useLoaderData();
+  const [views, setViews] = useState<number | null>(null);
   const post = getBlogPost(slug);
+
+  // oxlint-disable-next-line react-doctor/tanstack-start-no-useeffect-fetch -- View recording must happen after hydration, not during loader preloads.
+  useEffect(() => {
+    let cancelled = false;
+
+    const recordView = async () => {
+      try {
+        const count = await recordBlogView({ data: { slug } });
+
+        if (!cancelled) {
+          setViews(count);
+        }
+      } catch {
+        if (!cancelled) {
+          setViews(null);
+        }
+      }
+    };
+
+    void recordView();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
 
   if (!post) {
     throw Object.assign(new Error("Blog post not found."), notFound());
@@ -76,13 +102,6 @@ const BlogPostPage = () => {
 
 export const Route = createFileRoute("/blog/$slug")({
   component: BlogPostPage,
-  loader: async ({ params }) => {
-    if (!getBlogPost(params.slug)) {
-      throw Object.assign(new Error("Blog post not found."), notFound());
-    }
-
-    return await recordBlogView({ data: { slug: params.slug } });
-  },
   head: ({ params }) => {
     const post = getBlogPost(params.slug);
 
