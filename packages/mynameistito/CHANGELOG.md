@@ -1,5 +1,11 @@
 # mynameistito
 
+## 0.3.3
+
+### Patch Changes
+
+- ea7c823: Apply formatting fixes to the CLI package.
+
 ## 0.3.2
 
 ### Patch Changes
