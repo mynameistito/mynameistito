@@ -113,7 +113,7 @@ export const decodeCurrentlyPlaying = Effect.fn(
     title: current.name,
     artists: [current.artist["#text"]],
     album: current.album?.["#text"] ?? "",
-    albumArt: albumArt ?? null,
+    albumArt: albumArt === "" ? null : (albumArt ?? null),
     spotifyUrl: `https://open.spotify.com/search/${searchQuery}`,
     isPlaying: true,
     progressMs: null,
