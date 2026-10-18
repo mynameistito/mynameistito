@@ -139,7 +139,7 @@ export const Route = createFileRoute("/projects/$slug")({
       throw Object.assign(new Error("Project not found."), notFound());
     }
 
-    if (project.hasDetailPage === false) {
+    if (project.hasDetailPage !== true) {
       throw Object.assign(
         new Error("Project redirects to its source."),
         redirect({ href: project.source })
