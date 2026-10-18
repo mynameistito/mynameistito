@@ -7,6 +7,18 @@ import { getBlogViews } from "@/server/functions/blog-views";
 
 type BlogViews = Readonly<Record<string, number | null>>;
 
+/** Keeps the post list available when the optional view counter is unavailable.
+ * @param slug - The post slug to look up.
+ * @returns The count, or `null` when the request fails.
+ */
+const safelyGetBlogViews = async (slug: string) => {
+  try {
+    return await getBlogViews({ data: { slug } });
+  } catch {
+    return null;
+  }
+};
+
 const BlogIndexPage = () => {
   const views = Route.useLoaderData();
 
@@ -69,7 +81,7 @@ export const Route = createFileRoute("/blog/")({
   loader: async (): Promise<BlogViews> => {
     const views = await Promise.all(
       blogPosts.map(async (post) => {
-        const count = await getBlogViews({ data: { slug: post.slug } });
+        const count = await safelyGetBlogViews(post.slug);
 
         return [post.slug, count] as const;
       })
