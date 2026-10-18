@@ -12,6 +12,9 @@ import path from "node:path";
 
 import { Schema } from "effect";
 
+import { parsePackageManifest } from "./package-manifest.js";
+import type { PackageManifest } from "./package-manifest.js";
+
 type DependencyField =
   | "dependencies"
   | "devDependencies"
@@ -20,27 +23,8 @@ type DependencyField =
 
 type DependencyMap = Record<string, string>;
 
-interface PackageManifest {
-  name: string;
-  version: string;
-  dependencies?: DependencyMap;
-  devDependencies?: DependencyMap;
-  optionalDependencies?: DependencyMap;
-  peerDependencies?: DependencyMap;
-}
-
 const manifestFilename = "package.json";
-
 const DependencyMapSchema = Schema.Record(Schema.String, Schema.String);
-
-const PackageManifestSchema = Schema.Struct({
-  dependencies: Schema.optional(DependencyMapSchema),
-  devDependencies: Schema.optional(DependencyMapSchema),
-  name: Schema.String,
-  optionalDependencies: Schema.optional(DependencyMapSchema),
-  peerDependencies: Schema.optional(DependencyMapSchema),
-  version: Schema.String,
-});
 
 const RootManifestSchema = Schema.Struct({
   catalog: Schema.optional(DependencyMapSchema),
@@ -49,10 +33,6 @@ const RootManifestSchema = Schema.Struct({
 
 const parseRootManifest = Schema.decodeUnknownSync(
   Schema.fromJsonString(RootManifestSchema)
-);
-
-const parsePackageManifest = Schema.decodeUnknownSync(
-  Schema.fromJsonString(PackageManifestSchema)
 );
 
 const rootManifest = parseRootManifest(readFileSync(manifestFilename, "utf-8"));
