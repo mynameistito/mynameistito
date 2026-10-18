@@ -22,7 +22,7 @@
 
 🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐6 — A CLI tool that update deps across multiple repos with auto commits and pull requests.
 
-🔷 **[opencode-plugins](https://github.com/mynameistito/opencode-plugins)** ⭐3 — My Personal OpenCode v2 Plugins
+🔷 **[opencode-plugins](https://github.com/mynameistito/opencode-plugins)** ⭐4 — My Personal OpenCode v2 Plugins
 
 🔷 **[fxinstagram](https://github.com/mynameistito/fxinstagram)** ⭐2 — Effect and Alchemy service for fixing Instagram embeds in Discord
 
