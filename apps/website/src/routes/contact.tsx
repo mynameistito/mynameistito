@@ -39,7 +39,14 @@ const directMessages = [
 
 const ContactPage = () => {
   const turnstileSitekey = Route.useLoaderData();
+
+  const turnstileUnavailable =
+    turnstileSitekey === null ||
+    turnstileSitekey === undefined ||
+    turnstileSitekey.length === 0;
+
   const submissionInProgress = useRef(false);
+
   const [status, setStatus] = useState<SubmissionStatus>("idle");
 
   const sendMessage = (event: SubmitEvent<HTMLFormElement>) => {
@@ -49,11 +56,7 @@ const ContactPage = () => {
       return;
     }
 
-    if (
-      turnstileSitekey === null ||
-      turnstileSitekey === undefined ||
-      turnstileSitekey.length === 0
-    ) {
+    if (turnstileUnavailable) {
       setStatus("error");
 
       return;
@@ -198,16 +201,14 @@ const ContactPage = () => {
             className="m-0 max-w-[32ch] text-xs leading-5 text-muted"
             role={status === "error" ? "alert" : "status"}
           >
-            {status === "idle" &&
-            (turnstileSitekey === null || turnstileSitekey === undefined)
+            {status === "idle" && turnstileUnavailable
               ? "Message verification is unavailable right now."
               : statusMessages[status]}
           </p>
           <button
             className="min-h-11 rounded-control bg-text px-4 text-sm font-semibold text-page transition-transform active:scale-[0.98] disabled:opacity-60"
             disabled={
-              turnstileSitekey === null ||
-              turnstileSitekey === undefined ||
+              turnstileUnavailable ||
               status === "submitting" ||
               status === "success"
             }
