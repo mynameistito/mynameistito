@@ -35,7 +35,7 @@ const createChangeset = async (filename: string): Promise<string> => {
       throw error;
     }
 
-    return createChangeset(`${randomBytes(4).toString("hex")}.md`);
+    return await createChangeset(`${randomBytes(4).toString("hex")}.md`);
   }
 };
 

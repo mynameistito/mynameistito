@@ -91,7 +91,9 @@ export const SiteControls = () => {
       <button
         aria-label={soundOn ? "Turn click sounds off" : "Turn click sounds on"}
         className="grid size-[30px] place-items-center rounded-control border border-line bg-surface text-xs text-muted transition-colors hover:text-text"
-        onClick={() => updateSetting("sound", soundOn ? "off" : "on")}
+        onClick={() => {
+          updateSetting("sound", soundOn ? "off" : "on");
+        }}
         type="button"
       >
         {soundOn ? (
@@ -103,9 +105,9 @@ export const SiteControls = () => {
       <button
         aria-label="Toggle color theme"
         className="grid size-[30px] place-items-center rounded-control border border-line bg-surface text-xs text-muted transition-colors hover:text-text"
-        onClick={() =>
-          updateSetting("theme", theme === "dark" ? "light" : "dark")
-        }
+        onClick={() => {
+          updateSetting("theme", theme === "dark" ? "light" : "dark");
+        }}
         type="button"
       >
         {theme === "dark" ? (

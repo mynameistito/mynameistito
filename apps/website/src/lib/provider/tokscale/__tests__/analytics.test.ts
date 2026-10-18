@@ -1,4 +1,4 @@
-import { Effect } from "effect";
+import { Effect, Schema } from "effect";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -118,27 +118,30 @@ describe("Tokscale analytics", () => {
 
   it("decodes and validates Tokscale data at the provider boundary", async () => {
     const decoded = await Effect.runPromise(
-      decodeTokscaleResponse({
-        stats: {
-          totalTokens: 40,
-          totalCost: 0.2,
-          inputTokens: 0,
-          outputTokens: 0,
-          cacheReadTokens: 0,
-          cacheWriteTokens: 0,
-          reasoningTokens: 0,
-          submissionCount: 1,
-          activeDays: 1,
-          sessionCount: 1,
-        },
-        updatedAt: "2026-10-13T00:00:00.000Z",
-        modelUsage: [
-          { model: "gpt-6-luna", tokens: 40, cost: 0.2, percentage: 100 },
-        ],
-        contributions: [
-          createDay("2026-10-13", "codex", "gpt-6-luna", 40, 0.2),
-        ],
-      })
+      Effect.flatMap(
+        Schema.decodeUnknownEffect(Schema.Json)({
+          stats: {
+            totalTokens: 40,
+            totalCost: 0.2,
+            inputTokens: 0,
+            outputTokens: 0,
+            cacheReadTokens: 0,
+            cacheWriteTokens: 0,
+            reasoningTokens: 0,
+            submissionCount: 1,
+            activeDays: 1,
+            sessionCount: 1,
+          },
+          updatedAt: "2026-10-13T00:00:00.000Z",
+          modelUsage: [
+            { model: "gpt-6-luna", tokens: 40, cost: 0.2, percentage: 100 },
+          ],
+          contributions: [
+            createDay("2026-10-13", "codex", "gpt-6-luna", 40, 0.2),
+          ],
+        }),
+        decodeTokscaleResponse
+      )
     );
 
     expect(decoded.stats.totalTokens).toBe(40);

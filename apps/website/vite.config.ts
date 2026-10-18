@@ -27,7 +27,7 @@ const standaloneTakumiWasmPlugin: Plugin = {
     const normalizedImporter = importer?.replaceAll("\\", "/");
 
     return source === "../pkg/takumi_wasm_bg.wasm" &&
-      normalizedImporter?.endsWith("/bundlers/workerd.js")
+      normalizedImporter?.endsWith("/bundlers/workerd.js") === true
       ? { external: true, id: "./takumi_wasm_bg.wasm" }
       : undefined;
   },

@@ -179,7 +179,7 @@ const fetchContributionRepositories = Effect.gen(
           const pullRequests = items.map((item): ContributionPullRequest => {
             let state: PullRequestState = "Closed";
 
-            if (item.pull_request?.merged_at) {
+            if ((item.pull_request?.merged_at ?? "").length > 0) {
               state = "Merged";
             } else if (item.state === "open") {
               state = "Open";
@@ -240,8 +240,8 @@ const startContributionsRefresh = Effect.fn("startContributionsRefresh")(
 
     const result = yield* Effect.result(
       Effect.tryPromise({
-        try: () =>
-          refresh.create({
+        try: async () =>
+          await refresh.create({
             id: workflowId,
             params: {},
           }),
@@ -275,7 +275,7 @@ export const loadContributions = Effect.fn("loadContributions")(
 
     const stored = yield* Effect.result(
       Effect.tryPromise({
-        try: () => kv.get(snapshotKey, "text"),
+        try: async () => await kv.get(snapshotKey, "text"),
         catch: (cause) =>
           cause instanceof Error
             ? cause
@@ -298,15 +298,9 @@ export const loadContributions = Effect.fn("loadContributions")(
     }
 
     const decoded = yield* Effect.result(
-      Effect.try({
-        try: () => JSON.parse(snapshotText),
-        catch: (cause) =>
-          cause instanceof Error
-            ? cause
-            : new Error("Invalid snapshot JSON", { cause }),
-      }).pipe(
-        Effect.flatMap(Schema.decodeUnknownEffect(ContributionSnapshotSchema))
-      )
+      Schema.decodeUnknownEffect(
+        Schema.fromJsonString(ContributionSnapshotSchema)
+      )(snapshotText)
     );
 
     if (decoded._tag === "Failure") {
@@ -404,7 +398,9 @@ export const refreshContributions = Effect.fn("refreshContributions")(
       })
     );
     yield* Effect.tryPromise({
-      try: () => kv.put(snapshotKey, JSON.stringify(snapshot)),
+      try: async () => {
+        await kv.put(snapshotKey, JSON.stringify(snapshot));
+      },
       catch: (cause) =>
         cause instanceof Error
           ? cause

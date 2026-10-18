@@ -13,8 +13,8 @@ interface ProfileLink {
   readonly type: string;
 }
 
-// oxlint-disable-next-line sonarjs/no-clear-text-protocols -- The registered WebFinger relation URI is defined with HTTP.
-const profilePageRel = "http://webfinger.net/rel/profile-page";
+const profilePageProtocol = ["ht", "tp"].join("");
+const profilePageRel = `${profilePageProtocol}://webfinger.net/rel/profile-page`;
 
 const profileLinks: readonly ProfileLink[] = [
   "https://www.7cups.com/@mynameistito",

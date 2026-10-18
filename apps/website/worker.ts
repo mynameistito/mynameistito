@@ -1,20 +1,14 @@
-// oxlint-disable max-classes-per-file -- Workflow entrypoint classes are registered from one Worker module.
-import { WorkflowEntrypoint } from "cloudflare:workers";
-import type { WorkflowEvent, WorkflowStep } from "cloudflare:workers";
-import { Effect } from "effect";
 import server from "virtual:tanstack-start-server-entry";
 
-import { createAppEnv } from "./src/env";
 import type { RuntimeBindings } from "./src/env";
-import { refreshContributions } from "./src/lib/contributions";
-import { refreshPackages } from "./src/lib/packages";
-import { refreshTokscale } from "./src/lib/provider/tokscale/snapshot";
-
-const workflowRetryPolicy = {
-  retries: { limit: 3, delay: "30 seconds", backoff: "exponential" },
-} as const;
 
 export { VisitorCounter } from "./src/lib/visitor-counter";
+
+export { ContributionsRefreshWorkflow } from "./src/workflows/contributions-refresh";
+
+export { PackagesRefreshWorkflow } from "./src/workflows/packages-refresh";
+
+export { TokscaleRefreshWorkflow } from "./src/workflows/tokscale-refresh";
 
 /** Starts the durable contributions refresh on the configured Cron Trigger.
  * @param controller - The scheduled event containing its stable fire time.
@@ -117,129 +111,3 @@ export const scheduled = async (
 };
 
 export default { ...server, scheduled };
-
-/** Refreshes GitHub contributions away from the website request path. */
-export class ContributionsRefreshWorkflow extends WorkflowEntrypoint<
-  RuntimeBindings,
-  Record<string, never>
-> {
-  /** Executes one durable refresh attempt and publishes its result.
-   * @param event - The event that started this Workflow run.
-   * @param step - The durable step interface supplied by Cloudflare.
-   * @returns The published snapshot summary.
-   */
-  override async run(
-    event: Readonly<WorkflowEvent<Record<string, never>>>,
-    step: WorkflowStep
-  ) {
-    const stepName = "refresh-github-contributions";
-    console.info("[open-source] Contribution refresh workflow started.", {
-      workflowId: event.instanceId,
-      stepName,
-    });
-
-    try {
-      const result = await step.do(stepName, workflowRetryPolicy, () =>
-        Effect.runPromise(refreshContributions(createAppEnv(this.env)))
-      );
-
-      console.info("[open-source] Contribution refresh workflow completed.", {
-        workflowId: event.instanceId,
-        ...result,
-      });
-
-      return result;
-    } catch (error) {
-      console.error("[open-source] Contribution refresh workflow failed.", {
-        workflowId: event.instanceId,
-        stepName,
-        errorName: error instanceof Error ? error.name : "UnknownError",
-        error: error instanceof Error ? error.message : String(error),
-      });
-      throw error;
-    }
-  }
-}
-
-/** Refreshes Tokscale usage away from the website request path. */
-export class TokscaleRefreshWorkflow extends WorkflowEntrypoint<
-  RuntimeBindings,
-  Record<string, never>
-> {
-  /** Executes and publishes one durable Tokscale refresh.
-   * @param event - The event that started this Workflow run.
-   * @param step - The durable step interface supplied by Cloudflare.
-   * @returns A summary of the published Tokscale profile.
-   */
-  override async run(
-    event: Readonly<WorkflowEvent<Record<string, never>>>,
-    step: WorkflowStep
-  ) {
-    console.info("[ai] Tokscale refresh workflow started.", {
-      workflowId: event.instanceId,
-    });
-
-    try {
-      const result = await step.do(
-        "refresh-and-publish-tokscale",
-        workflowRetryPolicy,
-        () => Effect.runPromise(refreshTokscale(createAppEnv(this.env)))
-      );
-
-      console.info("[ai] Tokscale refresh workflow completed.", {
-        workflowId: event.instanceId,
-        ...result,
-      });
-
-      return result;
-    } catch (error) {
-      console.error("[ai] Tokscale refresh workflow failed.", {
-        workflowId: event.instanceId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      throw error;
-    }
-  }
-}
-
-/** Refreshes npm package metadata away from the website request path. */
-export class PackagesRefreshWorkflow extends WorkflowEntrypoint<
-  RuntimeBindings,
-  Record<string, never>
-> {
-  /** Executes and publishes one durable npm package refresh.
-   * @param event - The event that started this Workflow run.
-   * @param step - The durable step interface supplied by Cloudflare.
-   * @returns A summary of the published package data.
-   */
-  override async run(
-    event: Readonly<WorkflowEvent<Record<string, never>>>,
-    step: WorkflowStep
-  ) {
-    const stepName = "refresh-and-publish-npm-packages";
-    console.info("[packages] Package refresh workflow started.", {
-      workflowId: event.instanceId,
-      stepName,
-    });
-
-    try {
-      const result = await step.do(stepName, workflowRetryPolicy, () =>
-        Effect.runPromise(refreshPackages(createAppEnv(this.env)))
-      );
-
-      console.info("[packages] Package refresh workflow completed.", {
-        workflowId: event.instanceId,
-        ...result,
-      });
-
-      return result;
-    } catch (error) {
-      console.error("[packages] Package refresh workflow failed.", {
-        workflowId: event.instanceId,
-        stepName,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      throw error;
-    }
-  }
-}

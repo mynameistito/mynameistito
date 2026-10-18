@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import { catch as catchEffect } from "effect/Effect";
 import { ArrowUpRight } from "lucide-react";
 import { useRef, useState } from "react";
-import type { FormEvent } from "react";
+import type { SubmitEvent } from "react";
 
 import { profile } from "@/lib/profile";
 import { socialMeta } from "@/lib/social-meta";
@@ -19,19 +19,41 @@ const statusMessages: Record<SubmissionStatus, string> = {
   error: "Verification failed. Try again.",
 };
 
+const directMessages = [
+  {
+    label: "Discord",
+    href: `https://discord.com/users/${profile.discord}`,
+    detail: "Fastest way to reach me",
+  },
+  {
+    label: "X",
+    href: `https://x.com/messages/compose?recipient_id=${profile["x-dm"]}`,
+    detail: "Send me a DM",
+  },
+  {
+    label: "Signal",
+    href: `https://signal.me/#eu/${profile.signal}`,
+    detail: "Send me a message",
+  },
+] as const;
+
 const ContactPage = () => {
   const turnstileSitekey = Route.useLoaderData();
   const submissionInProgress = useRef(false);
   const [status, setStatus] = useState<SubmissionStatus>("idle");
 
-  const sendMessage = (event: FormEvent<HTMLFormElement>) => {
+  const sendMessage = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (submissionInProgress.current) {
       return;
     }
 
-    if (!turnstileSitekey) {
+    if (
+      turnstileSitekey === null ||
+      turnstileSitekey === undefined ||
+      turnstileSitekey.length === 0
+    ) {
       setStatus("error");
 
       return;
@@ -46,7 +68,7 @@ const ContactPage = () => {
       try: async () => {
         const token = await getTurnstileToken(turnstileSitekey, "contact");
 
-        return fetch("/api/contact", {
+        return await fetch("/api/contact", {
           body: JSON.stringify({
             message: values,
             turnstileToken: token,
@@ -75,24 +97,6 @@ const ContactPage = () => {
 
     void submit();
   };
-
-  const directMessages = [
-    {
-      label: "Discord",
-      href: `https://discord.com/users/${profile.discord}`,
-      detail: "Fastest way to reach me",
-    },
-    {
-      label: "X",
-      href: `https://x.com/messages/compose?recipient_id=${profile["x-dm"]}`,
-      detail: "Send me a DM",
-    },
-    {
-      label: "Signal",
-      href: `https://signal.me/#eu/${profile.signal}`,
-      detail: "Send me a message",
-    },
-  ] as const;
 
   const submitLabel = {
     idle: "Send message",
@@ -194,14 +198,16 @@ const ContactPage = () => {
             className="m-0 max-w-[32ch] text-xs leading-5 text-muted"
             role={status === "error" ? "alert" : "status"}
           >
-            {status === "idle" && !turnstileSitekey
+            {status === "idle" &&
+            (turnstileSitekey === null || turnstileSitekey === undefined)
               ? "Message verification is unavailable right now."
               : statusMessages[status]}
           </p>
           <button
             className="min-h-11 rounded-control bg-text px-4 text-sm font-semibold text-page transition-transform active:scale-[0.98] disabled:opacity-60"
             disabled={
-              !turnstileSitekey ||
+              turnstileSitekey === null ||
+              turnstileSitekey === undefined ||
               status === "submitting" ||
               status === "success"
             }
@@ -216,7 +222,7 @@ const ContactPage = () => {
 };
 
 export const Route = createFileRoute("/contact")({
-  loader: () => getTurnstileSitekey(),
+  loader: async () => await getTurnstileSitekey(),
   component: ContactPage,
   head: () => ({
     meta: [

@@ -10,6 +10,8 @@ import {
 import { tmpdir } from "node:os";
 import path from "node:path";
 
+import { Schema } from "effect";
+
 type DependencyField =
   | "dependencies"
   | "devDependencies"
@@ -27,17 +29,33 @@ interface PackageManifest {
   peerDependencies?: DependencyMap;
 }
 
-interface RootManifest {
-  catalog?: DependencyMap;
-  catalogs?: Record<string, DependencyMap>;
-}
-
 const manifestFilename = "package.json";
 
-// SAFETY: The repository root package.json is validated by the workspace tooling.
-const rootManifest = JSON.parse(
-  readFileSync(manifestFilename, "utf-8")
-) as RootManifest;
+const DependencyMapSchema = Schema.Record(Schema.String, Schema.String);
+
+const PackageManifestSchema = Schema.Struct({
+  dependencies: Schema.optional(DependencyMapSchema),
+  devDependencies: Schema.optional(DependencyMapSchema),
+  name: Schema.String,
+  optionalDependencies: Schema.optional(DependencyMapSchema),
+  peerDependencies: Schema.optional(DependencyMapSchema),
+  version: Schema.String,
+});
+
+const RootManifestSchema = Schema.Struct({
+  catalog: Schema.optional(DependencyMapSchema),
+  catalogs: Schema.optional(Schema.Record(Schema.String, DependencyMapSchema)),
+});
+
+const parseRootManifest = Schema.decodeUnknownSync(
+  Schema.fromJsonString(RootManifestSchema)
+);
+
+const parsePackageManifest = Schema.decodeUnknownSync(
+  Schema.fromJsonString(PackageManifestSchema)
+);
+
+const rootManifest = parseRootManifest(readFileSync(manifestFilename, "utf-8"));
 
 const resolveCatalog = (dependencies: DependencyMap): DependencyMap =>
   Object.fromEntries(
@@ -54,7 +72,7 @@ const resolveCatalog = (dependencies: DependencyMap): DependencyMap =>
 
       const version = catalog?.[name];
 
-      if (!version) {
+      if (version === undefined || version.length === 0) {
         throw new Error(
           `Missing catalog entry for ${catalogName || "default"}:${name}`
         );
@@ -75,7 +93,7 @@ const resolveManifestCatalog = (manifest: PackageManifest): void => {
   for (const field of dependencyFields) {
     const dependencies = manifest[field];
 
-    if (dependencies) {
+    if (dependencies !== undefined) {
       manifest[field] = resolveCatalog(dependencies);
     }
   }
@@ -101,10 +119,9 @@ if (hasPendingChangesets) {
 const stagePackage = (directory: { name: string }): void => {
   const packageDirectory = path.join("packages", directory.name);
 
-  // SAFETY: Each packages/* directory is expected to contain a package manifest.
-  const manifest = JSON.parse(
+  const manifest = parsePackageManifest(
     readFileSync(path.join(packageDirectory, manifestFilename), "utf-8")
-  ) as PackageManifest;
+  );
 
   const packageSpec = `${manifest.name}@${manifest.version}`;
 
@@ -133,10 +150,9 @@ const stagePackage = (directory: { name: string }): void => {
     cpSync(packageDirectory, stagedDirectory, { recursive: true });
     const packageManifestPath = path.join(stagedDirectory, manifestFilename);
 
-    // SAFETY: The staged directory was copied from a validated packages/* directory.
-    const packageManifest = JSON.parse(
+    const packageManifest = parsePackageManifest(
       readFileSync(packageManifestPath, "utf-8")
-    ) as PackageManifest;
+    );
 
     resolveManifestCatalog(packageManifest);
     writeFileSync(

@@ -20,6 +20,15 @@ declare module "cloudflare:workers" {
     readonly storage: DurableObjectStorage;
   }
 
+  /** Values that can be persisted by the website's Durable Object storage. */
+  export type DurableObjectValue =
+    | string
+    | number
+    | boolean
+    | null
+    | { readonly [key: string]: DurableObjectValue }
+    | readonly DurableObjectValue[];
+
   /** Storage operations available inside a Durable Object. */
   export interface DurableObjectStorage {
     /** Delete a stored key. */
@@ -34,7 +43,7 @@ declare module "cloudflare:workers" {
     }) => Promise<Map<string, T>>;
 
     /** Store a value. */
-    readonly put: <T>(key: string, value: T) => Promise<void>;
+    readonly put: (key: string, value: DurableObjectValue) => Promise<void>;
 
     /** Schedule the object's alarm. */
     readonly setAlarm: (time: number) => Promise<void>;

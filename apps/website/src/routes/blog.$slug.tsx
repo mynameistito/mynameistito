@@ -1,12 +1,11 @@
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
-import { Effect, Schema } from "effect";
 import { Eye } from "lucide-react";
-import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import type { Components } from "react-markdown";
 
 import { getBlogPost } from "@/lib/blog-posts";
 import { socialMeta } from "@/lib/social-meta";
+import { recordBlogView } from "@/server/functions/blog-views";
 
 const markdownComponents: Components = {
   a: ({ children, href }) => (
@@ -24,65 +23,13 @@ const markdownComponents: Components = {
   ),
 };
 
-const PostViewCount = ({ slug }: { slug: string }) => {
-  const [views, setViews] = useState<number | null>(null);
-
-  // oxlint-disable-next-line react-doctor/tanstack-start-no-useeffect-fetch -- Recording a view is a post-hydration mutation and must not run during SSR.
-  useEffect(() => {
-    let cancelled = false;
-
-    const recordView = async () => {
-      try {
-        const response = await fetch("/api/blog-views", {
-          body: JSON.stringify({ slug }),
-          headers: { "content-type": "application/json" },
-          method: "POST",
-        });
-
-        if (!response.ok) {
-          return;
-        }
-
-        const payload: unknown = await response.json();
-
-        const result = await Effect.runPromise(
-          Schema.decodeUnknownEffect(Schema.Struct({ views: Schema.Number }))(
-            payload
-          )
-        );
-
-        if (!cancelled) {
-          setViews(result.views);
-        }
-      } catch {
-        // View totals are optional UI; a failed request should not block the post.
-      }
-    };
-
-    void recordView();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [slug]);
-
-  return (
-    <p
-      aria-live="polite"
-      className="m-0 flex items-center gap-1.5 text-sm text-muted"
-    >
-      <Eye aria-hidden="true" size={14} />
-      {views === null ? "Views unavailable" : `${views.toLocaleString()} views`}
-    </p>
-  );
-};
-
 const BlogPostPage = () => {
   const { slug } = Route.useParams();
+  const views = Route.useLoaderData();
   const post = getBlogPost(slug);
 
   if (!post) {
-    throw notFound();
+    throw Object.assign(new Error("Blog post not found."), notFound());
   }
 
   return (
@@ -107,7 +54,15 @@ const BlogPostPage = () => {
           <h1 className="m-0 text-page-title leading-tight font-semibold tracking-title text-text">
             {post.title}
           </h1>
-          <PostViewCount slug={post.slug} />
+          <p
+            aria-live="polite"
+            className="m-0 flex items-center gap-1.5 text-sm text-muted"
+          >
+            <Eye aria-hidden="true" size={14} />
+            {views === null
+              ? "Views unavailable"
+              : `${views.toLocaleString()} views`}
+          </p>
         </header>
         <div className="grid gap-5">
           <ReactMarkdown components={markdownComponents}>
@@ -121,10 +76,12 @@ const BlogPostPage = () => {
 
 export const Route = createFileRoute("/blog/$slug")({
   component: BlogPostPage,
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
     if (!getBlogPost(params.slug)) {
-      throw notFound();
+      throw Object.assign(new Error("Blog post not found."), notFound());
     }
+
+    return await recordBlogView({ data: { slug: params.slug } });
   },
   head: ({ params }) => {
     const post = getBlogPost(params.slug);

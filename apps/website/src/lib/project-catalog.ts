@@ -38,7 +38,7 @@ export const readPinnedRepositoryNames = (
     const item = match.groups?.item;
     const name = item?.match(repositoryHref)?.groups?.name;
 
-    if (name && !seen.has(name)) {
+    if (name !== undefined && !seen.has(name)) {
       names.push(name);
       seen.add(name);
     }

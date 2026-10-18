@@ -26,8 +26,8 @@ export const recordVisitor = Effect.fn("recordVisitor")(function* recordVisitor(
     return null;
   }
 
-  const response = yield* Effect.tryPromise(() =>
-    visitorCounter.getByName("site").track(visitorId)
+  const response = yield* Effect.tryPromise(
+    async () => await visitorCounter.getByName("site").track(visitorId)
   ).pipe(Effect.option);
 
   if (Option.isNone(response)) {

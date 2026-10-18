@@ -86,8 +86,10 @@ export class NpmRegistry extends Context.Service<
                 `https://www.npmjs.com/package/${encodeURIComponent(registryPackage.name)}`,
             };
 
-            if (registryPackage.links?.repository) {
-              const repositoryUrl = registryPackage.links.repository
+            const repository = registryPackage.links?.repository;
+
+            if (repository !== undefined && repository.length > 0) {
+              const repositoryUrl = repository
                 .replace(/^git\+https:/u, "https:")
                 .replace(/\.git$/u, "");
 
@@ -141,7 +143,7 @@ const startPackagesRefresh = Effect.fn("startPackagesRefresh")(
 
     const created = yield* Effect.result(
       Effect.tryPromise({
-        try: () => refresh.create({ id: workflowId, params: {} }),
+        try: async () => await refresh.create({ id: workflowId, params: {} }),
         catch: (cause) =>
           cause instanceof Error
             ? cause
@@ -173,7 +175,7 @@ export const loadPackages = Effect.fn("loadPackages")(function* loadPackages(
 
   const stored = yield* Effect.result(
     Effect.tryPromise({
-      try: () => kv.get(snapshotKey, "text"),
+      try: async () => await kv.get(snapshotKey, "text"),
       catch: (cause) =>
         cause instanceof Error ? cause : new Error("KV read failed", { cause }),
     })
@@ -194,13 +196,9 @@ export const loadPackages = Effect.fn("loadPackages")(function* loadPackages(
   }
 
   const decoded = yield* Effect.result(
-    Effect.try({
-      try: () => JSON.parse(storedText),
-      catch: (cause) =>
-        cause instanceof Error
-          ? cause
-          : new Error("Invalid package snapshot JSON", { cause }),
-    }).pipe(Effect.flatMap(Schema.decodeUnknownEffect(PackagesSnapshotSchema)))
+    Schema.decodeUnknownEffect(Schema.fromJsonString(PackagesSnapshotSchema))(
+      storedText
+    )
   );
 
   if (decoded._tag === "Failure") {
@@ -260,7 +258,9 @@ export const refreshPackages = Effect.fn("refreshPackages")(
     };
 
     yield* Effect.tryPromise({
-      try: () => kv.put(snapshotKey, JSON.stringify(snapshot)),
+      try: async () => {
+        await kv.put(snapshotKey, JSON.stringify(snapshot));
+      },
       catch: (cause) =>
         cause instanceof Error
           ? cause

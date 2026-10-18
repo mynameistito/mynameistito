@@ -1,4 +1,4 @@
-import { Effect, Schema } from "effect";
+import { Data, Effect, Schema } from "effect";
 
 /** A currently playing Spotify track projected from Last.fm. */
 export interface NowPlaying {
@@ -13,14 +13,10 @@ export interface NowPlaying {
 }
 
 /** A Last.fm request failed or returned an unexpected response. */
-// oxlint-disable-next-line unicorn/throw-new-error -- SAFETY: Effect Schema.TaggedError is a class factory and must be extended without `new`.
-export class LastFmError extends Schema.TaggedError<LastFmError>()(
-  "LastFmError",
-  {
-    operation: Schema.String,
-    cause: Schema.Defect(),
-  }
-) {}
+export class LastFmError extends Data.TaggedError("LastFmError")<{
+  readonly operation: string;
+  readonly cause: unknown;
+}> {}
 
 const ImageSchema = Schema.Struct({
   "#text": Schema.String,
@@ -37,6 +33,37 @@ const TrackSchema = Schema.Struct({
     Schema.Struct({ nowplaying: Schema.optional(Schema.String) })
   ),
 });
+
+type LastFmTrack = Schema.Schema.Type<typeof TrackSchema>;
+
+const isTrackList = (
+  value: LastFmTrack | readonly LastFmTrack[]
+): value is readonly LastFmTrack[] => Array.isArray(value);
+
+const firstTrack = (
+  tracks: LastFmTrack | readonly LastFmTrack[]
+): LastFmTrack | undefined => {
+  if (isTrackList(tracks)) {
+    return tracks[0];
+  }
+
+  return tracks;
+};
+
+/** Schema for the public now-playing response returned to the browser. */
+export const NowPlayingResponseSchema = Schema.Union([
+  Schema.Struct({
+    title: Schema.String,
+    artists: Schema.Array(Schema.String),
+    album: Schema.String,
+    albumArt: Schema.NullOr(Schema.String),
+    spotifyUrl: Schema.String,
+    isPlaying: Schema.Literal(true),
+    progressMs: Schema.Null,
+    durationMs: Schema.Null,
+  }),
+  Schema.Null,
+]);
 
 const LastFmResponseSchema = Schema.Struct({
   recenttracks: Schema.Struct({
@@ -58,10 +85,9 @@ const LastFmErrorResponseSchema = Schema.Struct({
  * @param input - Untrusted JSON returned by Last.fm.
  * @returns The current track, or `null` when Last.fm has no now-playing track.
  */
-// oxlint-disable anti-slop/no-unknown-parameters -- SAFETY: The decoder parses unknown Last.fm JSON through Effect Schema before reading any fields.
 export const decodeCurrentlyPlaying = Effect.fn(
   "LastFm.decodeCurrentlyPlaying"
-)(function* decodeCurrentlyPlaying(input: unknown) {
+)(function* decodeCurrentlyPlaying(input: Schema.Json) {
   const response = yield* Schema.decodeUnknownEffect(LastFmResponseSchema)(
     input
   ).pipe(
@@ -69,15 +95,15 @@ export const decodeCurrentlyPlaying = Effect.fn(
   );
 
   const tracks = response.recenttracks.track;
-  const current = Array.isArray(tracks) ? tracks[0] : tracks;
+  const current = tracks === undefined ? undefined : firstTrack(tracks);
 
-  if (!current || current["@attr"]?.nowplaying !== "true") {
+  if (current === undefined || current["@attr"]?.nowplaying !== "true") {
     return null;
   }
 
-  const albumArt = current.image?.find(
-    (image: Schema.Schema.Type<typeof ImageSchema>) => image.size === "large"
-  )?.["#text"];
+  const albumArt = current.image?.find((image) => image.size === "large")?.[
+    "#text"
+  ];
 
   const searchQuery = encodeURIComponent(
     `${current.name} ${current.artist["#text"]}`
@@ -87,14 +113,13 @@ export const decodeCurrentlyPlaying = Effect.fn(
     title: current.name,
     artists: [current.artist["#text"]],
     album: current.album?.["#text"] ?? "",
-    albumArt: albumArt || null,
+    albumArt: albumArt ?? null,
     spotifyUrl: `https://open.spotify.com/search/${searchQuery}`,
     isPlaying: true,
     progressMs: null,
     durationMs: null,
   } satisfies NowPlaying;
 });
-// oxlint-enable anti-slop/no-unknown-parameters
 
 /** Fetches the current Spotify track Last.fm reports for a user.
  * @param config - Last.fm API credentials and the linked account username.
@@ -115,7 +140,8 @@ export const currentlyPlaying = Effect.fn("LastFm.currentlyPlaying")(
     }).toString();
 
     const response = yield* Effect.tryPromise({
-      try: () => fetch(url, { headers: { accept: "application/json" } }),
+      try: async () =>
+        await fetch(url, { headers: { accept: "application/json" } }),
       catch: (cause) => makeLastFmError("fetch recent tracks", cause),
     });
 
@@ -126,7 +152,7 @@ export const currentlyPlaying = Effect.fn("LastFm.currentlyPlaying")(
     }
 
     const payload = yield* Effect.tryPromise({
-      try: () => response.json(),
+      try: async () => await response.json(),
       catch: (cause) => makeLastFmError("read recent tracks response", cause),
     });
 
@@ -143,7 +169,10 @@ export const currentlyPlaying = Effect.fn("LastFm.currentlyPlaying")(
       );
     }
 
-    return yield* decodeCurrentlyPlaying(payload);
+    const json = yield* Schema.decodeUnknownEffect(Schema.Json)(payload).pipe(
+      Effect.mapError((cause) => makeLastFmError("decode recent tracks", cause))
+    );
+
+    return yield* decodeCurrentlyPlaying(json);
   }
 );
-// oxlint-enable anti-slop/no-unknown-parameters

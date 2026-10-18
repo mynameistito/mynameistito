@@ -41,10 +41,8 @@ const ProfileResponseSchema = Schema.Struct({
  * @param input - Untrusted JSON returned by the MDFromX profile endpoint.
  * @returns The parsed public profile.
  */
-// oxlint-disable-next-line anti-slop/no-unknown-parameters -- SAFETY: This untrusted JSON is decoded against ProfileResponseSchema before use.
 export const decodeProfileResponse = Effect.fn("MDFromX.decodeProfileResponse")(
-  // oxlint-disable-next-line anti-slop/no-unknown-parameters -- SAFETY: input is schema-decoded before use.
-  function* decodeProfileResponse(input: unknown) {
+  function* decodeProfileResponse(input: Schema.Json) {
     const response = yield* Schema.decodeUnknownEffect(ProfileResponseSchema)(
       input
     ).pipe(
@@ -82,9 +80,7 @@ export class MDFromX extends Context.Service<
    * @param apiKey - The optional redacted MDFromX API key.
    * @returns A layer with the HttpClient requirement still available.
    */
-  static readonly layerWithoutDependencies = (
-    apiKey?: Redacted.Redacted<string>
-  ) =>
+  static readonly layerWithoutDependencies = (apiKey?: Redacted.Redacted) =>
     Layer.effect(
       MDFromX,
       Effect.gen(function* layerWithoutDependencies() {
@@ -115,7 +111,16 @@ export class MDFromX extends Context.Service<
             )
           );
 
-          return yield* decodeProfileResponse(payload);
+          const json = yield* Schema.decodeUnknownEffect(Schema.Json)(
+            payload
+          ).pipe(
+            Effect.mapError(
+              (cause) =>
+                new MDFromXRequestError({ operation: "profile", cause })
+            )
+          );
+
+          return yield* decodeProfileResponse(json);
         });
 
         return MDFromX.of({ profile });
@@ -126,7 +131,7 @@ export class MDFromX extends Context.Service<
    * @param apiKey - The optional redacted MDFromX API key.
    * @returns A fully assembled MDFromX provider layer.
    */
-  static readonly layer = (apiKey?: Redacted.Redacted<string>) =>
+  static readonly layer = (apiKey?: Redacted.Redacted) =>
     MDFromX.layerWithoutDependencies(apiKey).pipe(
       Layer.provide(FetchHttpClient.layer)
     );

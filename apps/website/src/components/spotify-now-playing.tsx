@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import type { NowPlaying } from "@/lib/provider/spotify/lastfm";
+import { fetchNowPlaying } from "@/lib/spotify-now-playing-client";
 
 const refreshIntervalMs = 30_000;
 
@@ -15,16 +16,7 @@ export const SpotifyNowPlaying = () => {
 
     const refresh = async () => {
       try {
-        const response = await fetch("/api/spotify/now-playing", {
-          headers: { accept: "application/json" },
-        });
-
-        if (!response.ok) {
-          return;
-        }
-
-        // SAFETY: This same-origin endpoint returns the schema-decoded NowPlaying projection.
-        const nextTrack = (await response.json()) as NowPlaying | null;
+        const nextTrack = await fetchNowPlaying();
 
         if (active) {
           setTrack(nextTrack);
@@ -34,11 +26,10 @@ export const SpotifyNowPlaying = () => {
       }
     };
 
-    // oxlint-disable-next-line no-void -- SAFETY: refresh handles request failures internally and is intentionally fire-and-forget.
     void refresh();
 
     const interval = window.setInterval(() => {
-      refresh();
+      void refresh();
     }, refreshIntervalMs);
 
     return () => {
@@ -61,18 +52,18 @@ export const SpotifyNowPlaying = () => {
       rel="noreferrer"
       target="_blank"
     >
-      {track.albumArt ? (
+      {track.albumArt === null ? (
+        <span
+          aria-hidden="true"
+          className="size-8 shrink-0 rounded-full bg-subtle"
+        />
+      ) : (
         <img
           alt=""
           className="size-8 shrink-0 rounded-full object-cover"
           height={32}
           src={track.albumArt}
           width={32}
-        />
-      ) : (
-        <span
-          aria-hidden="true"
-          className="size-8 shrink-0 rounded-full bg-subtle"
         />
       )}
       <span className="min-w-0">

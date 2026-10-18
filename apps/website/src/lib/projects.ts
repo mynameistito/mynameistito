@@ -80,7 +80,10 @@ const fetchProjects = Effect.gen(function* fetchProjects() {
     const project: Project = {
       name: repository.name,
       description: repository.description ?? `${repository.name} on GitHub.`,
-      languages: repository.language ? [repository.language] : [],
+      languages:
+        repository.language === null || repository.language === undefined
+          ? []
+          : [repository.language],
       image: repository.owner_avatar_url,
       archived: repository.archived,
       featured,
@@ -88,11 +91,12 @@ const fetchProjects = Effect.gen(function* fetchProjects() {
       ...override,
     };
 
-    const projectWithPreview = override?.image
-      ? { ...project, previewImage: override.image }
-      : project;
+    const projectWithPreview =
+      override?.image === undefined
+        ? project
+        : { ...project, previewImage: override.image };
 
-    if (repository.homepage && !override?.demo) {
+    if (repository.homepage !== null && override?.demo === undefined) {
       return { ...projectWithPreview, demo: repository.homepage };
     }
 
@@ -104,7 +108,10 @@ const fetchProjects = Effect.gen(function* fetchProjects() {
 export const loadProjects = Effect.fn("loadProjects")(function* loadProjects() {
   const now = yield* DateTime.now;
 
-  if (cachedProjects && now.epochMilliseconds - cachedAt < cacheDuration) {
+  if (
+    cachedProjects !== undefined &&
+    now.epochMilliseconds - cachedAt < cacheDuration
+  ) {
     return cachedProjects;
   }
 

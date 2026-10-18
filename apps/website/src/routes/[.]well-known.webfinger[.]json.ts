@@ -3,11 +3,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CORS_HEADERS, webfingerJson } from "@/lib/webfinger";
 import { webfingerResponse } from "@/server/functions/webfinger-response";
 
-const getWebfingerJson = ({
+const getWebfingerJson = async ({
   request,
 }: {
   request: Request;
-}): Promise<Response> => webfingerResponse(request, webfingerJson);
+}): Promise<Response> => await webfingerResponse(request, webfingerJson);
 
 const options = () => new Response(null, { headers: CORS_HEADERS });
 

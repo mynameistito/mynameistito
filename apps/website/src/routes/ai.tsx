@@ -7,7 +7,7 @@ import { getTokscale } from "@/server/functions/tokscale";
 const AiPage = () => <AiUsageDashboard snapshot={Route.useLoaderData()} />;
 
 export const Route = createFileRoute("/ai")({
-  loader: () => getTokscale(),
+  loader: async () => await getTokscale(),
   component: AiPage,
   head: () => ({
     meta: [

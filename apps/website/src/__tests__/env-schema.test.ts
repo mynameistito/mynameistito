@@ -1,9 +1,18 @@
 import { spawnSync } from "node:child_process";
+import { homedir } from "node:os";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
 const websiteDirectory = fileURLToPath(new URL("../../", import.meta.url));
+
+const bunExecutable = path.resolve(
+  process.env.BUN_INSTALL ?? path.join(homedir(), ".bun"),
+  "bin",
+  process.platform === "win32" ? "bun.exe" : "bun"
+);
+
 const secret = "test-secret-value-not-for-production";
 const lastFmApiKey = "test-lastfm-api-key";
 
@@ -23,8 +32,7 @@ const productionConfig = {
 };
 
 const loadConfig = (env: NodeJS.ProcessEnv) =>
-  // oxlint-disable-next-line sonarjs/no-os-command-from-path -- Bun is the repository package manager.
-  spawnSync("bun", ["run", "varlock", "load", "--agent"], {
+  spawnSync(bunExecutable, ["run", "varlock", "load", "--agent"], {
     cwd: websiteDirectory,
     encoding: "utf-8",
     env,

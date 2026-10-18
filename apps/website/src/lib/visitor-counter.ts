@@ -27,16 +27,16 @@ export class VisitorCounter extends DurableObject {
    * @param visitorId - The stable visitor identifier.
    * @returns The post's unique view count.
    */
-  recordPostView(postSlug: string, visitorId: string): Promise<number> {
+  async recordPostView(postSlug: string, visitorId: string): Promise<number> {
     const viewKey = `post:${postSlug}:visitor:${visitorId}`;
     const countKey = `post:${postSlug}:views`;
 
-    return this.ctx.storage.transaction(async (transaction) => {
+    return await this.ctx.storage.transaction(async (transaction) => {
       const alreadyViewed = await transaction.get<boolean>(viewKey);
       const current = (await transaction.get<number>(countKey)) ?? 0;
       const next = postViewCountAfterVisit(current, alreadyViewed ?? false);
 
-      if (!alreadyViewed) {
+      if (alreadyViewed !== true) {
         await transaction.put(viewKey, true);
         await transaction.put(countKey, next);
       }
@@ -70,7 +70,9 @@ export class VisitorCounter extends DurableObject {
           liveEntries: [],
         });
 
-        await Promise.all(expired.map((key) => transaction.delete(key)));
+        await Promise.all(
+          expired.map(async (key) => await transaction.delete(key))
+        );
         await transaction.put("today", keys.today);
       }
 
@@ -81,18 +83,25 @@ export class VisitorCounter extends DurableObject {
       const visitorWasActive =
         active.has(keys.live) && !expiredLiveSet.has(keys.live);
 
-      await Promise.all(expiredLive.map((key) => transaction.delete(key)));
+      await Promise.all(
+        expiredLive.map(async (key) => await transaction.delete(key))
+      );
 
-      const seen = await transaction.get<boolean>(keys.seen);
-      const joined = await transaction.get<boolean>(keys.joined);
-      const current = (await transaction.get<number>(keys.daily)) ?? 0;
-      const total = (await transaction.get<number>("total")) ?? 0;
+      const [seen, joined, dailyCount, totalCount] = await Promise.all([
+        transaction.get<boolean>(keys.seen),
+        transaction.get<boolean>(keys.joined),
+        transaction.get<number>(keys.daily),
+        transaction.get<number>("total"),
+      ]);
 
-      if (!seen) {
+      const current = dailyCount ?? 0;
+      const total = totalCount ?? 0;
+
+      if (seen !== true) {
         await transaction.put(keys.seen, true);
       }
 
-      if (!joined) {
+      if (joined !== true) {
         await transaction.put(keys.joined, true);
       }
 
@@ -128,7 +137,7 @@ export class VisitorCounter extends DurableObject {
     const { storage } = this.ctx;
     const active = await storage.list<number>({ prefix: "live:" });
     const expired = expiredLiveVisitorKeys(active, now);
-    await Promise.all(expired.map((key) => storage.delete(key)));
+    await Promise.all(expired.map(async (key) => await storage.delete(key)));
     const remaining = await storage.list({ prefix: "live:" });
 
     if (remaining.size > 0) {

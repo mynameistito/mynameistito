@@ -11,4 +11,8 @@ const output = [
   ...links.map((link) => link.url),
 ].join("\n");
 
-Effect.runSync(Effect.sync(() => console.log(output)));
+Effect.runSync(
+  Effect.sync(() => {
+    console.log(output);
+  })
+);

@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import { catch as catchEffect } from "effect/Effect";
 import { ArrowUpRight, ChartColumnIncreasing } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import type { CSSProperties, FocusEvent, KeyboardEvent, SVGProps } from "react";
+import type { FocusEvent, KeyboardEvent, SVGProps } from "react";
 
 import { profile } from "@/lib/profile";
 import { buildCalendar } from "@/lib/provider/tokscale/analytics";
@@ -118,10 +118,7 @@ const GitHubHoverCard = ({
       <figure
         aria-label={`GitHub contribution graph, ${contributionCount.toLocaleString()} contributions in the last 12 months`}
         className="social-hover-card-contribution-grid"
-        style={
-          // SAFETY: This object contains only the --week-count CSS custom property.
-          { "--week-count": weeks.length } as CSSProperties
-        }
+        style={{ "--week-count": weeks.length }}
       >
         {weeks.map((week, weekIndex) => (
           <span className="social-hover-card-contribution-week" key={weekIndex}>
@@ -145,11 +142,12 @@ const XHoverCard = ({ data }: { readonly data: SocialProfileData["x"] }) => (
     <span
       aria-hidden="true"
       className="social-hover-card-cover"
-      // SAFETY: bannerUrl is parsed as HTTPS before reaching the UI; this is a CSS custom property.
       style={
-        data?.bannerUrl
-          ? ({ "--cover-image": `url("${data.bannerUrl}")` } as CSSProperties)
-          : undefined
+        data?.bannerUrl === undefined ||
+        data.bannerUrl === null ||
+        data.bannerUrl.length === 0
+          ? undefined
+          : { "--cover-image": `url("${data.bannerUrl}")` }
       }
     >
       <span>𝕏</span>
@@ -170,8 +168,10 @@ const XHoverCard = ({ data }: { readonly data: SocialProfileData["x"] }) => (
       <span className="social-hover-card-follow">Follow</span>
     </span>
     <span className="social-hover-card-bio">
-      {data?.description || "👋 @KZG_AU | @gamehostbros"}
-      {data?.location ? ` · ${data.location}` : " · New Zealand"}
+      {data?.description ?? "👋 @KZG_AU | @gamehostbros"}
+      {data?.location !== undefined && data.location.length > 0
+        ? ` · ${data.location}`
+        : " · New Zealand"}
     </span>
     <span className="social-hover-card-stats">
       <span>
@@ -235,8 +235,7 @@ const TokscaleHoverCard = ({
       <figure
         aria-label="Tokscale token usage heatmap for the last year"
         className="social-hover-card-contribution-grid"
-        // SAFETY: The CSS custom property is the calendar's computed week count.
-        style={{ "--week-count": weeks.length } as CSSProperties}
+        style={{ "--week-count": weeks.length }}
       >
         {weeks.map((week, weekIndex) => (
           <span className="social-hover-card-contribution-week" key={weekIndex}>
@@ -303,9 +302,9 @@ export const SocialDock = () => {
   useEffect(() => {
     let isMounted = true;
 
-    const profiles = Effect.tryPromise(() => getSocialProfiles()).pipe(
-      catchEffect(() => Effect.succeed(null))
-    );
+    const profiles = Effect.tryPromise(
+      async () => await getSocialProfiles()
+    ).pipe(catchEffect(() => Effect.succeed(null)));
 
     const loadProfiles = async () => {
       const data = await Effect.runPromise(profiles);
@@ -326,7 +325,7 @@ export const SocialDock = () => {
     let observer: ResizeObserver | undefined;
 
     if (
-      !activeItem ||
+      activeItem === null ||
       !dockRef.current ||
       !panelRef.current ||
       !triggerRef.current
@@ -390,7 +389,7 @@ export const SocialDock = () => {
   const handleBlur = (event: FocusEvent<HTMLElement>) => {
     if (
       !(event.relatedTarget instanceof Node) ||
-      !dockRef.current?.contains(event.relatedTarget)
+      dockRef.current?.contains(event.relatedTarget) !== true
     ) {
       closePreview();
     }
@@ -448,7 +447,9 @@ export const SocialDock = () => {
               triggerRef.current = event.currentTarget;
             }
           }}
-          onPointerLeave={(event) => handlePointerLeave(event.pointerType)}
+          onPointerLeave={(event) => {
+            handlePointerLeave(event.pointerType);
+          }}
           rel={item.href.startsWith("/") ? undefined : "noreferrer"}
           target={item.href.startsWith("/") ? undefined : "_blank"}
         >
@@ -465,7 +466,9 @@ export const SocialDock = () => {
         onBlur={handleBlur}
         onKeyDown={handleEscape}
         onPointerEnter={cancelPendingClose}
-        onPointerLeave={(event) => handlePointerLeave(event.pointerType)}
+        onPointerLeave={(event) => {
+          handlePointerLeave(event.pointerType);
+        }}
         to="/links"
       >
         <ArrowUpRight aria-hidden="true" size={16} />
@@ -480,7 +483,9 @@ export const SocialDock = () => {
           onBlur={handleBlur}
           onKeyDown={handleEscape}
           onPointerEnter={cancelPendingClose}
-          onPointerLeave={(event) => handlePointerLeave(event.pointerType)}
+          onPointerLeave={(event) => {
+            handlePointerLeave(event.pointerType);
+          }}
           ref={panelRef}
           rel={activeItem.href.startsWith("/") ? undefined : "noreferrer"}
           tabIndex={panelLeft === null ? -1 : 0}

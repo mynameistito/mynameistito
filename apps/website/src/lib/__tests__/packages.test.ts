@@ -1,4 +1,4 @@
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Schema } from "effect";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createAppEnv } from "@/env";
@@ -7,6 +7,30 @@ import { loadPackages, NpmRegistry, refreshPackages } from "@/lib/packages";
 import type { NpmPackage } from "@/lib/packages";
 
 const snapshotKey = "npm:packages:v1";
+
+const StoredPackagesSchema = Schema.Struct({
+  refreshedAt: Schema.String,
+  packages: Schema.Array(
+    Schema.Struct({
+      name: Schema.String,
+      description: Schema.String,
+      version: Schema.String,
+      weeklyDownloads: Schema.Number,
+      npmUrl: Schema.String,
+      repositoryUrl: Schema.optional(Schema.String),
+    })
+  ),
+});
+
+const decodeStoredPackages = (snapshot: string | undefined) => {
+  if (snapshot === undefined) {
+    throw new Error("The packages snapshot was not written.");
+  }
+
+  return Schema.decodeUnknownSync(Schema.fromJsonString(StoredPackagesSchema))(
+    snapshot
+  );
+};
 
 const npmPackage: NpmPackage = {
   name: "useful-package",
@@ -25,11 +49,10 @@ const createKV = (initial?: string) => {
   }
 
   const binding: OpenSourceKVBinding = {
-    get: (key) => Promise.resolve(values.get(key) ?? null),
-    put: (key, value) => {
+    get: async (key) => await Promise.resolve(values.get(key) ?? null),
+    put: async (key, value) => {
+      await Promise.resolve();
       values.set(key, value);
-
-      return Promise.resolve();
     },
   };
 
@@ -77,7 +100,7 @@ describe("npm package snapshots", () => {
 
     const create = vi
       .fn<PackagesRefreshBinding["create"]>()
-      .mockImplementation(({ id }) => Promise.resolve({ id }));
+      .mockImplementation(async ({ id }) => await Promise.resolve({ id }));
 
     await expect(
       Effect.runPromise(
@@ -89,10 +112,9 @@ describe("npm package snapshots", () => {
         )
       )
     ).resolves.toStrictEqual([]);
-    expect(create).toHaveBeenCalledExactlyOnceWith({
-      id: expect.stringMatching(/^packages-refresh-\d+$/u),
-      params: {},
-    });
+    expect(create).toHaveBeenCalledOnce();
+    expect(create.mock.calls[0]?.[0].params).toStrictEqual({});
+    expect(create.mock.calls[0]?.[0].id).toMatch(/^packages-refresh-\d+$/u);
   });
 
   it("serves stale data while scheduling a refresh", async () => {
@@ -105,7 +127,7 @@ describe("npm package snapshots", () => {
 
     const create = vi
       .fn<PackagesRefreshBinding["create"]>()
-      .mockImplementation(({ id }) => Promise.resolve({ id }));
+      .mockImplementation(async ({ id }) => await Promise.resolve({ id }));
 
     await expect(
       Effect.runPromise(
@@ -131,7 +153,7 @@ describe("npm package snapshots", () => {
     );
 
     expect(result.packageCount).toBe(1);
-    const stored = JSON.parse(values.get(snapshotKey) ?? "null");
+    const stored = decodeStoredPackages(values.get(snapshotKey));
     expect(stored).toMatchObject({ packages: [npmPackage] });
     expect(stored.refreshedAt).toStrictEqual(expect.any(String));
   });

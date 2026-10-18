@@ -70,7 +70,11 @@ const loadFromProviders = (
       tokscale: tokscaleSnapshot?.data ?? null,
     };
 
-    if (nextData.github || nextData.x || nextData.tokscale) {
+    if (
+      nextData.github !== null ||
+      nextData.x !== null ||
+      nextData.tokscale !== null
+    ) {
       yield* Ref.set(lastKnown, nextData);
     }
 
@@ -115,7 +119,10 @@ export const makeSocialProfilesLayer = ({
         (_key: "social-profiles") =>
           loadProviders(lastKnown).pipe(
             Effect.map((data) => ({
-              cacheable: Boolean(data.github || data.x || data.tokscale),
+              cacheable:
+                data.github !== null ||
+                data.x !== null ||
+                data.tokscale !== null,
               data,
             }))
           ),
@@ -163,8 +170,8 @@ const socialProfilesRuntime = ManagedRuntime.make(socialProfilesLayer);
 /** Loads cached public GitHub, X, and Tokscale profile details.
  * @returns The latest available social profile data.
  */
-export const loadSocialProfiles = () =>
-  socialProfilesRuntime.runPromise(
+export const loadSocialProfiles = async () =>
+  await socialProfilesRuntime.runPromise(
     Effect.gen(function* loadSocialProfilesProgram() {
       const service = yield* SocialProfiles;
 

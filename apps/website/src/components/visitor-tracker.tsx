@@ -1,12 +1,9 @@
 import { useRouterState } from "@tanstack/react-router";
 import { Effect } from "effect";
-import { catch as catchEffect } from "effect/Effect";
-import { decodeUnknownEffect } from "effect/Schema";
 import { UsersRound } from "lucide-react";
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { getTurnstileToken } from "@/lib/turnstile-client";
-import { VisitorCountsSchema } from "@/lib/visitor-counting";
+import { loadVisitorCounts } from "@/lib/visitor-count-client";
 import type { VisitorCounts } from "@/lib/visitor-counting";
 import { getTurnstileSitekey } from "@/server/functions/contact-turnstile-config";
 
@@ -34,29 +31,6 @@ const runWithHeartbeatGuard = async <A,>(
     guard.active = false;
   }
 };
-
-const loadVisitorCounts = (pathname: string, sitekey: string) =>
-  Effect.gen(function* loadVisitorCountsProgram() {
-    const token = yield* Effect.tryPromise(() =>
-      getTurnstileToken(sitekey, "visitor")
-    );
-
-    const response = yield* Effect.tryPromise(() =>
-      fetch("/api/visitors", {
-        body: JSON.stringify({ path: pathname, turnstileToken: token }),
-        headers: { "content-type": "application/json" },
-        method: "POST",
-      })
-    );
-
-    if (!response.ok) {
-      return null;
-    }
-
-    const payload = yield* Effect.tryPromise(() => response.json());
-
-    return yield* decodeUnknownEffect(VisitorCountsSchema)(payload);
-  }).pipe(catchEffect(() => Effect.succeed(null)));
 
 /** Tracks live sessions site-wide and shares counts with the profile UI.
  * @param props - The application subtree that can display visitor activity.
@@ -101,7 +75,8 @@ export const VisitorTracker = ({ children }: { children: React.ReactNode }) => {
     const sitekey = turnstileSitekey;
 
     const shouldTrack =
-      Boolean(sitekey) &&
+      sitekey !== null &&
+      sitekey !== undefined &&
       pathname !== "/blog" &&
       !pathname.startsWith("/blog/");
 
@@ -110,12 +85,14 @@ export const VisitorTracker = ({ children }: { children: React.ReactNode }) => {
     const heartbeatGuard = { active: false };
 
     const trackHeartbeat = async () => {
-      if (!sitekey) {
+      if (sitekey === undefined || sitekey === null) {
         return;
       }
 
-      const value = await runWithHeartbeatGuard(heartbeatGuard, () =>
-        Effect.runPromise(loadVisitorCounts(pathname, sitekey))
+      const value = await runWithHeartbeatGuard(
+        heartbeatGuard,
+        async () =>
+          await Effect.runPromise(loadVisitorCounts(pathname, sitekey))
       );
 
       if (!cancelled && value) {
@@ -165,7 +142,9 @@ export const VisitorActivity = () => {
         aria-expanded={isOpen}
         aria-label={isOpen ? "Hide visitor activity" : "View visitor activity"}
         className="grid size-[30px] place-items-center rounded-control border border-line bg-surface text-muted transition-colors hover:text-text active:translate-y-px"
-        onClick={() => setIsOpen((open) => !open)}
+        onClick={() => {
+          setIsOpen((open) => !open);
+        }}
         type="button"
       >
         <UsersRound aria-hidden="true" size={15} />

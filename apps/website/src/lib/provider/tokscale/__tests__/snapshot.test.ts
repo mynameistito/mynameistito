@@ -37,11 +37,10 @@ describe("Tokscale snapshot refresh", () => {
     const values = new Map<string, string>();
 
     const kv: OpenSourceKVBinding = {
-      get: (key) => Promise.resolve(values.get(key) ?? null),
-      put: (key, value) => {
+      get: async (key) => await Promise.resolve(values.get(key) ?? null),
+      put: async (key, value) => {
+        await Promise.resolve();
         values.set(key, value);
-
-        return Promise.resolve();
       },
     };
 
@@ -74,20 +73,23 @@ describe("Tokscale snapshot refresh", () => {
     const workflowIds: string[] = [];
 
     const kv: OpenSourceKVBinding = {
-      get: () => Promise.resolve(null),
-      put: () => Promise.resolve(),
+      get: async () => await Promise.resolve(null),
+      put: async () => {},
     };
 
     const tokscaleRefresh = {
-      create: ({ id }: { readonly id: string }) => {
+      create: async ({ id }: { readonly id: string }) => {
+        await Promise.resolve();
         workflowIds.push(id);
 
-        return Promise.resolve({ id });
+        return { id };
       },
-      get: () =>
-        Promise.resolve({
-          status: () => Promise.resolve({ status: "running" }),
-          restart: () => Promise.resolve(),
+      get: async () =>
+        await Promise.resolve({
+          status: async () => await Promise.resolve({ status: "running" }),
+          restart: async () => {
+            await Promise.resolve();
+          },
         }),
     };
 
@@ -111,20 +113,22 @@ describe("Tokscale snapshot refresh", () => {
     const restartedIds: string[] = [];
 
     const kv: OpenSourceKVBinding = {
-      get: () => Promise.resolve(null),
-      put: () => Promise.resolve(),
+      get: async () => await Promise.resolve(null),
+      put: async () => {},
     };
 
     const tokscaleRefresh = {
-      create: ({ id }: { readonly id: string }) =>
-        Promise.reject(new Error(`Workflow ${id} already exists`)),
-      get: (id: string) =>
-        Promise.resolve({
-          status: () => Promise.resolve({ status: "errored" }),
-          restart: () => {
+      create: async ({ id }: { readonly id: string }) => {
+        await Promise.resolve();
+        throw new Error(`Workflow ${id} already exists`);
+      },
+      get: async (id: string) =>
+        await Promise.resolve({
+          status: async () => await Promise.resolve({ status: "errored" }),
+          restart: async () => {
             restartedIds.push(id);
 
-            return Promise.resolve();
+            await Promise.resolve();
           },
         }),
     };

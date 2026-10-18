@@ -3,14 +3,14 @@ import { describe, expect, it } from "vitest";
 import { webfinger } from "@/lib/webfinger";
 import { webfingerResponse } from "@/server/functions/webfinger-response";
 
-const responseFor = (resource?: string) => {
+const responseFor = async (resource?: string) => {
   const url = new URL("https://mynameistito.com/.well-known/webfinger");
 
   if (resource !== undefined) {
     url.searchParams.set("resource", resource);
   }
 
-  return webfingerResponse(new Request(url), webfinger);
+  return await webfingerResponse(new Request(url), webfinger);
 };
 
 describe("WebFinger response", () => {

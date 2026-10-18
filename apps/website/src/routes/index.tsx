@@ -92,7 +92,7 @@ const HomeContent = () => {
 };
 
 export const Route = createFileRoute("/")({
-  loader: () => getProjects(),
+  loader: async () => await getProjects(),
   component: Home,
   head: () => ({
     links: [

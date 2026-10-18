@@ -2,10 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
-interface PackageManifest {
-  name: string;
-  version: string;
-}
+import { Schema } from "effect";
 
 interface ChangesetsOutputEvent {
   packageName: string;
@@ -15,9 +12,15 @@ interface ChangesetsOutputEvent {
 
 const outputPath = process.env.CHANGESETS_OUTPUT;
 
-if (!outputPath) {
+if (outputPath === undefined || outputPath.length === 0) {
   throw new Error("CHANGESETS_OUTPUT is required by the Changesets action");
 }
+
+const parsePackageManifest = Schema.decodeUnknownSync(
+  Schema.fromJsonString(
+    Schema.Struct({ name: Schema.String, version: Schema.String })
+  )
+);
 
 const gitCommand = process.platform === "win32" ? "git.exe" : "git";
 const bunxCommand = process.platform === "win32" ? "bunx.exe" : "bunx";
@@ -27,7 +30,7 @@ const existingTags = new Set(
     encoding: "utf-8",
   })
     .split("\n")
-    .map((line) => line.match(/refs\/tags\/(?<tag>.+)$/u)?.groups?.tag)
+    .map((line) => /refs\/tags\/(?<tag>.+)$/u.exec(line)?.groups?.tag)
     .filter((tag): tag is string => tag !== undefined && !tag.endsWith("^{}"))
 );
 
@@ -42,10 +45,9 @@ for (const directory of readdirSync("packages", { withFileTypes: true })) {
     continue;
   }
 
-  // SAFETY: Each packages/* directory is expected to contain a package manifest.
-  const manifest = JSON.parse(
+  const manifest = parsePackageManifest(
     readFileSync(path.join("packages", directory.name, "package.json"), "utf-8")
-  ) as PackageManifest;
+  );
 
   const tag = `${manifest.name}@${manifest.version}`;
 

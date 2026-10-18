@@ -16,7 +16,7 @@ const githubUserAgent = "portfolio-website";
 
 interface GitHubLayerConfig {
   readonly username: string;
-  readonly token?: Redacted.Redacted<string>;
+  readonly token?: Redacted.Redacted;
 }
 
 const runGitHubSdk = <A, E>(

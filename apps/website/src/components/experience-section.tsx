@@ -20,7 +20,9 @@ export const ExperienceSection = () => {
         <button
           aria-expanded={expanded}
           className="py-1 text-xs leading-5 text-muted transition-colors hover:text-text"
-          onClick={() => setExpanded(!expanded)}
+          onClick={() => {
+            setExpanded(!expanded);
+          }}
           type="button"
         >
           {expanded ? "See less" : "See more"}

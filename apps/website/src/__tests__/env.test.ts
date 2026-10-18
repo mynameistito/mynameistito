@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { createAppEnv } from "@/env";
 
-const getSecretValue = (value: Redacted.Redacted<string> | undefined) =>
+const getSecretValue = (value: Redacted.Redacted | undefined) =>
   value ? Redacted.value(value) : null;
 
 describe("Worker environment configuration", () => {
@@ -26,7 +26,11 @@ describe("Worker environment configuration", () => {
       turnstile: "turnstile-secret",
       lastfm: "lastfm-api-key",
     });
-    expect(String(appEnv.TURNSTILE_SECRET)).not.toContain("turnstile-secret");
-    expect(String(appEnv.LASTFM_API_KEY)).not.toContain("lastfm-api-key");
+    expect(JSON.stringify(appEnv.TURNSTILE_SECRET)).not.toContain(
+      "turnstile-secret"
+    );
+    expect(JSON.stringify(appEnv.LASTFM_API_KEY)).not.toContain(
+      "lastfm-api-key"
+    );
   });
 });

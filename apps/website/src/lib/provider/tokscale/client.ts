@@ -148,10 +148,8 @@ export const TokscaleProfileSchema = Schema.Struct({
  * @param input - The unknown JSON returned by Tokscale.
  * @returns A validated profile with the fields consumed by this website.
  */
-// oxlint-disable-next-line anti-slop/no-unknown-parameters -- SAFETY: Untrusted JSON is schema-decoded before use.
 export const decodeTokscaleResponse = Effect.fn("Tokscale.decodeResponse")(
-  // oxlint-disable-next-line anti-slop/no-unknown-parameters -- SAFETY: Decode unknown provider data before using it.
-  function* decodeTokscaleResponse(input: unknown) {
+  function* decodeTokscaleResponse(input: Schema.Json) {
     return yield* Schema.decodeUnknownEffect(TokscaleProfileSchema)(input).pipe(
       Effect.mapError(
         (cause) => new TokscaleRequestError({ operation: "decode", cause })
@@ -195,7 +193,16 @@ export class Tokscale extends Context.Service<
             )
           );
 
-          return yield* decodeTokscaleResponse(payload);
+          const json = yield* Schema.decodeUnknownEffect(Schema.Json)(
+            payload
+          ).pipe(
+            Effect.mapError(
+              (cause) =>
+                new TokscaleRequestError({ operation: "decode", cause })
+            )
+          );
+
+          return yield* decodeTokscaleResponse(json);
         });
 
         return Tokscale.of({ profile });

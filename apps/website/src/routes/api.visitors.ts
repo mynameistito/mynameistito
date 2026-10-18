@@ -25,8 +25,8 @@ const VisitorRequest = Struct({
 
 const visitorUnavailableMessage = "Visitor counts are unavailable.";
 
-const post = ({ request }: { request: Request }) =>
-  Effect.runPromise(
+const post = async ({ request }: { request: Request }) =>
+  await Effect.runPromise(
     Effect.gen(function* trackVisitor() {
       const origin = request.headers.get("origin");
 
@@ -37,7 +37,9 @@ const post = ({ request }: { request: Request }) =>
         );
       }
 
-      const decoded = yield* Effect.tryPromise(() => request.json()).pipe(
+      const decoded = yield* Effect.tryPromise(
+        async () => await request.json()
+      ).pipe(
         Effect.flatMap(decodeUnknownEffect(VisitorRequest)),
         catchEffect(() => Effect.succeed(null))
       );
@@ -59,9 +61,9 @@ const post = ({ request }: { request: Request }) =>
 
       const cookie = request.headers.get("cookie") ?? "";
 
-      const existingId = cookie.match(
-        /(?:^|;\s*)site_visitor=(?<visitorId>[\da-f-]{36})/iu
-      )?.groups?.visitorId;
+      const existingId =
+        /(?:^|;\s*)site_visitor=(?<visitorId>[\da-f-]{36})/iu.exec(cookie)
+          ?.groups?.visitorId;
 
       const recorded = yield* recordVisitor(existingId);
 
