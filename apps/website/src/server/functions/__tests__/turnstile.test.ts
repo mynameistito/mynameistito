@@ -17,8 +17,9 @@ interface SiteverifyReply {
 }
 
 const stubSiteverify = (body: SiteverifyReply, status = 200) => {
-  vi.stubGlobal("fetch", () =>
-    Promise.resolve(Response.json(body, { status }))
+  vi.stubGlobal(
+    "fetch",
+    async () => await Promise.resolve(Response.json(body, { status }))
   );
 };
 
@@ -95,7 +96,10 @@ describe("Turnstile verification", () => {
   });
 
   it("fails closed when Siteverify returns malformed JSON", async () => {
-    vi.stubGlobal("fetch", () => Promise.resolve(new Response("not json")));
+    vi.stubGlobal(
+      "fetch",
+      async () => await Promise.resolve(new Response("not json"))
+    );
 
     await expect(
       Effect.runPromise(verifyTurnstile(input))

@@ -1,4 +1,4 @@
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Schema } from "effect";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createAppEnv } from "@/env";
@@ -10,6 +10,38 @@ import { GitHubRequestError } from "@/lib/provider/github/errors";
 
 const snapshotKey = "open-source:contributions:v2";
 
+const StoredContributionsSchema = Schema.Struct({
+  refreshedAt: Schema.String,
+  repositories: Schema.Array(
+    Schema.Struct({
+      avatarUrl: Schema.String,
+      featured: Schema.Boolean,
+      name: Schema.String,
+      pullRequests: Schema.Array(
+        Schema.Struct({
+          number: Schema.Number,
+          state: Schema.String,
+          title: Schema.String,
+          url: Schema.String,
+        })
+      ),
+      repo: Schema.String,
+      stars: Schema.Number,
+      url: Schema.String,
+    })
+  ),
+});
+
+const decodeStoredContributions = (snapshot: string | undefined) => {
+  if (snapshot === undefined) {
+    throw new Error("The contributions snapshot was not written.");
+  }
+
+  return Schema.decodeUnknownSync(
+    Schema.fromJsonString(StoredContributionsSchema)
+  )(snapshot);
+};
+
 const createKV = (initial?: string) => {
   const values = new Map<string, string>();
 
@@ -18,11 +50,10 @@ const createKV = (initial?: string) => {
   }
 
   const binding: OpenSourceKVBinding = {
-    get: (key) => Promise.resolve(values.get(key) ?? null),
-    put: (key, value) => {
+    get: async (key) => await Promise.resolve(values.get(key) ?? null),
+    put: async (key, value) => {
+      await Promise.resolve();
       values.set(key, value);
-
-      return Promise.resolve();
     },
   };
 
@@ -118,7 +149,7 @@ describe("open-source contribution snapshots", () => {
 
     const create = vi
       .fn<ContributionsRefreshBinding["create"]>()
-      .mockImplementation(({ id }) => Promise.resolve({ id }));
+      .mockImplementation(async ({ id }) => await Promise.resolve({ id }));
 
     const env = createAppEnv({
       OPEN_SOURCE_KV: binding,
@@ -128,10 +159,9 @@ describe("open-source contribution snapshots", () => {
     await expect(
       Effect.runPromise(loadContributions(env))
     ).resolves.toStrictEqual([]);
-    expect(create).toHaveBeenCalledWith({
-      id: expect.stringMatching(/^contributions-refresh-\d+$/u),
-      params: {},
-    });
+    expect(create.mock.calls[0]?.[0].id).toMatch(
+      /^contributions-refresh-\d+$/u
+    );
   });
 
   it("serves stale snapshots and starts a refresh Workflow", async () => {
@@ -144,7 +174,7 @@ describe("open-source contribution snapshots", () => {
 
     const create = vi
       .fn<ContributionsRefreshBinding["create"]>()
-      .mockImplementation(({ id }) => Promise.resolve({ id }));
+      .mockImplementation(async ({ id }) => await Promise.resolve({ id }));
 
     const env = createAppEnv({
       OPEN_SOURCE_KV: binding,
@@ -154,10 +184,11 @@ describe("open-source contribution snapshots", () => {
     await expect(
       Effect.runPromise(loadContributions(env))
     ).resolves.toStrictEqual([repository]);
-    expect(create).toHaveBeenCalledExactlyOnceWith({
-      id: expect.stringMatching(/^contributions-refresh-\d+$/u),
-      params: {},
-    });
+    expect(create).toHaveBeenCalledOnce();
+    expect(create.mock.calls[0]?.[0].params).toStrictEqual({});
+    expect(create.mock.calls[0]?.[0].id).toMatch(
+      /^contributions-refresh-\d+$/u
+    );
   });
 
   it("ignores a malformed snapshot instead of failing the page loader", async () => {
@@ -165,7 +196,7 @@ describe("open-source contribution snapshots", () => {
 
     const create = vi
       .fn<ContributionsRefreshBinding["create"]>()
-      .mockImplementation(({ id }) => Promise.resolve({ id }));
+      .mockImplementation(async ({ id }) => await Promise.resolve({ id }));
 
     vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -201,7 +232,7 @@ describe("open-source contribution snapshots", () => {
     );
 
     expect(result.repositoryCount).toBe(1);
-    const stored = JSON.parse(values.get(snapshotKey) ?? "null");
+    const stored = decodeStoredContributions(values.get(snapshotKey));
     expect(stored).toMatchObject({ repositories: [repository] });
     expect(stored.refreshedAt).toStrictEqual(expect.any(String));
   });
@@ -230,7 +261,7 @@ describe("open-source contribution snapshots", () => {
       )
     );
 
-    const stored = JSON.parse(values.get(snapshotKey) ?? "null");
+    const stored = decodeStoredContributions(values.get(snapshotKey));
     expect(
       stored.repositories.map(
         ({
@@ -303,7 +334,7 @@ describe("open-source contribution snapshots", () => {
       )
     );
 
-    const stored = JSON.parse(values.get(snapshotKey) ?? "null");
+    const stored = decodeStoredContributions(values.get(snapshotKey));
     expect(
       stored.repositories.map(({ repo }: { readonly repo: string }) => repo)
     ).toStrictEqual(["keep/visible-repo"]);
@@ -342,7 +373,7 @@ describe("open-source contribution snapshots", () => {
       )
     );
 
-    const stored = JSON.parse(values.get(snapshotKey) ?? "null");
+    const stored = decodeStoredContributions(values.get(snapshotKey));
     expect(stored.repositories).toHaveLength(1);
     expect(stored.repositories[0]).toMatchObject({
       repo: "owner/small-repo",
@@ -355,7 +386,10 @@ describe("open-source contribution snapshots", () => {
 
     const failingBinding: OpenSourceKVBinding = {
       ...binding,
-      put: () => Promise.reject(new Error("KV unavailable")),
+      put: async () => {
+        await Promise.resolve();
+        throw new Error("KV unavailable");
+      },
     };
 
     const githubLayer = createGitHubLayer([], () =>

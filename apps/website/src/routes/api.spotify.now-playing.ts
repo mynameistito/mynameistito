@@ -4,12 +4,16 @@ import { Effect, Redacted } from "effect";
 import { getAppEnv } from "@/env";
 import { currentlyPlaying, LastFmError } from "@/lib/provider/spotify/lastfm";
 
-const get = () =>
-  Effect.runPromise(
+const get = async () =>
+  await Effect.runPromise(
     Effect.gen(function* spotifyNowPlaying() {
       const env = yield* getAppEnv();
 
-      if (!env.LASTFM_API_KEY || !env.LASTFM_USERNAME) {
+      if (
+        env.LASTFM_API_KEY === undefined ||
+        env.LASTFM_USERNAME === undefined ||
+        env.LASTFM_USERNAME.length === 0
+      ) {
         return Response.json(null, {
           headers: { "cache-control": "no-store" },
         });

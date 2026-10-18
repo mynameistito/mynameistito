@@ -55,7 +55,7 @@ const ProjectsPage = () => {
 };
 
 export const Route = createFileRoute("/projects/")({
-  loader: () => getProjects(),
+  loader: async () => await getProjects(),
   component: ProjectsPage,
   head: () => ({
     meta: [

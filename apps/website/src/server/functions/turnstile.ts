@@ -12,7 +12,7 @@ const SiteverifyResponseSchema = Schema.Struct({
 /** Inputs needed to verify a Turnstile response. */
 export interface VerifyTurnstileInput {
   readonly token: string;
-  readonly secret: Redacted.Redacted<string>;
+  readonly secret: Redacted.Redacted;
   readonly expectedHostname: string;
   readonly expectedAction: string;
   readonly remoteIp?: string;
@@ -40,18 +40,21 @@ export const verifyTurnstile = Effect.fn("Turnstile.verify")(
       secret: Redacted.value(input.secret),
     });
 
-    if (input.remoteIp) {
+    if (input.remoteIp !== undefined && input.remoteIp.length > 0) {
       body.set("remoteip", input.remoteIp);
     }
 
     const response = yield* Effect.tryPromise({
-      try: () =>
-        fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-          method: "POST",
-          headers: { "content-type": "application/x-www-form-urlencoded" },
-          body,
-          signal: AbortSignal.timeout(10_000),
-        }),
+      try: async () =>
+        await fetch(
+          "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+          {
+            method: "POST",
+            headers: { "content-type": "application/x-www-form-urlencoded" },
+            body,
+            signal: AbortSignal.timeout(10_000),
+          }
+        ),
       catch: () => new Error("Turnstile Siteverify request failed"),
     }).pipe(Effect.option);
 
@@ -60,7 +63,7 @@ export const verifyTurnstile = Effect.fn("Turnstile.verify")(
     }
 
     const responseBody = yield* Effect.tryPromise({
-      try: () => response.value.json(),
+      try: async () => await response.value.json(),
       catch: () => new Error("Turnstile Siteverify response was not JSON"),
     }).pipe(Effect.option);
 

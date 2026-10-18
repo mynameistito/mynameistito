@@ -4,7 +4,6 @@ import {
   Cpu,
   Sparkles,
 } from "lucide-react";
-import type { CSSProperties } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -42,32 +41,49 @@ const currencyFormat = new Intl.NumberFormat("en-US", {
   style: "currency",
 });
 
+const compactNumberFormat = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
+const dateFormat = new Intl.DateTimeFormat("en-NZ", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+const monthFormat = new Intl.DateTimeFormat("en", {
+  month: "short",
+  timeZone: "UTC",
+});
+
+const refreshedDateFormat = new Intl.DateTimeFormat("en-NZ", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
 const compactTokens = (value: number): string =>
-  new Intl.NumberFormat("en-US", {
-    notation: "compact",
-    maximumFractionDigits: 1,
-  }).format(value);
+  compactNumberFormat.format(value);
 
 const formatDate = (value: string): string =>
-  new Intl.DateTimeFormat("en-NZ", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(`${value.slice(0, 10)}T00:00:00.000Z`));
+  dateFormat.format(new Date(`${value.slice(0, 10)}T00:00:00.000Z`));
 
 const monthLabels = (weeks: readonly CalendarWeek[]) => {
   const labels: { label: string; week: number }[] = [];
 
   for (const [weekIndex, week] of weeks.entries()) {
-    const firstDayOfMonth = week.find((day) => day?.date.endsWith("-01"));
+    const firstDayOfMonth = week.find(
+      (day) => day?.date.endsWith("-01") === true
+    );
 
     if (firstDayOfMonth) {
       labels.push({
-        label: new Intl.DateTimeFormat("en", {
-          month: "short",
-          timeZone: "UTC",
-        }).format(new Date(`${firstDayOfMonth.date}T00:00:00.000Z`)),
+        label: monthFormat.format(
+          new Date(`${firstDayOfMonth.date}T00:00:00.000Z`)
+        ),
         week: weekIndex,
       });
     }
@@ -107,8 +123,7 @@ const ActivityCalendar = ({
               {labels.map((month) => (
                 <span
                   key={`${month.label}-${month.week}`}
-                  // SAFETY: The month position is an integer in the 53-week grid.
-                  style={{ "--month-column": month.week + 1 } as CSSProperties}
+                  style={{ "--month-column": month.week + 1 }}
                 >
                   {month.label}
                 </span>
@@ -205,12 +220,9 @@ const UsageRanking = ({
                 </div>
                 <div aria-hidden="true" className="ai-usage-bar">
                   <span
-                    // SAFETY: Usage ratio is clamped to a positive percentage.
-                    style={
-                      {
-                        "--usage-width": `${Math.max((row.tokens / maxTokens) * 100, 1)}%`,
-                      } as CSSProperties
-                    }
+                    style={{
+                      "--usage-width": `${Math.max((row.tokens / maxTokens) * 100, 1)}%`,
+                    }}
                   />
                 </div>
               </li>
@@ -330,9 +342,9 @@ export const AiUsageDashboard = ({
           </CardHeader>
           <CardContent>
             <p className="m-0 text-xs text-muted">
-              {models[0]
-                ? `${compactTokens(models[0].tokens)} tokens tracked`
-                : "Model totals are not available"}
+              {models[0] === undefined
+                ? "Model totals are not available"
+                : `${compactTokens(models[0].tokens)} tokens tracked`}
             </p>
           </CardContent>
         </Card>
@@ -373,13 +385,7 @@ export const AiUsageDashboard = ({
             : "No daily usage recorded"}
         </span>
         <span>
-          Snapshot refreshed{" "}
-          {new Intl.DateTimeFormat("en-NZ", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-            timeZone: "UTC",
-          }).format(latestUpdate)}
+          Snapshot refreshed {refreshedDateFormat.format(latestUpdate)}
         </span>
       </footer>
     </main>

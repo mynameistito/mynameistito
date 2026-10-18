@@ -21,7 +21,7 @@ describe("profile data", () => {
   });
 
   it("prints the profile card through the Effect runtime", async () => {
-    const log = vi.spyOn(console, "log").mockImplementation(vi.fn());
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
 
     try {
       await import("../src/cli.js");

@@ -28,13 +28,13 @@ declare global {
 
 let apiPromise: Promise<TurnstileApi> | null = null;
 
-const loadTurnstileApi = (): Promise<TurnstileApi> => {
+const loadTurnstileApi = async (): Promise<TurnstileApi> => {
   if (window.turnstile) {
-    return Promise.resolve(window.turnstile);
+    return window.turnstile;
   }
 
   if (apiPromise !== null) {
-    return apiPromise;
+    return await apiPromise;
   }
 
   const script = document.querySelector<HTMLScriptElement>(
@@ -42,47 +42,50 @@ const loadTurnstileApi = (): Promise<TurnstileApi> => {
   );
 
   if (!script) {
-    return Promise.reject(new Error("Turnstile script is not configured."));
+    throw new Error("Turnstile script is not configured.");
   }
 
   if (document.readyState === "complete") {
-    return Promise.reject(new Error("Turnstile did not initialize."));
+    throw new Error("Turnstile did not initialize.");
   }
 
-  // eslint-disable-next-line promise/avoid-new -- Bridge the script's load events.
-  const pending = new Promise<TurnstileApi>((resolve, reject) => {
-    let timeout = 0;
+  const {
+    promise: pending,
+    reject,
+    resolve,
+  } = Promise.withResolvers<TurnstileApi>();
 
-    const onLoad = () => {
-      window.clearTimeout(timeout);
+  let timeout = 0;
 
-      if (window.turnstile) {
-        resolve(window.turnstile);
-      } else {
-        apiPromise = null;
-        reject(new Error("Turnstile did not initialize."));
-      }
-    };
+  const onLoad = () => {
+    window.clearTimeout(timeout);
 
-    const onError = () => {
-      window.clearTimeout(timeout);
+    if (window.turnstile) {
+      resolve(window.turnstile);
+    } else {
       apiPromise = null;
-      reject(new Error("Turnstile failed to load."));
-    };
+      reject(new Error("Turnstile did not initialize."));
+    }
+  };
 
-    timeout = window.setTimeout(() => {
-      script.removeEventListener("load", onLoad);
-      script.removeEventListener("error", onError);
-      apiPromise = null;
-      reject(new Error("Turnstile load timed out."));
-    }, 15_000);
-    script.addEventListener("load", onLoad, { once: true });
-    script.addEventListener("error", onError, { once: true });
-  });
+  const onError = () => {
+    window.clearTimeout(timeout);
+    apiPromise = null;
+    reject(new Error("Turnstile failed to load."));
+  };
+
+  timeout = window.setTimeout(() => {
+    script.removeEventListener("load", onLoad);
+    script.removeEventListener("error", onError);
+    apiPromise = null;
+    reject(new Error("Turnstile load timed out."));
+  }, 15_000);
+  script.addEventListener("load", onLoad, { once: true });
+  script.addEventListener("error", onError, { once: true });
 
   apiPromise = pending;
 
-  return pending;
+  return await pending;
 };
 
 /** Requests a one-use token without displaying the widget unless challenged.
@@ -97,10 +100,17 @@ export const getTurnstileToken = async (
 ): Promise<string> => {
   const turnstile = await loadTurnstileApi();
   const container = document.createElement("div");
-  document.body.append(container);
+  const body = document.querySelector<HTMLBodyElement>("body");
 
-  // eslint-disable-next-line promise/avoid-new -- Bridge Turnstile's callback API.
-  return new Promise<string>((resolve, reject) => {
+  if (body === null) {
+    throw new Error("The document body is unavailable.");
+  }
+
+  Node.prototype.appendChild.call(body, container);
+
+  const { promise, reject, resolve } = Promise.withResolvers<string>();
+
+  const startWidget = () => {
     const widget: ActiveWidget = {};
     const timeout = { id: 0 };
     let settled = false;
@@ -108,7 +118,7 @@ export const getTurnstileToken = async (
     const cleanup = () => {
       window.clearTimeout(timeout.id);
 
-      if (widget.id) {
+      if (widget.id !== undefined) {
         turnstile.remove(widget.id);
       }
 
@@ -130,10 +140,9 @@ export const getTurnstileToken = async (
       }
     };
 
-    timeout.id = window.setTimeout(
-      () => settle(new Error("Turnstile token request timed out.")),
-      120_000
-    );
+    timeout.id = window.setTimeout(() => {
+      settle(new Error("Turnstile token request timed out."));
+    }, 120_000);
 
     try {
       widget.id = turnstile.render(container, {
@@ -142,10 +151,15 @@ export const getTurnstileToken = async (
         appearance: "interaction-only",
         execution: "execute",
         size: "normal",
-        callback: (token) => settle(token),
-        "error-callback": () =>
-          settle(new Error("Turnstile token request failed.")),
-        "expired-callback": () => settle(new Error("Turnstile token expired.")),
+        callback: (token) => {
+          settle(token);
+        },
+        "error-callback": () => {
+          settle(new Error("Turnstile token request failed."));
+        },
+        "expired-callback": () => {
+          settle(new Error("Turnstile token expired."));
+        },
       });
       turnstile.execute(widget.id);
     } catch (error) {
@@ -155,5 +169,9 @@ export const getTurnstileToken = async (
           : new Error("Turnstile token request failed.")
       );
     }
-  });
+  };
+
+  startWidget();
+
+  return await promise;
 };

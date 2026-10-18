@@ -16,7 +16,7 @@ import type { ContactMessage } from "@/lib/contact-message";
  */
 export const sendContactMessage = Effect.fn("sendContactMessage")(
   function* sendContactMessage(message: ContactMessage) {
-    if (message.company) {
+    if (message.company.length > 0) {
       return { _tag: "Sent" } as const;
     }
 
@@ -29,17 +29,33 @@ export const sendContactMessage = Effect.fn("sendContactMessage")(
     const env = loadedEnv.value;
     const { RESEND_API_KEY, CONTACT_RECIPIENT, RESEND_FROM } = env;
 
-    const missing = [
-      { name: "RESEND_API_KEY", value: RESEND_API_KEY },
-      { name: "CONTACT_RECIPIENT", value: CONTACT_RECIPIENT },
-      { name: "RESEND_FROM", value: RESEND_FROM },
-    ].flatMap(({ name, value }) => (value ? [] : [name]));
+    const missing: string[] = [];
+
+    if (RESEND_API_KEY === undefined) {
+      missing.push("RESEND_API_KEY");
+    }
+
+    if (CONTACT_RECIPIENT === undefined || CONTACT_RECIPIENT.length === 0) {
+      missing.push("CONTACT_RECIPIENT");
+    }
+
+    if (RESEND_FROM === undefined || RESEND_FROM.length === 0) {
+      missing.push("RESEND_FROM");
+    }
 
     if (missing.length > 0) {
       return { _tag: "NotConfigured", missing } as const;
     }
 
-    if (!(RESEND_API_KEY && CONTACT_RECIPIENT && RESEND_FROM)) {
+    if (RESEND_API_KEY === undefined) {
+      return { _tag: "NotConfigured", missing: [] } as const;
+    }
+
+    if (CONTACT_RECIPIENT === undefined || CONTACT_RECIPIENT.length === 0) {
+      return { _tag: "NotConfigured", missing: [] } as const;
+    }
+
+    if (RESEND_FROM === undefined || RESEND_FROM.length === 0) {
       return { _tag: "NotConfigured", missing: [] } as const;
     }
 

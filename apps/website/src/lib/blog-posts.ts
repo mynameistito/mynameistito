@@ -56,9 +56,10 @@ const isCalendarDate = (value: string): boolean => {
  * @returns The parsed post and its validated metadata.
  */
 export const parseBlogPost = (source: string): BlogPost => {
-  const frontmatter = source.match(
-    /^---\r?\n(?<metadata>[\s\S]*?)\r?\n---\r?\n?(?<body>[\s\S]*)$/u
-  );
+  const frontmatter =
+    /^---\r?\n(?<metadata>[\s\S]*?)\r?\n---\r?\n?(?<body>[\s\S]*)$/u.exec(
+      source
+    );
 
   if (!frontmatter?.groups) {
     throw new Error("Blog post is missing YAML frontmatter.");

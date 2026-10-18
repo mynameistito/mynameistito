@@ -9,8 +9,8 @@
       "#/*": ["./src/*"],
       "@/*": ["./src/*"]
     },
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "types": ["vite/client"],
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "types": ["@cloudflare/workers-types", "vite/client"],
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -25,6 +25,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
-  },
-  "exclude": ["worker.ts"]
+  }
 }

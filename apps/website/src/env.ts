@@ -44,14 +44,14 @@ export interface AppEnv {
   readonly CONTACT_RECIPIENT?: string;
   readonly CONTRIBUTIONS_REFRESH?: ContributionsRefreshBinding;
   readonly TOKSCALE_REFRESH?: TokscaleRefreshBinding;
-  readonly RESEND_API_KEY?: Redacted.Redacted<string>;
+  readonly RESEND_API_KEY?: Redacted.Redacted;
   readonly RESEND_FROM?: string;
   readonly TURNSTILE_SITEKEY?: string;
-  readonly TURNSTILE_SECRET?: Redacted.Redacted<string>;
-  readonly GITHUB_TOKEN?: Redacted.Redacted<string>;
-  readonly WORKER_GITHUB_TOKEN?: Redacted.Redacted<string>;
-  readonly MDFROMX_API_KEY?: Redacted.Redacted<string>;
-  readonly LASTFM_API_KEY?: Redacted.Redacted<string>;
+  readonly TURNSTILE_SECRET?: Redacted.Redacted;
+  readonly GITHUB_TOKEN?: Redacted.Redacted;
+  readonly WORKER_GITHUB_TOKEN?: Redacted.Redacted;
+  readonly MDFROMX_API_KEY?: Redacted.Redacted;
+  readonly LASTFM_API_KEY?: Redacted.Redacted;
   readonly LASTFM_USERNAME?: string;
   readonly OPEN_SOURCE_KV?: OpenSourceKVBinding;
   readonly PACKAGES_REFRESH?: PackagesRefreshBinding;
@@ -92,24 +92,33 @@ export interface RuntimeBindings {
  */
 export const createAppEnv = (bindings: RuntimeBindings): AppEnv => ({
   ...bindings,
-  GITHUB_TOKEN: bindings.GITHUB_TOKEN
-    ? Redacted.make(bindings.GITHUB_TOKEN)
-    : undefined,
-  WORKER_GITHUB_TOKEN: bindings.WORKER_GITHUB_TOKEN
-    ? Redacted.make(bindings.WORKER_GITHUB_TOKEN)
-    : undefined,
-  RESEND_API_KEY: bindings.RESEND_API_KEY
-    ? Redacted.make(bindings.RESEND_API_KEY)
-    : undefined,
-  TURNSTILE_SECRET: bindings.TURNSTILE_SECRET
-    ? Redacted.make(bindings.TURNSTILE_SECRET)
-    : undefined,
-  MDFROMX_API_KEY: bindings.MDFROMX_API_KEY
-    ? Redacted.make(bindings.MDFROMX_API_KEY)
-    : undefined,
-  LASTFM_API_KEY: bindings.LASTFM_API_KEY
-    ? Redacted.make(bindings.LASTFM_API_KEY)
-    : undefined,
+  GITHUB_TOKEN:
+    bindings.GITHUB_TOKEN !== undefined && bindings.GITHUB_TOKEN.length > 0
+      ? Redacted.make(bindings.GITHUB_TOKEN)
+      : undefined,
+  WORKER_GITHUB_TOKEN:
+    bindings.WORKER_GITHUB_TOKEN !== undefined &&
+    bindings.WORKER_GITHUB_TOKEN.length > 0
+      ? Redacted.make(bindings.WORKER_GITHUB_TOKEN)
+      : undefined,
+  RESEND_API_KEY:
+    bindings.RESEND_API_KEY !== undefined && bindings.RESEND_API_KEY.length > 0
+      ? Redacted.make(bindings.RESEND_API_KEY)
+      : undefined,
+  TURNSTILE_SECRET:
+    bindings.TURNSTILE_SECRET !== undefined &&
+    bindings.TURNSTILE_SECRET.length > 0
+      ? Redacted.make(bindings.TURNSTILE_SECRET)
+      : undefined,
+  MDFROMX_API_KEY:
+    bindings.MDFROMX_API_KEY !== undefined &&
+    bindings.MDFROMX_API_KEY.length > 0
+      ? Redacted.make(bindings.MDFROMX_API_KEY)
+      : undefined,
+  LASTFM_API_KEY:
+    bindings.LASTFM_API_KEY !== undefined && bindings.LASTFM_API_KEY.length > 0
+      ? Redacted.make(bindings.LASTFM_API_KEY)
+      : undefined,
 });
 
 /** Loads and redacts Worker bindings at the runtime configuration boundary.
@@ -117,7 +126,7 @@ export const createAppEnv = (bindings: RuntimeBindings): AppEnv => ({
  */
 export const getAppEnv = Effect.fn("getAppEnv")(() =>
   Effect.sync(() => {
-    // SAFETY: Alchemy's Worker config supplies bindings matching RuntimeBindings.
+    // SAFETY: The Worker runtime supplies these bindings; all supported keys are represented by RuntimeBindings.
     const bindings = env as RuntimeBindings;
 
     return createAppEnv(bindings);

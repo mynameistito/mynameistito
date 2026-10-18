@@ -16,7 +16,7 @@ const ProjectPage = () => {
   const project = projects.find((item) => projectSlug(item.name) === slug);
 
   if (!project) {
-    throw notFound();
+    throw Object.assign(new Error("Project not found."), notFound());
   }
 
   return (
@@ -42,7 +42,7 @@ const ProjectPage = () => {
               aria-label="Project links"
               className="flex min-h-6 flex-wrap items-center gap-x-3 gap-y-2"
             >
-              {project.demo && (
+              {project.demo !== undefined && project.demo.length > 0 && (
                 <a
                   className="inline-flex min-h-6 items-center text-text underline underline-offset-2 transition-colors hover:text-accent"
                   href={project.demo}
@@ -64,15 +64,16 @@ const ProjectPage = () => {
           </div>
         </header>
 
-        {project.detailImage && (
-          <img
-            alt={`${project.name} project preview`}
-            className="mt-6 aspect-[59/38] w-full rounded-lg border border-line-strong bg-surface-raised object-cover"
-            height="416"
-            src={project.detailImage}
-            width="646"
-          />
-        )}
+        {project.detailImage !== undefined &&
+          project.detailImage.length > 0 && (
+            <img
+              alt={`${project.name} project preview`}
+              className="mt-6 aspect-[59/38] w-full rounded-lg border border-line-strong bg-surface-raised object-cover"
+              height="416"
+              src={project.detailImage}
+              width="646"
+            />
+          )}
 
         <section
           aria-labelledby="about-project-title"
@@ -135,11 +136,14 @@ export const Route = createFileRoute("/projects/$slug")({
     );
 
     if (!project) {
-      throw notFound();
+      throw Object.assign(new Error("Project not found."), notFound());
     }
 
-    if (!project.hasDetailPage) {
-      throw redirect({ href: project.source });
+    if (project.hasDetailPage !== true) {
+      throw Object.assign(
+        new Error("Project redirects to its source."),
+        redirect({ href: project.source })
+      );
     }
 
     return projects;

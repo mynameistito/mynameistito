@@ -1,6 +1,8 @@
 import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 
+import { Schema } from "effect";
+
 // Repos to skip (forks, profile repo, uninteresting)
 const SKIP = new Set([
   "mynameistito",
@@ -28,6 +30,7 @@ const SKIP = new Set([
 ]);
 
 // Emoji fallback by language
+/** @type {Readonly<Record<string, string>>} */
 const LANG_EMOJI = {
   HTML: "🌐",
   JavaScript: "🟨",
@@ -37,6 +40,45 @@ const LANG_EMOJI = {
   TypeScript: "🔷",
 };
 
+const RepositorySchema = Schema.Struct({
+  description: Schema.NullOr(Schema.String),
+  fork: Schema.Boolean,
+  html_url: Schema.String,
+  language: Schema.NullOr(Schema.String),
+  name: Schema.String,
+  private: Schema.Boolean,
+  stargazers_count: Schema.Number,
+  updated_at: Schema.String,
+});
+
+const PinnedRepositoriesSchema = Schema.Struct({
+  data: Schema.Struct({
+    user: Schema.Struct({
+      pinnedItems: Schema.Struct({
+        nodes: Schema.Array(
+          Schema.Struct({
+            description: Schema.NullOr(Schema.String),
+            name: Schema.String,
+            primaryLanguage: Schema.NullOr(
+              Schema.Struct({ name: Schema.String })
+            ),
+            stargazerCount: Schema.Number,
+            url: Schema.String,
+          })
+        ),
+      }),
+    }),
+  }),
+});
+
+const parsePinnedRepositories = Schema.decodeUnknownSync(
+  Schema.fromJsonString(PinnedRepositoriesSchema)
+);
+
+const parseRepositoryPages = Schema.decodeUnknownSync(
+  Schema.fromJsonString(Schema.Array(Schema.Array(RepositorySchema)))
+);
+
 const username = "mynameistito";
 
 // Fetch pinned repos via GraphQL (these become the featured list)
@@ -45,11 +87,11 @@ const pinnedResult = execSync(
   { env: { ...process.env } }
 );
 
-const pinnedData = JSON.parse(pinnedResult.toString());
+const pinnedData = parsePinnedRepositories(pinnedResult.toString());
 
 const pinnedRepos = pinnedData.data.user.pinnedItems.nodes.map((r) => ({
   desc: r.description ?? r.name,
-  emoji: LANG_EMOJI[r.primaryLanguage?.name] ?? "📦",
+  emoji: LANG_EMOJI[r.primaryLanguage?.name ?? ""] ?? "📦",
   name: r.name,
   stars: r.stargazerCount,
   url: r.url,
@@ -63,7 +105,7 @@ const reposResult = execSync(
   { env: { ...process.env } }
 );
 
-const repos = JSON.parse(reposResult.toString())
+const repos = parseRepositoryPages(reposResult.toString())
   .flat()
   .filter((r) => !r.fork && !r.private);
 
@@ -75,13 +117,13 @@ const autoRepos = repos
       return b.stargazers_count - a.stargazers_count;
     }
 
-    return new Date(b.updated_at) - new Date(a.updated_at);
+    return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
   })
   // Pad with up to 3 auto-discovered repos.
   .slice(0, 3)
   .map((r) => ({
     desc: r.description ?? r.name,
-    emoji: LANG_EMOJI[r.language] ?? "📦",
+    emoji: LANG_EMOJI[r.language ?? ""] ?? "📦",
     name: r.name,
     stars: r.stargazers_count,
     url: r.html_url,

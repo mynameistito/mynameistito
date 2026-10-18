@@ -69,7 +69,7 @@ const PackagesPage = () => {
                     <span>
                       {item.weeklyDownloads.toLocaleString()} weekly downloads
                     </span>
-                    {item.repositoryUrl && (
+                    {item.repositoryUrl !== undefined && (
                       <a
                         className="transition-colors hover:text-text"
                         href={item.repositoryUrl}

@@ -9,7 +9,7 @@ const OpenSourcePage = () => (
 );
 
 export const Route = createFileRoute("/open-source")({
-  loader: () => getContributions(),
+  loader: async () => await getContributions(),
   component: OpenSourcePage,
   head: () => ({
     meta: [

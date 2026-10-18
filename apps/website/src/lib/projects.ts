@@ -1,4 +1,13 @@
-import { DateTime, Effect } from "effect";
+import {
+  Cache,
+  Context,
+  Duration,
+  Effect,
+  Exit,
+  Layer,
+  ManagedRuntime,
+  Ref,
+} from "effect";
 
 import { getAppEnv } from "@/env";
 import { profile } from "@/lib/profile";
@@ -11,9 +20,7 @@ import { GitHub, GitHubRequestError } from "@/lib/provider/github/client";
 import type { Repository } from "@/lib/provider/github/client";
 import { collectRepositoryPages } from "@/lib/provider/github/repository-pages";
 
-const cacheDuration = 60 * 60 * 1000;
-let cachedAt = 0;
-let cachedProjects: readonly Project[] | undefined;
+const cacheDuration = "1 hour";
 
 const overrides = new Map<string, Partial<Project>>([
   [".github", { showInProjects: false }],
@@ -80,7 +87,10 @@ const fetchProjects = Effect.gen(function* fetchProjects() {
     const project: Project = {
       name: repository.name,
       description: repository.description ?? `${repository.name} on GitHub.`,
-      languages: repository.language ? [repository.language] : [],
+      languages:
+        repository.language === null || repository.language === undefined
+          ? []
+          : [repository.language],
       image: repository.owner_avatar_url,
       archived: repository.archived,
       featured,
@@ -88,11 +98,12 @@ const fetchProjects = Effect.gen(function* fetchProjects() {
       ...override,
     };
 
-    const projectWithPreview = override?.image
-      ? { ...project, previewImage: override.image }
-      : project;
+    const projectWithPreview =
+      override?.image === undefined
+        ? project
+        : { ...project, previewImage: override.image };
 
-    if (repository.homepage && !override?.demo) {
+    if (repository.homepage !== null && override?.demo === undefined) {
       return { ...projectWithPreview, demo: repository.homepage };
     }
 
@@ -100,33 +111,94 @@ const fetchProjects = Effect.gen(function* fetchProjects() {
   });
 });
 
-/** Loads cached public, non-fork projects using GitHub as the source. */
-export const loadProjects = Effect.fn("loadProjects")(function* loadProjects() {
-  const now = yield* DateTime.now;
+interface ProjectsDependencies {
+  readonly fetch: () => Effect.Effect<readonly Project[], GitHubRequestError>;
+}
 
-  if (cachedProjects && now.epochMilliseconds - cachedAt < cacheDuration) {
-    return cachedProjects;
-  }
+const projectsAfterFetchFailure = (
+  lastKnown: Ref.Ref<readonly Project[] | null>
+) =>
+  Ref.get(lastKnown).pipe(
+    Effect.tap(Effect.logError("Failed to load GitHub projects.")),
+    Effect.map((projects) => ({
+      cacheable: false,
+      projects: projects ?? [],
+    }))
+  );
 
-  const env = yield* getAppEnv();
+/** Cached project data shared by all requests in one Worker isolate. */
+export class Projects extends Context.Service<
+  Projects,
+  { readonly load: () => Effect.Effect<readonly Project[]> }
+>()("website/lib/Projects") {}
 
-  return yield* fetchProjects.pipe(
-    Effect.provide(
-      GitHub.layer({
-        username: profile.github,
-        token: env.GITHUB_TOKEN,
-      })
-    ),
-    Effect.tap((projects) =>
-      Effect.sync(() => {
-        cachedProjects = projects;
-        cachedAt = now.epochMilliseconds;
-      })
-    ),
-    Effect.catchTag("GitHubRequestError", (error) => {
-      console.error("Failed to load GitHub projects.", error._tag);
+/** Builds the project cache in its owning Layer.
+ * @param dependencies - The GitHub lookup used on cache misses.
+ * @returns A service layer with a shared one-hour cache.
+ */
+export const makeProjectsLayer = ({ fetch }: ProjectsDependencies) =>
+  Layer.effect(
+    Projects,
+    Effect.gen(function* makeProjects() {
+      const lastKnown = yield* Ref.make<readonly Project[] | null>(null);
 
-      return Effect.succeed(cachedProjects ?? []);
+      const cache = yield* Cache.makeWith(
+        (_key: "projects") =>
+          fetch().pipe(
+            Effect.map((projects) => ({ cacheable: true, projects })),
+            Effect.catchTag("GitHubRequestError", () =>
+              projectsAfterFetchFailure(lastKnown)
+            ),
+            Effect.tap(({ cacheable, projects }) =>
+              cacheable ? Ref.set(lastKnown, projects) : Effect.void
+            )
+          ),
+        {
+          capacity: 1,
+          timeToLive: (exit) =>
+            Exit.isSuccess(exit) && exit.value.cacheable
+              ? cacheDuration
+              : Duration.zero,
+        }
+      );
+
+      const load = Effect.fn("Projects.load")(function* load() {
+        const cached = yield* Cache.get(cache, "projects");
+
+        return cached.projects;
+      });
+
+      return Projects.of({ load });
     })
   );
-});
+
+const projectsLayer = Layer.unwrap(
+  Effect.gen(function* createRuntimeProjectsLayer(): Effect.fn.Return<
+    Layer.Layer<Projects>
+  > {
+    const env = yield* getAppEnv();
+
+    return makeProjectsLayer({
+      fetch: () =>
+        fetchProjects.pipe(
+          Effect.provide(
+            GitHub.layer({ username: profile.github, token: env.GITHUB_TOKEN })
+          )
+        ),
+    });
+  })
+);
+
+const projectsRuntime = ManagedRuntime.make(projectsLayer);
+
+/** Loads cached public, non-fork projects using GitHub as the source.
+ * @returns The latest available project list.
+ */
+export const loadProjects = async () =>
+  await projectsRuntime.runPromise(
+    Effect.gen(function* loadProjectsProgram() {
+      const projects = yield* Projects;
+
+      return yield* projects.load();
+    })
+  );

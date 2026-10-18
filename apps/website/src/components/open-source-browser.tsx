@@ -49,7 +49,9 @@ const RepositoryAvatar = ({
       alt={`${name} owner avatar`}
       className="size-[30px] shrink-0 rounded-control border border-line-strong bg-surface-raised object-cover"
       height="30"
-      onError={() => setHasError(true)}
+      onError={() => {
+        setHasError(true);
+      }}
       src={avatarUrl}
       width="30"
     />
@@ -157,23 +159,22 @@ export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
 
   const filteredRepositories = useMemo(
     () =>
-      repositories
-        .map((repository) => ({
-          ...repository,
-          pullRequests: repository.pullRequests.filter((pullRequest) => {
-            const matchesState =
-              stateFilter === "All" || pullRequest.state === stateFilter;
+      repositories.flatMap((repository) => {
+        const pullRequests = repository.pullRequests.filter((pullRequest) => {
+          const matchesState =
+            stateFilter === "All" || pullRequest.state === stateFilter;
 
-            const matchesQuery =
-              !normalizedQuery ||
-              `${repository.name} ${repository.repo} ${pullRequest.title} ${pullRequest.number}`
-                .toLowerCase()
-                .includes(normalizedQuery);
+          const matchesQuery =
+            !normalizedQuery ||
+            `${repository.name} ${repository.repo} ${pullRequest.title} ${pullRequest.number}`
+              .toLowerCase()
+              .includes(normalizedQuery);
 
-            return matchesState && matchesQuery;
-          }),
-        }))
-        .filter((repository) => repository.pullRequests.length > 0),
+          return matchesState && matchesQuery;
+        });
+
+        return pullRequests.length > 0 ? [{ ...repository, pullRequests }] : [];
+      }),
     [normalizedQuery, repositories, stateFilter]
   );
 
@@ -241,7 +242,9 @@ export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
               autoComplete="off"
               className="h-[34px] min-w-0 rounded-control border border-line bg-surface px-2.5 text-xs text-text transition-colors outline-none placeholder:text-subtle focus:border-focus"
               id="contribution-search"
-              onChange={(event) => setQuery(event.currentTarget.value)}
+              onChange={(event) => {
+                setQuery(event.currentTarget.value);
+              }}
               placeholder="Title, repository, or pull request"
               type="search"
               value={query}
@@ -254,7 +257,9 @@ export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
                 aria-pressed={stateFilter === state}
                 className={`flex min-w-0 items-center gap-1 border border-line px-1.5 text-micro transition-colors last:rounded-r-control first-of-type:rounded-l-control ${stateFilter === state ? "bg-surface-raised text-text" : "bg-surface text-muted hover:text-text"}`}
                 key={state}
-                onClick={() => setStateFilter(state)}
+                onClick={() => {
+                  setStateFilter(state);
+                }}
                 type="button"
               >
                 {state} <span className="text-subtle">{stateCount(state)}</span>

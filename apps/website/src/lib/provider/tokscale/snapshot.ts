@@ -40,7 +40,7 @@ const startTokscaleRefresh = Effect.fn("startTokscaleRefresh")(
 
     const created = yield* Effect.result(
       Effect.tryPromise({
-        try: () => refresh.create({ id: workflowId, params: {} }),
+        try: async () => await refresh.create({ id: workflowId, params: {} }),
         catch: (cause) =>
           cause instanceof Error
             ? cause
@@ -54,7 +54,7 @@ const startTokscaleRefresh = Effect.fn("startTokscaleRefresh")(
 
     const existing = yield* Effect.result(
       Effect.tryPromise({
-        try: () => refresh.get(workflowId),
+        try: async () => await refresh.get(workflowId),
         catch: (cause) =>
           cause instanceof Error
             ? cause
@@ -73,7 +73,7 @@ const startTokscaleRefresh = Effect.fn("startTokscaleRefresh")(
 
     const status = yield* Effect.result(
       Effect.tryPromise({
-        try: () => existing.success.status(),
+        try: async () => await existing.success.status(),
         catch: (cause) =>
           cause instanceof Error
             ? cause
@@ -96,7 +96,9 @@ const startTokscaleRefresh = Effect.fn("startTokscaleRefresh")(
 
     const restarted = yield* Effect.result(
       Effect.tryPromise({
-        try: () => existing.success.restart(),
+        try: async () => {
+          await existing.success.restart();
+        },
         catch: (cause) =>
           cause instanceof Error
             ? cause
@@ -133,7 +135,7 @@ export const loadTokscale = Effect.fn("loadTokscale")(function* loadTokscale(
 
   const stored = yield* Effect.result(
     Effect.tryPromise({
-      try: () => kv.get(snapshotKey, "text"),
+      try: async () => await kv.get(snapshotKey, "text"),
       catch: (cause) =>
         cause instanceof Error ? cause : new Error("KV read failed", { cause }),
     })
@@ -154,13 +156,9 @@ export const loadTokscale = Effect.fn("loadTokscale")(function* loadTokscale(
   }
 
   const decoded = yield* Effect.result(
-    Effect.try({
-      try: () => JSON.parse(storedText),
-      catch: (cause) =>
-        cause instanceof Error
-          ? cause
-          : new Error("Invalid Tokscale snapshot JSON", { cause }),
-    }).pipe(Effect.flatMap(Schema.decodeUnknownEffect(TokscaleSnapshotSchema)))
+    Schema.decodeUnknownEffect(Schema.fromJsonString(TokscaleSnapshotSchema))(
+      storedText
+    )
   );
 
   if (decoded._tag === "Failure") {
@@ -224,7 +222,9 @@ export const refreshTokscale = Effect.fn("refreshTokscale")(
     };
 
     yield* Effect.tryPromise({
-      try: () => kv.put(snapshotKey, JSON.stringify(snapshot)),
+      try: async () => {
+        await kv.put(snapshotKey, JSON.stringify(snapshot));
+      },
       catch: (cause) =>
         cause instanceof Error
           ? cause

@@ -19,9 +19,9 @@ const redirects = new Map<string, string>([
 const redirectRef = ({ params }: { params: { ref: string } }) => {
   const destination = redirects.get(params.ref);
 
-  return destination
-    ? new Response(null, { headers: { Location: destination }, status: 302 })
-    : new Response("Not Found", { status: 404 });
+  return destination === undefined
+    ? new Response("Not Found", { status: 404 })
+    : new Response(null, { headers: { Location: destination }, status: 302 });
 };
 
 export const Route = createFileRoute("/r/$ref")({

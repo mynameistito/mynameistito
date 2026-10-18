@@ -13,16 +13,18 @@ const json = (body: Record<string, string>, status: number) =>
     status,
   });
 
-const post = ({ request }: { request: Request }) =>
-  Effect.runPromise(
+const post = async ({ request }: { request: Request }) =>
+  await Effect.runPromise(
     Effect.gen(function* postContactMessage() {
       const origin = request.headers.get("origin");
 
-      if (origin && origin !== new URL(request.url).origin) {
+      if (origin !== null && origin !== new URL(request.url).origin) {
         return json({ error: "Invalid request origin." }, 403);
       }
 
-      const submission = yield* Effect.tryPromise(() => request.json()).pipe(
+      const submission = yield* Effect.tryPromise(
+        async () => await request.json()
+      ).pipe(
         Effect.flatMap(decodeUnknownEffect(ContactSubmissionSchema)),
         catchEffect(() => Effect.succeed(null))
       );

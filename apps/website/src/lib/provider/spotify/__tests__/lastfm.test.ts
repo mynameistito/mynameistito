@@ -54,6 +54,26 @@ describe("Last.fm Spotify activity decoding", () => {
     expect(track).toBeNull();
   });
 
+  it("normalizes empty artwork URLs to null", async () => {
+    const track = await Effect.runPromise(
+      decodeCurrentlyPlaying({
+        recenttracks: {
+          track: [
+            {
+              name: "Kiwi",
+              artist: { "#text": "Harry Styles" },
+              url: "https://www.last.fm/music/Harry+Styles/_/Kiwi",
+              image: [{ "#text": "", size: "large" }],
+              "@attr": { nowplaying: "true" },
+            },
+          ],
+        },
+      })
+    );
+
+    expect(track?.albumArt).toBeNull();
+  });
+
   it("accepts Last.fm's single-track object representation", async () => {
     const track = await Effect.runPromise(
       decodeCurrentlyPlaying({

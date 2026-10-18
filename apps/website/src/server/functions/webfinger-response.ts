@@ -20,7 +20,7 @@ const decodeWebfingerResource = decodeUnknownOption(WebfingerResourceSchema);
  * @param document - The JRD document to return for a supported resource.
  * @returns A successful JRD response, bad request, or no-match response.
  */
-export const webfingerResponse = (
+export const webfingerResponse = async (
   request: Request,
   document: WebfingerDocument
 ): Promise<Response> => {
@@ -32,7 +32,7 @@ export const webfingerResponse = (
       : Option.none();
 
   if (Option.isNone(resource)) {
-    return Promise.resolve(
+    return await Promise.resolve(
       Response.json(badRequestError, {
         headers: { "Content-Type": jrdContentType, ...CORS_HEADERS },
         status: 400,
@@ -43,7 +43,7 @@ export const webfingerResponse = (
   const lookup = resolveWebfingerResource(resource.value);
 
   if (lookup._tag === "NotFound") {
-    return Promise.resolve(
+    return await Promise.resolve(
       Response.json(noMatchError, {
         headers: { "Content-Type": jrdContentType, ...CORS_HEADERS },
         status: 404,
@@ -51,7 +51,7 @@ export const webfingerResponse = (
     );
   }
 
-  return Promise.resolve(
+  return await Promise.resolve(
     Response.json(document, {
       headers: { "Content-Type": jrdContentType, ...CORS_HEADERS },
     })
