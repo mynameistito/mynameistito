@@ -140,9 +140,7 @@ export const Route = createFileRoute("/projects/$slug")({
     }
 
     if (project.hasDetailPage !== true) {
-      // TanStack Router redirects are thrown control-flow values, not errors.
-      // oxlint-disable-next-line typescript/only-throw-error
-      throw redirect({ href: project.source });
+      redirect({ href: project.source, throw: true });
     }
 
     return projects;
