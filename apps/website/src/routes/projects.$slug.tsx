@@ -140,10 +140,9 @@ export const Route = createFileRoute("/projects/$slug")({
     }
 
     if (project.hasDetailPage !== true) {
-      throw Object.assign(
-        new Error("Project redirects to its source."),
-        redirect({ href: project.source })
-      );
+      // TanStack Router redirects are thrown control-flow values, not errors.
+      // oxlint-disable-next-line typescript/only-throw-error
+      throw redirect({ href: project.source });
     }
 
     return projects;
