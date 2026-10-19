@@ -43,6 +43,8 @@ jobs:
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           CONTACT_RECIPIENT: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/CONTACT_RECIPIENT
+          LASTFM_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/LASTFM_API_KEY
+          LASTFM_USERNAME: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/LASTFM_USERNAME
           MDFROMX_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/MDFROMX_API_KEY
           RESEND_API_KEY: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_API_KEY
           RESEND_FROM: op://uhub4xx3iwwsaxj3robdosm2hu/jzwlhhnq7fhnsoazz2esnl4xt4/RESEND_FROM
