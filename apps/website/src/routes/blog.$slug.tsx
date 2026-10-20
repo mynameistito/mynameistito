@@ -6,7 +6,9 @@ import type { Components } from "react-markdown";
 
 import { getBlogPost } from "@/lib/blog-posts";
 import { socialMeta } from "@/lib/social-meta";
+import { getTurnstileToken } from "@/lib/turnstile-client";
 import { recordBlogView } from "@/server/functions/blog-views";
+import { getTurnstileSitekey } from "@/server/functions/contact-turnstile-config";
 
 const markdownComponents: Components = {
   a: ({ children, href }) => (
@@ -35,7 +37,21 @@ const BlogPostPage = () => {
 
     const recordView = async () => {
       try {
-        const count = await recordBlogView({ data: { slug } });
+        const sitekey = await getTurnstileSitekey();
+
+        if (cancelled || sitekey === null || sitekey.length === 0) {
+          return;
+        }
+
+        const turnstileToken = await getTurnstileToken(sitekey, "blog-view");
+
+        if (cancelled) {
+          return;
+        }
+
+        const count = await recordBlogView({
+          data: { slug, turnstileToken },
+        });
 
         if (!cancelled) {
           setViews(count);

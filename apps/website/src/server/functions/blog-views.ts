@@ -8,6 +8,7 @@ import { Effect, Schema } from "effect";
 
 import { getAppEnv } from "@/env";
 import { getBlogPost } from "@/lib/blog-posts";
+import { verifyConfiguredTurnstile } from "@/server/functions/turnstile";
 
 /** Expected failure from a blog view counter operation. */
 // eslint-disable-next-line unicorn/throw-new-error -- Schema.TaggedError requires this subclass syntax.
@@ -48,37 +49,85 @@ const getBlogViewsProgram = Effect.fn("BlogViews.get")(function* getBlogViews(
   });
 });
 
-const recordBlogViewProgram = Effect.fn("BlogViews.record")(function* record(
-  slug: string,
-  visitorId: string
-) {
-  const post = getBlogPost(slug);
+/** Input required to verify and record one blog post view. */
+export interface RecordBlogViewInput {
+  readonly cookie: string;
+  readonly expectedHostname: string;
+  readonly remoteIp: string;
+  readonly slug: string;
+  readonly turnstileToken: string;
+}
 
-  if (!post) {
-    return null;
+/** Recorded view details used by the server-function adapter. */
+export interface RecordBlogViewResult {
+  readonly shouldSetCookie: boolean;
+  readonly visitorId: string;
+  readonly views: number | null;
+}
+
+/** Verifies and records a blog view, returning cookie details for the adapter. */
+export const recordBlogViewOperation = Effect.fn("BlogViews.recordVerified")(
+  function* record(input: RecordBlogViewInput) {
+    const post = getBlogPost(input.slug);
+
+    if (!post) {
+      return null;
+    }
+
+    const verified = yield* verifyConfiguredTurnstile({
+      token: input.turnstileToken,
+      expectedHostname: input.expectedHostname,
+      expectedAction: "blog-view",
+      remoteIp: input.remoteIp,
+    });
+
+    if (!verified) {
+      return null;
+    }
+
+    const existingId =
+      /(?:^|;\s*)site_visitor=(?<visitorId>[\da-f-]{36})/iu.exec(input.cookie)
+        ?.groups?.visitorId;
+
+    const visitorId =
+      existingId ?? (yield* Effect.sync(() => crypto.randomUUID()));
+
+    const counter = yield* getVisitorCounter();
+
+    if (!counter) {
+      return {
+        shouldSetCookie: existingId === undefined,
+        visitorId,
+        views: null,
+      } satisfies RecordBlogViewResult;
+    }
+
+    const views = yield* Effect.tryPromise({
+      try: async () => await counter.recordPostView(post.slug, visitorId),
+      catch: (cause) => new BlogViewError({ cause, operation: "record" }),
+    });
+
+    return {
+      shouldSetCookie: existingId === undefined,
+      visitorId,
+      views,
+    } satisfies RecordBlogViewResult;
   }
+);
 
-  const counter = yield* getVisitorCounter();
-
-  if (!counter) {
-    return null;
-  }
-
-  return yield* Effect.tryPromise({
-    try: async () => await counter.recordPostView(post.slug, visitorId),
-    catch: (cause) => new BlogViewError({ cause, operation: "record" }),
-  });
-});
+const BlogSlugInputSchema = Schema.toStandardSchemaV1(
+  Schema.Struct({ slug: Schema.String })
+);
 
 const BlogViewInputSchema = Schema.toStandardSchemaV1(
-  Schema.Struct({ slug: Schema.String })
+  Schema.Struct({ slug: Schema.String, turnstileToken: Schema.String })
 );
 
 /** Loads a blog post's view total on the server before the page renders.
  * @returns The current view total, or `null` when the counter is unavailable.
  */
 export const getBlogViews = createServerFn({ method: "GET" })
-  .validator(BlogViewInputSchema)
+  .validator(BlogSlugInputSchema)
   .handler(
     async ({ data }) =>
       await Effect.runPromise(
@@ -95,27 +144,35 @@ export const getBlogViews = createServerFn({ method: "GET" })
 export const recordBlogView = createServerFn({ method: "POST" })
   .validator(BlogViewInputSchema)
   .handler(async ({ data }) => {
-    const existingId =
-      /(?:^|;\s*)site_visitor=(?<visitorId>[\da-f-]{36})/iu.exec(
-        getRequestHeader("cookie") ?? ""
-      )?.groups?.visitorId;
-
-    const visitorId = existingId ?? crypto.randomUUID();
-
-    if (existingId === undefined) {
-      setCookie("site_visitor", visitorId, {
-        httpOnly: true,
-        maxAge: 31_536_000,
-        path: "/",
-        sameSite: "lax",
-        secure: getRequestProtocol() === "https",
-      });
-    }
+    const { hostname } = new URL(
+      `${getRequestProtocol()}://${getRequestHeader("host") ?? ""}`
+    );
 
     return await Effect.runPromise(
-      Effect.match(recordBlogViewProgram(data.slug, visitorId), {
-        onFailure: () => null,
-        onSuccess: (views) => views,
-      })
+      Effect.match(
+        recordBlogViewOperation({
+          cookie: getRequestHeader("cookie") ?? "",
+          expectedHostname: hostname,
+          remoteIp: getRequestHeader("cf-connecting-ip") ?? "",
+          slug: data.slug,
+          turnstileToken: data.turnstileToken,
+        }),
+        {
+          onFailure: () => null,
+          onSuccess: (result) => {
+            if (result?.shouldSetCookie === true) {
+              setCookie("site_visitor", result.visitorId, {
+                httpOnly: true,
+                maxAge: 31_536_000,
+                path: "/",
+                sameSite: "lax",
+                secure: getRequestProtocol() === "https",
+              });
+            }
+
+            return result?.views ?? null;
+          },
+        }
+      )
     );
   });

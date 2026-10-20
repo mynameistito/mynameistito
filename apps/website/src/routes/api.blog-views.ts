@@ -5,13 +5,21 @@ import { decodeUnknownEffect } from "effect/Schema";
 
 import { getAppEnv } from "@/env";
 import { getBlogPost } from "@/lib/blog-posts";
+import { verifyConfiguredTurnstile } from "@/server/functions/turnstile";
 
-const BlogViewRequest = Schema.Struct({ slug: Schema.String });
+const BlogViewRequest = Schema.Struct({
+  slug: Schema.String,
+  turnstileToken: Schema.String,
+});
 
 const unavailable = () =>
   Response.json({ error: "Post views are unavailable." }, { status: 503 });
 
-const postHandler = async ({ request }: { request: Request }) =>
+/** Handles a browser-facing blog-view POST request.
+ * @param input - The incoming request context.
+ * @returns The HTTP response for the attempted view.
+ */
+export const postHandler = async ({ request }: { request: Request }) =>
   await Effect.runPromise(
     Effect.gen(function* recordBlogView() {
       const origin = request.headers.get("origin");
@@ -34,6 +42,17 @@ const postHandler = async ({ request }: { request: Request }) =>
 
       if (!publishedPost) {
         return Response.json({ error: "Post not found." }, { status: 404 });
+      }
+
+      const verified = yield* verifyConfiguredTurnstile({
+        token: decoded.turnstileToken,
+        expectedHostname: new URL(request.url).hostname,
+        expectedAction: "blog-view",
+        remoteIp: request.headers.get("cf-connecting-ip") ?? "",
+      });
+
+      if (!verified) {
+        return Response.json({ error: "Forbidden." }, { status: 403 });
       }
 
       const cookie = request.headers.get("cookie") ?? "";
