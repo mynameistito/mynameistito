@@ -6,6 +6,7 @@ import { getAppEnv } from "@/env";
 import type { AppEnv } from "@/env";
 import { profile } from "@/lib/profile";
 import { GitHub } from "@/lib/provider/github/client";
+import { formatGitHubRequestError } from "@/lib/provider/github/errors";
 
 /** Pull request lifecycle states shown in the open-source browser. */
 export type PullRequestState = "Open" | "Merged" | "Closed";
@@ -109,23 +110,6 @@ const isRepositoryIgnored = (repo: string): boolean => {
     (owner ? repositoryOverrides.get(`${owner}/*`)?.ignored : undefined) ??
     owner === profile.github.toLowerCase()
   );
-};
-
-const summarizeGitHubFailure = (cause: unknown): string => {
-  if (HttpClientError.isHttpClientError(cause)) {
-    const responseStatus =
-      "response" in cause.reason
-        ? `HTTP ${cause.reason.response.status}: `
-        : "";
-
-    return `${responseStatus}${cause.message}`;
-  }
-
-  if (cause instanceof Error) {
-    return `${cause.name}: ${cause.message}`;
-  }
-
-  return String(cause);
 };
 
 const isGitHubNotFound = (cause: unknown): boolean =>
@@ -357,9 +341,7 @@ export const refreshContributions = Effect.fn("refreshContributions")(
           })
       ),
       Effect.catchTag("GitHubRequestError", (error) =>
-        Effect.logError(
-          `GitHub ${error.operation} failed: ${summarizeGitHubFailure(error.cause)}.`
-        ).pipe(
+        Effect.logError(formatGitHubRequestError(error)).pipe(
           Effect.annotateLogs({
             operation: error.operation,
             phase: githubFetchPhase,
