@@ -24,7 +24,7 @@ describe("GitHub request errors", () => {
     );
   });
 
-  it("includes the HTTP status and response failure summary", () => {
+  it("includes HTTP status details when a request error crosses the Effect boundary", async () => {
     const request = HttpClientRequest.get(
       "https://api.github.com/search/issues"
     );
@@ -42,6 +42,10 @@ describe("GitHub request errors", () => {
     });
 
     expect(formatGitHubRequestError(error)).toContain("HTTP 403:");
+
+    await expect(
+      Effect.runPromise(exposeGitHubRequestError(Effect.fail(error)))
+    ).rejects.toThrow("HTTP 403:");
   });
 
   it("formats transport failures that have no HTTP response", () => {
