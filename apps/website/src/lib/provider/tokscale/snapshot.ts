@@ -235,6 +235,8 @@ export const refreshTokscale = Effect.fn("refreshTokscale")(
       refreshedAt: snapshot.refreshedAt,
       contributionDays: data.contributions.length,
       totalTokens: data.stats.totalTokens,
+      stats: data.stats,
+      topModels: data.modelUsage.slice(0, 5),
     };
   }
 );

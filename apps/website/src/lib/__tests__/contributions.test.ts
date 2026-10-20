@@ -232,6 +232,18 @@ describe("open-source contribution snapshots", () => {
     );
 
     expect(result.repositoryCount).toBe(1);
+    expect(result).toMatchObject({
+      pullRequestCount: 1,
+      pullRequestsByState: { open: 0, merged: 1, closed: 0 },
+      repositories: [
+        {
+          name: repository.name,
+          repo: repository.repo,
+          stars: repository.stars,
+          pullRequestCount: 1,
+        },
+      ],
+    });
     const stored = decodeStoredContributions(values.get(snapshotKey));
     expect(stored).toMatchObject({ repositories: [repository] });
     expect(stored.refreshedAt).toStrictEqual(expect.any(String));
