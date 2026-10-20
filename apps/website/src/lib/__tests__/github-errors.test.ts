@@ -28,13 +28,15 @@ describe("GitHub request errors", () => {
     const request = HttpClientRequest.get(
       "https://api.github.com/search/issues"
     );
+
     const response = HttpClientResponse.fromWeb(
       request,
       new Response(null, { status: 403 })
     );
+
     const error = new GitHubRequestError({
       operation: "searchPullRequests",
-      cause: new HttpClientError({
+      cause: new HttpClientError.HttpClientError({
         reason: new HttpClientError.StatusCodeError({ request, response }),
       }),
     });
@@ -46,9 +48,10 @@ describe("GitHub request errors", () => {
     const request = HttpClientRequest.get(
       "https://api.github.com/search/issues"
     );
+
     const error = new GitHubRequestError({
       operation: "searchPullRequests",
-      cause: new HttpClientError({
+      cause: new HttpClientError.HttpClientError({
         reason: new HttpClientError.TransportError({
           request,
           cause: new Error("network unavailable"),
