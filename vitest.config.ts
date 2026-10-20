@@ -16,7 +16,12 @@ export default defineConfig({
   },
   test: {
     coverage: {
-      include: ["packages/*/src/**/*.ts"],
+      exclude: [
+        "apps/website/src/routeTree.gen.ts",
+        "apps/website/src/**/__tests__/**",
+        "apps/website/src/__tests__/cloudflare-workers.ts",
+      ],
+      include: ["packages/*/src/**/*.ts", "apps/website/src/**/*.{ts,tsx}"],
       provider: "v8",
       reporter: ["text", "lcov"],
       reportsDirectory: "./coverage",
