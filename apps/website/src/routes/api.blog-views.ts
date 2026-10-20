@@ -4,7 +4,7 @@ import { catch as catchEffect } from "effect/Effect";
 import { decodeUnknownEffect } from "effect/Schema";
 
 import { getAppEnv } from "@/env";
-import { getBlogPost } from "@/lib/blog-posts";
+import { getBlogPost } from "@/features/blog/posts";
 import { recordBlogViewOperation } from "@/server/functions/blog-views";
 
 const BlogViewRequest = Schema.Struct({

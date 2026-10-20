@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ExternalLink } from "lucide-react";
 
-import type { NpmPackage } from "@/lib/packages";
-import { socialMeta } from "@/lib/social-meta";
+import type { NpmPackage } from "@/features/packages/packages";
+import { socialMeta } from "@/features/social/meta";
 import { getPackages } from "@/server/functions/packages";
 
 const PackagesPage = () => {

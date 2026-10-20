@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import type { Components } from "react-markdown";
 
-import { getBlogPost } from "@/lib/blog-posts";
-import { socialMeta } from "@/lib/social-meta";
-import { getTurnstileToken } from "@/lib/turnstile-client";
+import { getBlogPost } from "@/features/blog/posts";
+import { getTurnstileToken } from "@/features/contact/turnstile-client";
+import { socialMeta } from "@/features/social/meta";
 import { recordBlogView } from "@/server/functions/blog-views";
 import { getTurnstileSitekey } from "@/server/functions/contact-turnstile-config";
 

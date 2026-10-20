@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Effect, Redacted } from "effect";
 
 import { getAppEnv } from "@/env";
-import { currentlyPlaying, LastFmError } from "@/lib/provider/spotify/lastfm";
+import { currentlyPlaying, LastFmError } from "@/integrations/spotify/lastfm";
 
 const get = async () =>
   await Effect.runPromise(

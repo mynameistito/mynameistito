@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { Effect, Redacted } from "effect";
 
-import type { VisitorCounts } from "@/lib/visitor-counting";
+import type { VisitorCounts } from "@/features/visitors/counting";
 
 /** KV methods used by the open-source contribution snapshot. */
 export interface OpenSourceKVBinding {

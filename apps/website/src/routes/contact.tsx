@@ -5,9 +5,9 @@ import { ArrowUpRight } from "lucide-react";
 import { useRef, useState } from "react";
 import type { SubmitEvent } from "react";
 
-import { profile } from "@/lib/profile";
-import { socialMeta } from "@/lib/social-meta";
-import { getTurnstileToken } from "@/lib/turnstile-client";
+import { profile } from "@/domain/profile";
+import { getTurnstileToken } from "@/features/contact/turnstile-client";
+import { socialMeta } from "@/features/social/meta";
 import { getTurnstileSitekey } from "@/server/functions/contact-turnstile-config";
 
 type SubmissionStatus = "idle" | "submitting" | "success" | "error";

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { OpenSourceBrowser } from "@/components/open-source-browser";
-import { socialMeta } from "@/lib/social-meta";
+import { OpenSourceBrowser } from "@/features/open-source/components/open-source-browser";
+import { socialMeta } from "@/features/social/meta";
 import { getContributions } from "@/server/functions/contributions";
 
 const OpenSourcePage = () => (

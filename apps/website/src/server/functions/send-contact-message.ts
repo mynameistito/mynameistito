@@ -8,7 +8,7 @@ import { layer as fetchHttpClientLayer } from "effect/http/FetchHttpClient";
 import { mergeAll } from "effect/Layer";
 
 import { getAppEnv } from "@/env";
-import type { ContactMessage } from "@/lib/contact-message";
+import type { ContactMessage } from "@/features/contact/message";
 
 /** Delivers a parsed contact message through the configured email provider.
  * @param message - The validated contact form values.

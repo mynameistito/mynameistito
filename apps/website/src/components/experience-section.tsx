@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { profile } from "@/lib/profile";
+import { profile } from "@/domain/profile";
 
 /** Renders Tito's work history, with detail revealed on request.
  * @returns The expandable work history.

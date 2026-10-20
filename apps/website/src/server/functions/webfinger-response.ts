@@ -5,8 +5,8 @@ import {
   CORS_HEADERS,
   resolveWebfingerResource,
   WebfingerResourceSchema,
-} from "@/lib/webfinger";
-import type { WebfingerDocument } from "@/lib/webfinger";
+} from "@/features/identity/webfinger";
+import type { WebfingerDocument } from "@/features/identity/webfinger";
 
 const badRequestError = { error: "Bad Request" } as const;
 const noMatchError = { error: "No match" } as const;

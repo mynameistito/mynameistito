@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { CORS_HEADERS } from "@/lib/webfinger";
+import { CORS_HEADERS } from "@/features/identity/webfinger";
 
 const hostMeta = `<?xml version="1.0" encoding="UTF-8"?>
 <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0">

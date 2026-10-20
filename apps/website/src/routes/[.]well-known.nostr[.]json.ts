@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { CORS_HEADERS } from "@/lib/webfinger";
+import { CORS_HEADERS } from "@/features/identity/webfinger";
 
 const nostr = {
   names: {

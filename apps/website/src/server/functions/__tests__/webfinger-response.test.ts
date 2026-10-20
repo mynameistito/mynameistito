@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { webfinger } from "@/lib/webfinger";
+import { webfinger } from "@/features/identity/webfinger";
 import { webfingerResponse } from "@/server/functions/webfinger-response";
 
 const responseFor = async (resource?: string) => {

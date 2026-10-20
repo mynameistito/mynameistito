@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import { catch as catchEffect } from "effect/Effect";
 import { decodeUnknownEffect } from "effect/Schema";
 
-import { ContactSubmissionSchema } from "@/lib/contact-message";
+import { ContactSubmissionSchema } from "@/features/contact/message";
 import { sendContactMessage } from "@/server/functions/send-contact-message";
 import { verifyConfiguredTurnstile } from "@/server/functions/turnstile";
 

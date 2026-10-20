@@ -2,9 +2,9 @@ import server from "virtual:tanstack-start-server-entry";
 
 import type { RuntimeBindings } from "./src/env";
 
-export { VisitorCounter } from "./src/lib/visitor-counter";
+export { VisitorCounter } from "./src/features/visitors/counter";
 
-export { GitHubSearchRateLimiter } from "./src/lib/github-search-rate-limiter";
+export { GitHubSearchRateLimiter } from "./src/integrations/github/search-rate-limiter";
 
 export { ContributionsRefreshWorkflow } from "./src/workflows/contributions-refresh";
 
