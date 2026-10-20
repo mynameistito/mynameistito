@@ -277,6 +277,7 @@ export class GitHub extends Context.Service<
           (typeof SearchResponseSchema)["Type"],
           GitHubRequestError
         > => {
+          const rateLimitDelay = token ? "2100 millis" : "6100 millis";
           const searchUrl = new URL("https://api.github.com/search/issues");
           searchUrl.searchParams.set("q", query);
           searchUrl.searchParams.set("per_page", "100");
@@ -286,8 +287,8 @@ export class GitHub extends Context.Service<
           // GitHub's Search API has a separate, much lower rate limit than
           // the rest of the REST API. Contribution refresh can fan out into
           // many date-partition and pagination requests, so pace each request
-          // below the authenticated 30-requests-per-minute limit.
-          return Effect.sleep("2100 millis").pipe(
+          // below GitHub's authenticated and unauthenticated Search API limits.
+          return Effect.sleep(rateLimitDelay).pipe(
             Effect.andThen(
               readJson(
                 "searchPullRequests",

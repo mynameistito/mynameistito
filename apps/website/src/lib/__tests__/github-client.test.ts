@@ -39,5 +39,5 @@ describe("GitHub client", () => {
     expect(results).toStrictEqual([]);
     expect(searchRequests).toHaveLength(1);
     expect(searchRequests[0]).toContain("author%3Aoctocat");
-  });
+  }, 10_000);
 });
