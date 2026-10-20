@@ -283,10 +283,18 @@ export class GitHub extends Context.Service<
           searchUrl.searchParams.set("page", String(page));
           searchUrl.searchParams.set("sort", "updated");
 
-          return readJson(
-            "searchPullRequests",
-            SearchResponseSchema,
-            HttpClientRequest.get(searchUrl.toString())
+          // GitHub's Search API has a separate, much lower rate limit than
+          // the rest of the REST API. Contribution refresh can fan out into
+          // many date-partition and pagination requests, so pace each request
+          // below the authenticated 30-requests-per-minute limit.
+          return Effect.sleep("2100 millis").pipe(
+            Effect.andThen(
+              readJson(
+                "searchPullRequests",
+                SearchResponseSchema,
+                HttpClientRequest.get(searchUrl.toString())
+              )
+            )
           );
         };
 
