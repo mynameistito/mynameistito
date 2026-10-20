@@ -7,9 +7,10 @@ const PrivacyPage = () => (
         Privacy
       </h1>
       <p className="m-0 text-base leading-6 text-muted">
-        This site uses Cloudflare Turnstile in invisible mode to verify visitor
-        count requests and contact form submissions. Turnstile runs in the
-        background without displaying a widget. See the{" "}
+        This site uses Cloudflare Turnstile to verify site-wide visitor count
+        requests, blog post view requests, and contact form submissions.
+        Turnstile usually runs in the background and shows a challenge only when
+        interaction is required. See the{" "}
         <a
           className="text-text underline"
           href="https://www.cloudflare.com/turnstile-privacy-policy/"
@@ -21,10 +22,11 @@ const PrivacyPage = () => (
         for information about how Cloudflare processes data for this service.
       </p>
       <p className="m-0 text-base leading-6 text-muted">
-        The visitor counter uses an HTTP-only cookie containing a random ID to
-        distinguish returning visits and calculate aggregate counts. The cookie
-        can remain in your browser for up to one year. Contact form submissions
-        (name, email address, and message) are sent to my inbox through Resend.
+        The site-wide visitor counter and blog post view counter use an
+        HTTP-only cookie containing a random ID to distinguish returning visits
+        and calculate counts. The cookie can remain in your browser for up to
+        one year. Contact form submissions (name, email address, and message)
+        are sent to my inbox through Resend.
       </p>
       <p className="m-0 text-base leading-6 text-muted">
         For privacy questions, use the <Link to="/contact">contact page</Link>.
