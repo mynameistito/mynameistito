@@ -353,6 +353,7 @@ export const refreshContributions = Effect.fn("refreshContributions")(
           GitHub.layer({
             username: profile.github,
             token: env.GITHUB_TOKEN,
+            searchRateLimiter: env.GITHUB_SEARCH_RATE_LIMITER,
           })
       ),
       Effect.catchTag("GitHubRequestError", (error) =>

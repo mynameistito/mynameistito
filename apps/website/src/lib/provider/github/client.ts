@@ -8,6 +8,7 @@ import {
   HttpClientResponse,
 } from "effect/http";
 
+import type { GitHubSearchRateLimitBinding } from "@/env";
 import { GitHubRequestError } from "@/lib/provider/github/errors";
 
 export { GitHubRequestError } from "@/lib/provider/github/errors";
@@ -17,7 +18,30 @@ const githubUserAgent = "portfolio-website";
 interface GitHubLayerConfig {
   readonly username: string;
   readonly token?: Redacted.Redacted;
+  readonly searchRateLimiter?: GitHubSearchRateLimitBinding;
 }
+
+const getSearchRateLimitKey = async (
+  rateLimitBinding: GitHubSearchRateLimitBinding | undefined,
+  token: Redacted.Redacted | undefined
+): Promise<string | undefined> => {
+  if (rateLimitBinding === undefined) {
+    return undefined;
+  }
+
+  if (token === undefined) {
+    return "unauthenticated";
+  }
+
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(Redacted.value(token))
+  );
+
+  return `authenticated:${[...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("")}`;
+};
 
 const runGitHubSdk = <A, E>(
   token: string,
@@ -220,11 +244,21 @@ export class GitHub extends Context.Service<
   static readonly layerWithoutDependencies = ({
     username,
     token,
+    searchRateLimiter: rateLimitBinding,
   }: GitHubLayerConfig) =>
     Layer.effect(
       GitHub,
       Effect.gen(function* layerWithoutDependencies() {
         const baseHttpClient = yield* HttpClient.HttpClient;
+
+        const rateLimitKey = yield* Effect.promise(
+          async () => await getSearchRateLimitKey(rateLimitBinding, token)
+        );
+
+        const rateLimiter =
+          rateLimitKey === undefined || rateLimitBinding === undefined
+            ? undefined
+            : rateLimitBinding.getByName(`github-search:${rateLimitKey}`);
 
         const apiClient = baseHttpClient.pipe(
           HttpClient.mapRequest((request) => {
@@ -277,7 +311,7 @@ export class GitHub extends Context.Service<
           (typeof SearchResponseSchema)["Type"],
           GitHubRequestError
         > => {
-          const rateLimitDelay = token ? "2100 millis" : "6100 millis";
+          const rateLimitIntervalMs = token ? 2100 : 6100;
           const searchUrl = new URL("https://api.github.com/search/issues");
           searchUrl.searchParams.set("q", query);
           searchUrl.searchParams.set("per_page", "100");
@@ -288,7 +322,23 @@ export class GitHub extends Context.Service<
           // the rest of the REST API. Contribution refresh can fan out into
           // many date-partition and pagination requests, so pace each request
           // below GitHub's authenticated and unauthenticated Search API limits.
-          return Effect.sleep(rateLimitDelay).pipe(
+          const rateLimit = rateLimiter
+            ? Effect.tryPromise({
+                try: async () =>
+                  await rateLimiter.reserveSlot(rateLimitIntervalMs),
+                catch: (cause) =>
+                  new GitHubRequestError({
+                    operation: "searchPullRequests",
+                    cause,
+                  }),
+              }).pipe(
+                Effect.flatMap((delayMs) =>
+                  delayMs > 0 ? Effect.sleep(`${delayMs} millis`) : Effect.void
+                )
+              )
+            : Effect.sleep(`${rateLimitIntervalMs} millis`);
+
+          return rateLimit.pipe(
             Effect.andThen(
               readJson(
                 "searchPullRequests",

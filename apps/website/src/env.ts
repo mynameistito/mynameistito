@@ -17,6 +17,13 @@ export interface ContributionsRefreshBinding {
   }) => Promise<{ readonly id: string }>;
 }
 
+/** Durable Object namespace used to coordinate GitHub Search API requests. */
+export interface GitHubSearchRateLimitBinding {
+  readonly getByName: (name: string) => {
+    readonly reserveSlot: (intervalMs: number) => Promise<number>;
+  };
+}
+
 /** Workflow binding used to refresh the public npm package snapshot. */
 export interface PackagesRefreshBinding {
   readonly create: (options: {
@@ -43,6 +50,7 @@ interface TokscaleRefreshBinding {
 export interface AppEnv {
   readonly CONTACT_RECIPIENT?: string;
   readonly CONTRIBUTIONS_REFRESH?: ContributionsRefreshBinding;
+  readonly GITHUB_SEARCH_RATE_LIMITER?: GitHubSearchRateLimitBinding;
   readonly TOKSCALE_REFRESH?: TokscaleRefreshBinding;
   readonly RESEND_API_KEY?: Redacted.Redacted;
   readonly RESEND_FROM?: string;
@@ -71,6 +79,7 @@ export interface AppEnv {
 export interface RuntimeBindings {
   readonly CONTACT_RECIPIENT?: string;
   readonly CONTRIBUTIONS_REFRESH?: ContributionsRefreshBinding;
+  readonly GITHUB_SEARCH_RATE_LIMITER?: GitHubSearchRateLimitBinding;
   readonly TOKSCALE_REFRESH?: TokscaleRefreshBinding;
   readonly RESEND_API_KEY?: string;
   readonly RESEND_FROM?: string;
