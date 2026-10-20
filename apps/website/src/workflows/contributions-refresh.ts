@@ -5,6 +5,7 @@ import { Effect } from "effect";
 import { createAppEnv } from "@/env";
 import type { RuntimeBindings } from "@/env";
 import { refreshContributions } from "@/lib/contributions";
+import { exposeGitHubRequestError } from "@/lib/provider/github/errors";
 
 const retryPolicy = {
   retries: { limit: 3, delay: "30 seconds", backoff: "exponential" },
@@ -35,7 +36,11 @@ export class ContributionsRefreshWorkflow extends WorkflowEntrypoint<
         stepName,
         retryPolicy,
         async () =>
-          await Effect.runPromise(refreshContributions(createAppEnv(this.env)))
+          await Effect.runPromise(
+            exposeGitHubRequestError(
+              refreshContributions(createAppEnv(this.env))
+            )
+          )
       );
 
       console.info("[open-source] Contribution refresh workflow completed.", {
