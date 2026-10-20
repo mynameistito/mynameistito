@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { formatProfile } from "../src/cli-output.js";
 import { links, profile } from "../src/index.js";
@@ -34,5 +34,16 @@ describe("profile data", () => {
         "- X: https://x.com/mynameistito",
       ].join("\n")
     );
+  });
+
+  it("prints the profile card through the Effect runtime", async () => {
+    const write = vi.spyOn(process.stdout, "write").mockReturnValue(true);
+
+    try {
+      await import("../src/cli.js");
+      expect(write).toHaveBeenCalledWith(`${formatProfile(profile, links)}\n`);
+    } finally {
+      write.mockRestore();
+    }
   });
 });
