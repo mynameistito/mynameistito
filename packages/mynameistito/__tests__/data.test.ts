@@ -1,5 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import { formatProfile } from "../src/cli-output.js";
 import { links, profile } from "../src/index.js";
 
 describe("profile data", () => {
@@ -20,22 +21,18 @@ describe("profile data", () => {
     ]);
   });
 
-  it("prints the profile card through the Effect runtime", async () => {
-    const log = vi.spyOn(console, "log").mockImplementation(() => {});
-
-    try {
-      await import("../src/cli.js");
-      expect(log).toHaveBeenCalledWith(
-        [
-          `# ${profile.name}`,
-          "",
-          profile.description,
-          "",
-          ...links.map((link) => link.url),
-        ].join("\n")
-      );
-    } finally {
-      log.mockRestore();
-    }
+  it("formats a profile card with labeled links", () => {
+    expect(formatProfile(profile, links)).toBe(
+      [
+        "# My Name is Tito",
+        "",
+        "Tito builds TypeScript CLIs, Cloudflare tools, browser extensions, and small useful internet things.",
+        "",
+        "- Website: https://mynameistito.com",
+        "- GitHub: https://github.com/mynameistito",
+        "- npm: https://www.npmjs.com/~mynameistito",
+        "- X: https://x.com/mynameistito",
+      ].join("\n")
+    );
   });
 });
