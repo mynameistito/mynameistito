@@ -59,7 +59,7 @@ export interface RecordBlogViewInput {
 }
 
 /** Recorded view details used by the server-function adapter. */
-export interface RecordBlogViewResult {
+interface RecordBlogViewResult {
   readonly shouldSetCookie: boolean;
   readonly visitorId: string;
   readonly views: number | null;
