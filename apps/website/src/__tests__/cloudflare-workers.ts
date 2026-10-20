@@ -18,17 +18,3 @@ export class DurableObject {
     this.ctx = ctx;
   }
 }
-
-/** Minimal base class for Worker-only Workflows in Node tests. */
-export class WorkflowEntrypoint<Env, Params = unknown> {
-  /** Runtime environment passed to the workflow instance. */
-  readonly env: Env;
-
-  /** Creates the test double with the runtime environment. */
-  constructor(_ctx: unknown, env: Env) {
-    this.env = env;
-  }
-
-  /** Keeps the runtime parameter type visible to workflow subclasses. */
-  declare readonly __testParams?: Params;
-}
