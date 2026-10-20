@@ -26,8 +26,8 @@ const markdownComponents: Components = {
 
 const BlogPostPage = () => {
   const { slug } = Route.useParams();
+  const post = Route.useLoaderData();
   const [views, setViews] = useState<number | null>(null);
-  const post = getBlogPost(slug);
 
   // oxlint-disable-next-line react-doctor/tanstack-start-no-useeffect-fetch -- View recording must happen after hydration, not during loader preloads.
   useEffect(() => {
@@ -53,10 +53,6 @@ const BlogPostPage = () => {
       cancelled = true;
     };
   }, [slug]);
-
-  if (!post) {
-    throw Object.assign(new Error("Blog post not found."), notFound());
-  }
 
   return (
     <main className="page-shell-narrow pt-page-top-header pb-page-bottom">
@@ -102,6 +98,15 @@ const BlogPostPage = () => {
 
 export const Route = createFileRoute("/blog/$slug")({
   component: BlogPostPage,
+  loader: ({ params }) => {
+    const post = getBlogPost(params.slug);
+
+    if (!post) {
+      throw Object.assign(new Error("Blog post not found."), notFound());
+    }
+
+    return post;
+  },
   head: ({ params }) => {
     const post = getBlogPost(params.slug);
 
