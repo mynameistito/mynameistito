@@ -4,6 +4,8 @@ import type { RuntimeBindings } from "./src/env";
 
 export { VisitorCounter } from "./src/lib/visitor-counter";
 
+export { GitHubSearchRateLimiter } from "./src/lib/github-search-rate-limiter";
+
 export { ContributionsRefreshWorkflow } from "./src/workflows/contributions-refresh";
 
 export { PackagesRefreshWorkflow } from "./src/workflows/packages-refresh";

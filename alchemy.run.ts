@@ -45,6 +45,10 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
       CONTRIBUTIONS_REFRESH: Workflow("ContributionsRefresh", {
         className: "ContributionsRefreshWorkflow",
       }),
+      GITHUB_SEARCH_RATE_LIMITER: DurableObjectResource(
+        "GitHubSearchRateLimiter",
+        { className: "GitHubSearchRateLimiter" }
+      ),
       GITHUB_TOKEN: ConfigRedacted("WORKER_GITHUB_TOKEN"),
       LASTFM_API_KEY: ConfigRedacted("LASTFM_API_KEY"),
       LASTFM_USERNAME: ConfigString("LASTFM_USERNAME"),
