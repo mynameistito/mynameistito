@@ -5,7 +5,7 @@ import { decodeUnknownEffect } from "effect/Schema";
 
 import { getAppEnv } from "@/env";
 import { getBlogPost } from "@/lib/blog-posts";
-import { verifyConfiguredTurnstile } from "@/server/functions/turnstile";
+import { recordBlogViewOperation } from "@/server/functions/blog-views";
 
 const BlogViewRequest = Schema.Struct({
   slug: Schema.String,
@@ -14,6 +14,9 @@ const BlogViewRequest = Schema.Struct({
 
 const unavailable = () =>
   Response.json({ error: "Post views are unavailable." }, { status: 503 });
+
+const notFound = () =>
+  Response.json({ error: "Post not found." }, { status: 404 });
 
 /** Handles a browser-facing blog-view POST request.
  * @param input - The incoming request context.
@@ -38,56 +41,46 @@ export const postHandler = async ({ request }: { request: Request }) =>
         catchEffect(() => Effect.succeed(null))
       );
 
-      const publishedPost = decoded && getBlogPost(decoded.slug);
-
-      if (!publishedPost) {
-        return Response.json({ error: "Post not found." }, { status: 404 });
+      if (!decoded) {
+        return notFound();
       }
 
-      const verified = yield* verifyConfiguredTurnstile({
-        token: decoded.turnstileToken,
-        expectedHostname: new URL(request.url).hostname,
-        expectedAction: "blog-view",
-        remoteIp: request.headers.get("cf-connecting-ip") ?? "",
-      });
+      const result = yield* Effect.match(
+        recordBlogViewOperation({
+          cookie: request.headers.get("cookie") ?? "",
+          expectedHostname: new URL(request.url).hostname,
+          remoteIp: request.headers.get("cf-connecting-ip") ?? "",
+          slug: decoded.slug,
+          turnstileToken: decoded.turnstileToken,
+        }),
+        {
+          onFailure: () => ({ _tag: "Unavailable" }) as const,
+          onSuccess: (outcome) => outcome,
+        }
+      );
 
-      if (!verified) {
+      if (result._tag === "PostNotFound") {
+        return notFound();
+      }
+
+      if (result._tag === "Forbidden") {
         return Response.json({ error: "Forbidden." }, { status: 403 });
       }
 
-      const cookie = request.headers.get("cookie") ?? "";
-
-      const existingId =
-        /(?:^|;\s*)site_visitor=(?<visitorId>[\da-f-]{36})/iu.exec(cookie)
-          ?.groups?.visitorId;
-
-      const visitorId =
-        existingId ?? (yield* Effect.sync(() => crypto.randomUUID()));
-
-      const env = Option.getOrUndefined(yield* getAppEnv().pipe(Effect.option));
-      const counter = env?.VISITOR_COUNTER?.getByName("site");
-
-      if (!counter) {
+      if (result._tag === "Unavailable") {
         return unavailable();
       }
 
-      const views = yield* Effect.tryPromise(
-        async () => await counter.recordPostView(publishedPost.slug, visitorId)
-      ).pipe(Effect.option);
+      const headers = new Headers({ "cache-control": "no-store" });
 
-      if (Option.isNone(views)) {
-        return unavailable();
+      if (result.shouldSetCookie) {
+        headers.set(
+          "set-cookie",
+          `site_visitor=${result.visitorId}; Path=/; Max-Age=31536000; HttpOnly${new URL(request.url).protocol === "https:" ? "; Secure" : ""}; SameSite=Lax`
+        );
       }
 
-      return Response.json(
-        { views: views.value },
-        {
-          headers: {
-            "cache-control": "no-store",
-            "set-cookie": `site_visitor=${visitorId}; Path=/; Max-Age=31536000; HttpOnly${new URL(request.url).protocol === "https:" ? "; Secure" : ""}; SameSite=Lax`,
-          },
-        }
-      );
+      return Response.json({ views: result.views }, { headers });
     })
   );
 

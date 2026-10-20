@@ -139,7 +139,7 @@ describe("blog view write protection", () => {
               turnstileToken: token,
             })
           )
-        ).resolves.toBeNull();
+        ).resolves.toStrictEqual({ _tag: "Forbidden" });
         expect(counter.recordPostView).not.toHaveBeenCalled();
       }
     );
@@ -153,7 +153,7 @@ describe("blog view write protection", () => {
 
       await expect(
         Effect.runPromise(recordBlogViewOperation(operationInput))
-      ).resolves.toBeNull();
+      ).resolves.toStrictEqual({ _tag: "Forbidden" });
       expect(fetch).not.toHaveBeenCalled();
       expect(counter.recordPostView).not.toHaveBeenCalled();
     });
@@ -167,7 +167,7 @@ describe("blog view write protection", () => {
         Effect.runPromise(
           recordBlogViewOperation({ ...operationInput, slug: "not-published" })
         )
-      ).resolves.toBeNull();
+      ).resolves.toStrictEqual({ _tag: "PostNotFound" });
       expect(fetch).not.toHaveBeenCalled();
       expect(counter.recordPostView).not.toHaveBeenCalled();
     });
@@ -185,11 +185,15 @@ describe("blog view write protection", () => {
         recordBlogViewOperation(operationInput)
       );
 
-      if (result === null) {
+      if (result._tag !== "Recorded") {
         throw new Error("Expected a verified view result.");
       }
 
-      expect(result).toMatchObject({ shouldSetCookie: true, views: 5 });
+      expect(result).toMatchObject({
+        _tag: "Recorded",
+        shouldSetCookie: true,
+        views: 5,
+      });
       expect(result.visitorId).toMatch(/^[\da-f-]{36}$/iu);
       expect(counter.recordPostView).toHaveBeenCalledExactlyOnceWith(
         "first-blog-post",
@@ -218,6 +222,7 @@ describe("blog view write protection", () => {
           })
         )
       ).resolves.toStrictEqual({
+        _tag: "Recorded",
         shouldSetCookie: false,
         visitorId,
         views: 5,

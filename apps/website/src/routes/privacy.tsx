@@ -7,10 +7,10 @@ const PrivacyPage = () => (
         Privacy
       </h1>
       <p className="m-0 text-base leading-6 text-muted">
-        This site uses Cloudflare Turnstile in invisible mode to verify
-        site-wide visitor count requests, blog post view requests, and contact
-        form submissions. Turnstile runs in the background without displaying a
-        widget. See the{" "}
+        This site uses Cloudflare Turnstile to verify site-wide visitor count
+        requests, blog post view requests, and contact form submissions.
+        Turnstile usually runs in the background and shows a challenge only when
+        interaction is required. See the{" "}
         <a
           className="text-text underline"
           href="https://www.cloudflare.com/turnstile-privacy-policy/"

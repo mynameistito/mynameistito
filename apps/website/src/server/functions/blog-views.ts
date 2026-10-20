@@ -58,12 +58,17 @@ export interface RecordBlogViewInput {
   readonly turnstileToken: string;
 }
 
-/** Recorded view details used by the server-function adapter. */
-interface RecordBlogViewResult {
-  readonly shouldSetCookie: boolean;
-  readonly visitorId: string;
-  readonly views: number | null;
-}
+/** Outcomes for verifying and recording a blog view. */
+type RecordBlogViewResult =
+  | { readonly _tag: "PostNotFound" }
+  | { readonly _tag: "Forbidden" }
+  | { readonly _tag: "Unavailable" }
+  | {
+      readonly _tag: "Recorded";
+      readonly shouldSetCookie: boolean;
+      readonly visitorId: string;
+      readonly views: number;
+    };
 
 /** Verifies and records a blog view, returning cookie details for the adapter. */
 export const recordBlogViewOperation = Effect.fn("BlogViews.recordVerified")(
@@ -71,7 +76,7 @@ export const recordBlogViewOperation = Effect.fn("BlogViews.recordVerified")(
     const post = getBlogPost(input.slug);
 
     if (!post) {
-      return null;
+      return { _tag: "PostNotFound" } as const;
     }
 
     const verified = yield* verifyConfiguredTurnstile({
@@ -82,7 +87,13 @@ export const recordBlogViewOperation = Effect.fn("BlogViews.recordVerified")(
     });
 
     if (!verified) {
-      return null;
+      return { _tag: "Forbidden" } as const;
+    }
+
+    const counter = yield* getVisitorCounter();
+
+    if (!counter) {
+      return { _tag: "Unavailable" } as const;
     }
 
     const existingId =
@@ -92,22 +103,13 @@ export const recordBlogViewOperation = Effect.fn("BlogViews.recordVerified")(
     const visitorId =
       existingId ?? (yield* Effect.sync(() => crypto.randomUUID()));
 
-    const counter = yield* getVisitorCounter();
-
-    if (!counter) {
-      return {
-        shouldSetCookie: existingId === undefined,
-        visitorId,
-        views: null,
-      } satisfies RecordBlogViewResult;
-    }
-
     const views = yield* Effect.tryPromise({
       try: async () => await counter.recordPostView(post.slug, visitorId),
       catch: (cause) => new BlogViewError({ cause, operation: "record" }),
     });
 
     return {
+      _tag: "Recorded",
       shouldSetCookie: existingId === undefined,
       visitorId,
       views,
@@ -160,7 +162,11 @@ export const recordBlogView = createServerFn({ method: "POST" })
         {
           onFailure: () => null,
           onSuccess: (result) => {
-            if (result?.shouldSetCookie === true) {
+            if (result._tag !== "Recorded") {
+              return null;
+            }
+
+            if (result.shouldSetCookie) {
               setCookie("site_visitor", result.visitorId, {
                 httpOnly: true,
                 maxAge: 31_536_000,
@@ -170,7 +176,7 @@ export const recordBlogView = createServerFn({ method: "POST" })
               });
             }
 
-            return result?.views ?? null;
+            return result.views;
           },
         }
       )
