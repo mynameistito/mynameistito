@@ -55,8 +55,12 @@ describe("Tokscale snapshot refresh", () => {
 
     const saved = values.get(snapshotKey);
 
-    expect(result.contributionDays).toBe(0);
-    expect(result.totalTokens).toBe(1250);
+    expect(result).toMatchObject({
+      contributionDays: 0,
+      totalTokens: 1250,
+      stats: profile.stats,
+      topModels: profile.modelUsage,
+    });
     expect(saved).toBeDefined();
     expect(JSON.parse(saved ?? "{}")).toMatchObject({ data: profile });
   });

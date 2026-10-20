@@ -270,6 +270,11 @@ export const refreshPackages = Effect.fn("refreshPackages")(
     return {
       refreshedAt: snapshot.refreshedAt,
       packageCount: packages.length,
+      packages: packages.map(({ name, version, weeklyDownloads }) => ({
+        name,
+        version,
+        weeklyDownloads,
+      })),
     };
   }
 );

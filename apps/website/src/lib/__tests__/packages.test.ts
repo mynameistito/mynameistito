@@ -153,6 +153,13 @@ describe("npm package snapshots", () => {
     );
 
     expect(result.packageCount).toBe(1);
+    expect(result.packages).toStrictEqual([
+      {
+        name: npmPackage.name,
+        version: npmPackage.version,
+        weeklyDownloads: npmPackage.weeklyDownloads,
+      },
+    ]);
     const stored = decodeStoredPackages(values.get(snapshotKey));
     expect(stored).toMatchObject({ packages: [npmPackage] });
     expect(stored.refreshedAt).toStrictEqual(expect.any(String));

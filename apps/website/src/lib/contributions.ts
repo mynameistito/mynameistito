@@ -402,6 +402,36 @@ export const refreshContributions = Effect.fn("refreshContributions")(
     return {
       refreshedAt: snapshot.refreshedAt,
       repositoryCount: repositories.length,
+      pullRequestCount,
+      pullRequestsByState: {
+        open: repositories.reduce(
+          (total, repository) =>
+            total +
+            repository.pullRequests.filter(({ state }) => state === "Open")
+              .length,
+          0
+        ),
+        merged: repositories.reduce(
+          (total, repository) =>
+            total +
+            repository.pullRequests.filter(({ state }) => state === "Merged")
+              .length,
+          0
+        ),
+        closed: repositories.reduce(
+          (total, repository) =>
+            total +
+            repository.pullRequests.filter(({ state }) => state === "Closed")
+              .length,
+          0
+        ),
+      },
+      repositories: repositories.map(({ name, repo, stars, pullRequests }) => ({
+        name,
+        repo,
+        stars,
+        pullRequestCount: pullRequests.length,
+      })),
     };
   }
 );
