@@ -1,2 +1,8 @@
 /** Node test seam for the Worker-only runtime module. */
-export const env = {};
+import type { RuntimeBindings } from "@/env";
+
+type MutableRuntimeBindings = {
+  -readonly [Key in keyof RuntimeBindings]: RuntimeBindings[Key];
+};
+
+export const env: MutableRuntimeBindings = {};
