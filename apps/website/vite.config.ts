@@ -10,6 +10,7 @@ import { defineConfig } from "vite";
 import type { Plugin } from "vite";
 
 const cloudflareWorkersModule = "cloudflare:workers";
+const cloudflareWorkersClientStub = "\0cloudflare:workers-client-stub";
 
 const isAlchemyCloudflareBuild =
   process.env.ALCHEMY_CLOUDFLARE_VITE_INJECTED === "1";
@@ -43,6 +44,37 @@ const standaloneTakumiWasmPlugin: Plugin = {
   },
 };
 
+const cloudflareWorkersRuntimePlugin: Plugin = {
+  name: "cloudflare-workers-runtime",
+  resolveId(source) {
+    if (source !== cloudflareWorkersModule) {
+      return null;
+    }
+
+    return this.environment.name === "client"
+      ? cloudflareWorkersClientStub
+      : { external: true, id: source };
+  },
+  load(id) {
+    if (id !== cloudflareWorkersClientStub) {
+      return null;
+    }
+
+    return `
+      export const env = new Proxy({}, {
+        get() {
+          throw new Error("Cloudflare Worker bindings are unavailable in the browser.");
+        },
+      });
+      export class DurableObject {
+        constructor() {
+          throw new Error("Durable Objects are unavailable in the browser.");
+        }
+      }
+    `;
+  },
+};
+
 const config = defineConfig({
   plugins: [
     devtools(),
@@ -50,13 +82,13 @@ const config = defineConfig({
     standaloneTakumiWasmPlugin,
     tanstackStart(),
     viteReact(),
+    cloudflareWorkersRuntimePlugin,
   ],
   resolve: {
     tsconfigPaths: true,
   },
   build: {
     rolldownOptions: {
-      external: [cloudflareWorkersModule],
       platform: "browser",
     },
   },
