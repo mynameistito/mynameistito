@@ -16,7 +16,7 @@ const createStorage = (
   let livePrefixListCalls = 0;
   let transactionTail: Promise<unknown> = Promise.resolve();
 
-  const storage: DurableObjectStorage = {
+  const storage = {
     delete: async (key: string) => await Promise.resolve(values.delete(key)),
     async get<T>(key: string): Promise<T | undefined> {
       const value = values.get(key);
@@ -29,6 +29,11 @@ const createStorage = (
       // SAFETY: This in-memory adapter stores values under their typed Durable Object keys.
       // eslint-disable-next-line typescript/no-unsafe-type-assertion -- SAFETY: Test reads use the key's persisted type.
       return await Promise.resolve(value as T);
+    },
+    async getAlarm(): Promise<number | null> {
+      const alarm = values.get("alarm");
+
+      return alarm === undefined ? null : await Promise.resolve(Number(alarm));
     },
     async list<T>(
       options: { readonly prefix?: string } = {}
@@ -67,6 +72,8 @@ const createStorage = (
 
       return await result;
     },
+  } satisfies DurableObjectStorage & {
+    readonly getAlarm: () => Promise<number | null>;
   };
 
   return {
@@ -209,6 +216,22 @@ describe("visitor counter live-count aggregate", () => {
       liveCount: 2,
       prefixListCalls: 1,
     });
+  });
+
+  it("does not postpone an existing cleanup alarm during repeated heartbeats", async () => {
+    const start = 4_500_000;
+    const cleanupDeadline = start + heartbeatMs;
+    vi.spyOn(Date, "now").mockReturnValue(start);
+    const database = createStorage(new Map([["alarm", cleanupDeadline]]));
+    const counter = createCounter(database.storage);
+
+    await counter.track("a");
+    vi.mocked(Date.now).mockReturnValue(start + heartbeatMs / 2);
+    await counter.track("a");
+    vi.mocked(Date.now).mockReturnValue(start + heartbeatMs - 1);
+    await counter.track("a");
+
+    expect(database.values.get("alarm")).toBe(cleanupDeadline);
   });
 
   it("decrements expired leases in an alarm once without underflow", async () => {

@@ -172,7 +172,11 @@ export class VisitorCounter extends DurableObject {
       } satisfies VisitorCounts;
     });
 
-    await storage.setAlarm(now + heartbeatMs);
+    const currentAlarm = await storage.getAlarm();
+
+    if (currentAlarm === null) {
+      await storage.setAlarm(now + heartbeatMs);
+    }
 
     return counts;
   }
