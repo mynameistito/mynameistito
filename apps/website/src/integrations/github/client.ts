@@ -311,7 +311,10 @@ export class GitHub extends Context.Service<
           (typeof SearchResponseSchema)["Type"],
           GitHubRequestError
         > => {
-          const rateLimitIntervalMs = token ? 2100 : 6100;
+          // Keep authenticated searches well below GitHub's primary limit too:
+          // other clients may share the token's quota, and secondary limits
+          // can reject bursts before the nominal per-minute limit is reached.
+          const rateLimitIntervalMs = 6100;
           const searchUrl = new URL("https://api.github.com/search/issues");
           searchUrl.searchParams.set("q", query);
           searchUrl.searchParams.set("per_page", "100");

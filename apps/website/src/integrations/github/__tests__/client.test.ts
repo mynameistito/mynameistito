@@ -78,6 +78,6 @@ describe("GitHub client", () => {
       /^github-search:authenticated:[a-f0-9]{64}$/u
     );
     expect(rateLimitNames[0]).not.toContain(token);
-    expect(rateLimitIntervals).toStrictEqual([2100]);
+    expect(rateLimitIntervals).toStrictEqual([6100]);
   });
 });
