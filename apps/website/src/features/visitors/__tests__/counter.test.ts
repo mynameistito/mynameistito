@@ -148,10 +148,12 @@ describe("visitor counter live-count aggregate", () => {
       counts: results.map(({ live }) => live),
       liveCount: database.values.get("liveCount"),
       prefixListCalls: database.livePrefixListCalls,
+      alarm: database.values.get("alarm"),
     }).toStrictEqual({
       counts: [2, 3],
       liveCount: 3,
       prefixListCalls: 1,
+      alarm: now + heartbeatMs,
     });
   });
 
@@ -230,6 +232,20 @@ describe("visitor counter live-count aggregate", () => {
     await counter.track("a");
     vi.mocked(Date.now).mockReturnValue(start + heartbeatMs - 1);
     await counter.track("a");
+
+    expect(database.values.get("alarm")).toBe(cleanupDeadline);
+  });
+
+  it("does not postpone an existing cleanup alarm during concurrent heartbeats", async () => {
+    const start = 4_750_000;
+    const cleanupDeadline = start + heartbeatMs;
+    vi.spyOn(Date, "now")
+      .mockReturnValueOnce(start)
+      .mockReturnValueOnce(start + heartbeatMs - 1);
+    const database = createStorage(new Map([["alarm", cleanupDeadline]]));
+    const counter = createCounter(database.storage);
+
+    await Promise.all([counter.track("a"), counter.track("b")]);
 
     expect(database.values.get("alarm")).toBe(cleanupDeadline);
   });
