@@ -157,6 +157,19 @@ describe("visitor counter live-count aggregate", () => {
     });
   });
 
+  it("keeps the earliest cleanup deadline for simultaneous first heartbeats", async () => {
+    const start = 2_500_000;
+    vi.spyOn(Date, "now")
+      .mockReturnValueOnce(start + heartbeatMs - 1)
+      .mockReturnValueOnce(start);
+    const database = createStorage();
+    const counter = createCounter(database.storage);
+
+    await Promise.all([counter.track("later"), counter.track("earlier")]);
+
+    expect(database.values.get("alarm")).toBe(start + heartbeatMs);
+  });
+
   it("initializes on the first alarm and removes expired legacy leases", async () => {
     const now = 3_000_000;
     vi.spyOn(Date, "now").mockReturnValue(now);
@@ -201,7 +214,7 @@ describe("visitor counter live-count aggregate", () => {
     const boundary = await counter.track("a");
 
     vi.mocked(Date.now).mockReturnValue(start + liveWindowMs + 1);
-    const renewed = await counter.track("a");
+    const renewed = await counter.track("b");
 
     expect({
       counts: [
@@ -278,6 +291,35 @@ describe("visitor counter live-count aggregate", () => {
       finalCount: 0,
       firstCleanup: { count: 0, leaseAExists: false, leaseBExists: false },
       prefixListCalls: 3,
+    });
+  });
+
+  it("reconciles the live-count aggregate from all leases during cleanup", async () => {
+    const now = 5_500_000;
+
+    vi.spyOn(Date, "now").mockReturnValue(now);
+
+    const database = createStorage(
+      new Map<string, DurableObjectValue>([
+        ["live:a", now],
+        ["live:b", now - liveWindowMs],
+        ["liveCount", 99],
+        ["liveCountInitialized", true],
+      ])
+    );
+
+    const counter = createCounter(database.storage);
+
+    await counter.alarm();
+
+    expect({
+      alarm: database.values.get("alarm"),
+      liveCount: database.values.get("liveCount"),
+      prefixListCalls: database.livePrefixListCalls,
+    }).toStrictEqual({
+      alarm: now + heartbeatMs,
+      liveCount: 2,
+      prefixListCalls: 1,
     });
   });
 });

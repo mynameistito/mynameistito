@@ -19,10 +19,12 @@ const liveCountInitializedKey = "liveCountInitialized";
 interface VisitorCounterTransaction {
   readonly delete: (key: string) => Promise<boolean>;
   readonly get: <Value>(key: string) => Promise<Value | undefined>;
+  readonly getAlarm: () => Promise<number | null>;
   readonly list: <Value>(options?: {
     readonly prefix?: string;
   }) => Promise<Map<string, Value>>;
   readonly put: (key: string, value: boolean | number) => Promise<void>;
+  readonly setAlarm: (time: number) => Promise<void>;
 }
 
 /** Initializes the aggregate once while preserving leases created by older code.
@@ -101,7 +103,7 @@ export class VisitorCounter extends DurableObject {
     const keys = keysForVisitor(now, visitorId);
     const { storage } = this.ctx;
 
-    const counts = await storage.transaction(async (transaction) => {
+    return await storage.transaction(async (transaction) => {
       const storedToday = await transaction.get<string>("today");
 
       if (storedToday !== keys.today) {
@@ -165,20 +167,19 @@ export class VisitorCounter extends DurableObject {
 
       await transaction.put(liveCountKey, liveCount);
 
+      const currentAlarm = await transaction.getAlarm();
+      const nextAlarm = now + heartbeatMs;
+
+      if (currentAlarm === null || currentAlarm > nextAlarm) {
+        await transaction.setAlarm(nextAlarm);
+      }
+
       return {
         daily: (await transaction.get<number>(keys.daily)) ?? 0,
         live: liveCount,
         total: (await transaction.get<number>("total")) ?? 0,
       } satisfies VisitorCounts;
     });
-
-    const currentAlarm = await storage.getAlarm();
-
-    if (currentAlarm === null) {
-      await storage.setAlarm(now + heartbeatMs);
-    }
-
-    return counts;
   }
 
   /** Remove expired live visitor leases and schedule the next cleanup. */
@@ -199,11 +200,11 @@ export class VisitorCounter extends DurableObject {
         expired.map(async (key) => await transaction.delete(key))
       );
 
-      if (expired.length > 0) {
-        await transaction.put(liveCountKey, aggregate.count - expired.length);
-      }
+      const remainingCount = active.size - expired.length;
 
-      return active.size - expired.length;
+      await transaction.put(liveCountKey, remainingCount);
+
+      return remainingCount;
     });
 
     if (remaining > 0) {
