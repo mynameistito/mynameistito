@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { AiUsageDashboard } from "@/components/ai-usage-dashboard";
-import { socialMeta } from "@/lib/social-meta";
+import { AiUsageDashboard } from "@/features/ai-usage/components/dashboard";
+import { socialMeta } from "@/features/social/meta";
 import { getTokscale } from "@/server/functions/tokscale";
 
 const AiPage = () => <AiUsageDashboard snapshot={Route.useLoaderData()} />;

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { homepageDiscordEmbed } from "@/lib/discord-component-embed";
+import { homepageDiscordEmbed } from "@/features/social/discord-embed";
 
 const getEmbed = (): Response =>
   Response.json(homepageDiscordEmbed, {

@@ -7,7 +7,7 @@ import {
 import { Effect, Schema } from "effect";
 
 import { getAppEnv } from "@/env";
-import { getBlogPost } from "@/lib/blog-posts";
+import { getBlogPost } from "@/features/blog/posts";
 import { verifyConfiguredTurnstile } from "@/server/functions/turnstile";
 
 /** Expected failure from a blog view counter operation. */

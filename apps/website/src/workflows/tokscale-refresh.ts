@@ -4,7 +4,7 @@ import { Effect } from "effect";
 
 import { createAppEnv } from "@/env";
 import type { RuntimeBindings } from "@/env";
-import { refreshTokscale } from "@/lib/provider/tokscale/snapshot";
+import { refreshTokscale } from "@/features/ai-usage/snapshot";
 
 const retryPolicy = {
   retries: { limit: 3, delay: "30 seconds", backoff: "exponential" },

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { blogPosts } from "@/lib/blog-posts";
+import { blogPosts } from "@/features/blog/posts";
 
 const publicPaths = [
   "/",

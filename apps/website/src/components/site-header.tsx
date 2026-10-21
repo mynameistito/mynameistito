@@ -2,9 +2,9 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
 import { SiteControls } from "@/components/site-controls";
-import { SpotifyNowPlaying } from "@/components/spotify-now-playing";
-import { VisitorActivity } from "@/components/visitor-tracker";
-import { profile } from "@/lib/profile";
+import { profile } from "@/domain/profile";
+import { SpotifyNowPlaying } from "@/features/now-playing/components/spotify-now-playing";
+import { VisitorActivity } from "@/features/visitors/components/tracker";
 
 interface SiteHeaderProps {
   backTo?: "/" | "/projects";

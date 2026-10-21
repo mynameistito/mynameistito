@@ -2,9 +2,9 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 
 import { SiteControls } from "@/components/site-controls";
-import { VisitorActivity } from "@/components/visitor-tracker";
-import { profile } from "@/lib/profile";
-import { socialMeta } from "@/lib/social-meta";
+import { profile } from "@/domain/profile";
+import { socialMeta } from "@/features/social/meta";
+import { VisitorActivity } from "@/features/visitors/components/tracker";
 
 const links = [
   {

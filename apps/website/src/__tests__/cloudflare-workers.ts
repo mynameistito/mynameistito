@@ -9,6 +9,8 @@ type MutableRuntimeBindings = {
 
 export const env: MutableRuntimeBindings = {};
 
+export { WorkflowEntrypoint } from "./workflow-entrypoint";
+
 /** Minimal base class for Worker-only Durable Objects in Node tests. */
 export class DurableObject {
   readonly ctx: DurableObjectState;

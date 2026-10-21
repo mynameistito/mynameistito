@@ -1,8 +1,8 @@
 import { Effect, Option, Schema } from "effect";
 
 import { getAppEnv } from "@/env";
-import { VisitorCountsSchema } from "@/lib/visitor-counting";
-import type { VisitorCounts } from "@/lib/visitor-counting";
+import { VisitorCountsSchema } from "@/features/visitors/counting";
+import type { VisitorCounts } from "@/features/visitors/counting";
 
 /** Records a visit through the visitor counter Durable Object.
  * @param existingVisitorId - Valid visitor identifier from the request cookie, if present.

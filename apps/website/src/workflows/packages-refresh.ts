@@ -4,7 +4,8 @@ import { Effect } from "effect";
 
 import { createAppEnv } from "@/env";
 import type { RuntimeBindings } from "@/env";
-import { refreshPackages } from "@/lib/packages";
+import { refreshPackages } from "@/features/packages/packages";
+import { NpmRegistry } from "@/integrations/npm/client";
 
 const retryPolicy = {
   retries: { limit: 3, delay: "30 seconds", backoff: "exponential" },
@@ -35,7 +36,11 @@ export class PackagesRefreshWorkflow extends WorkflowEntrypoint<
         stepName,
         retryPolicy,
         async () =>
-          await Effect.runPromise(refreshPackages(createAppEnv(this.env)))
+          await Effect.runPromise(
+            refreshPackages(createAppEnv(this.env)).pipe(
+              Effect.provide(NpmRegistry.layer)
+            )
+          )
       );
 
       console.info("[packages] Package refresh workflow completed.", {

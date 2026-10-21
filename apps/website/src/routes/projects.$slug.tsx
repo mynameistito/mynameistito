@@ -6,8 +6,8 @@ import {
 } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 
-import { isProjectVisible, projectSlug } from "@/lib/project";
-import { socialMeta } from "@/lib/social-meta";
+import { isProjectVisible, projectSlug } from "@/features/projects/project";
+import { socialMeta } from "@/features/social/meta";
 import { getProjects } from "@/server/functions/projects";
 
 const ProjectPage = () => {

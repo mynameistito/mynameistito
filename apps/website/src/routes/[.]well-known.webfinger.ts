@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { CORS_HEADERS, webfinger } from "@/lib/webfinger";
+import { CORS_HEADERS, webfinger } from "@/features/identity/webfinger";
 import { webfingerResponse } from "@/server/functions/webfinger-response";
 
 const getWebfinger = async ({

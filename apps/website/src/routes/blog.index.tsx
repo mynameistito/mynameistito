@@ -1,8 +1,8 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { Eye } from "lucide-react";
 
-import { blogPosts } from "@/lib/blog-posts";
-import { socialMeta } from "@/lib/social-meta";
+import { blogPosts } from "@/features/blog/posts";
+import { socialMeta } from "@/features/social/meta";
 import { getBlogViews } from "@/server/functions/blog-views";
 
 type BlogViews = Readonly<Record<string, number | null>>;

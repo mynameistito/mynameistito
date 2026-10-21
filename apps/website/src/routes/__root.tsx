@@ -8,9 +8,9 @@ import {
 
 import { NotFoundPage } from "@/components/not-found-page";
 import { SiteHeader } from "@/components/site-header";
-import { SocialDock } from "@/components/social-dock";
-import { VisitorTracker } from "@/components/visitor-tracker";
-import { socialMeta } from "@/lib/social-meta";
+import { SocialDock } from "@/features/social/components/dock";
+import { socialMeta } from "@/features/social/meta";
+import { VisitorTracker } from "@/features/visitors/components/tracker";
 
 import appCss from "@/styles.css?url";
 

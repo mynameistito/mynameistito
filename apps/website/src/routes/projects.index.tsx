@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { ProjectList } from "@/components/project-list";
-import { isProjectVisible } from "@/lib/project";
-import { socialMeta } from "@/lib/social-meta";
+import { ProjectList } from "@/features/projects/components/project-list";
+import { isProjectVisible } from "@/features/projects/project";
+import { socialMeta } from "@/features/social/meta";
 import { getProjects } from "@/server/functions/projects";
 
 const ProjectsPage = () => {

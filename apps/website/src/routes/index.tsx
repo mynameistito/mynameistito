@@ -1,10 +1,10 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 
 import { ExperienceSection } from "@/components/experience-section";
-import { ProjectList } from "@/components/project-list";
 import { HomeProfile, SiteHeader } from "@/components/site-header";
-import { profile } from "@/lib/profile";
-import { siteUrl, socialMeta } from "@/lib/social-meta";
+import { profile } from "@/domain/profile";
+import { ProjectList } from "@/features/projects/components/project-list";
+import { siteUrl, socialMeta } from "@/features/social/meta";
 import { getProjects } from "@/server/functions/projects";
 
 const Home = () => (
