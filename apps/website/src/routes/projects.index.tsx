@@ -1,56 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 
-import { ProjectList } from "@/features/projects/components/project-list";
-import { isProjectVisible } from "@/features/projects/project";
+import { ProjectDirectory } from "@/features/projects/components/project-directory";
 import { socialMeta } from "@/features/social/meta";
 import { getProjects } from "@/server/functions/projects";
 
 const ProjectsPage = () => {
-  const projects = Route.useLoaderData().filter(isProjectVisible);
-  const featuredProjects = projects.filter((project) => project.featured);
-  const otherProjects = projects.filter((project) => !project.featured);
+  const [query, setQuery] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
 
   return (
-    <main className="page-shell pt-page-top-header pb-page-bottom">
-      <section className="mt-section">
-        <h1 className="m-0 text-page-title leading-tight font-semibold tracking-title text-text">
-          Projects
-        </h1>
-        <p className="mt-2 mb-0 text-base leading-6 text-muted">
-          Things I&apos;ve built and shipped.
-        </p>
-      </section>
-
-      <section aria-labelledby="featured-title" className="mt-section">
-        <div className="mb-3 flex items-center justify-between gap-6">
-          <h2
-            className="m-0 text-base font-semibold text-text"
-            id="featured-title"
-          >
-            Featured projects
-          </h2>
-          <span className="text-xs text-muted">
-            {featuredProjects.length} projects
-          </span>
-        </div>
-        <ProjectList items={featuredProjects} showImages />
-      </section>
-
-      <section aria-labelledby="other-title" className="mt-section">
-        <div className="mb-3 flex items-center justify-between gap-6">
-          <h2
-            className="m-0 text-base font-semibold text-text"
-            id="other-title"
-          >
-            Other projects
-          </h2>
-          <span className="text-xs text-muted">
-            {otherProjects.length} projects
-          </span>
-        </div>
-        <ProjectList items={otherProjects} showImages />
-      </section>
-    </main>
+    <ProjectDirectory
+      onClearFilters={() => {
+        setQuery("");
+        setSelectedLanguage("");
+      }}
+      onLanguageChange={setSelectedLanguage}
+      onQueryChange={setQuery}
+      projects={Route.useLoaderData()}
+      query={query}
+      selectedLanguage={selectedLanguage}
+    />
   );
 };
 
