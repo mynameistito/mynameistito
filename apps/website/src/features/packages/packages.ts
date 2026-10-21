@@ -22,6 +22,14 @@ interface PackagesSnapshot {
   readonly packages: readonly NpmPackage[];
 }
 
+/** Package metadata and the stored snapshot time, when it is available and valid. */
+export interface PackagesData {
+  readonly packages: readonly NpmPackage[];
+  readonly refreshedAt: string | null;
+}
+
+const emptyPackages: PackagesData = { packages: [], refreshedAt: null };
+
 const PackagesSnapshotSchema = Schema.Struct({
   refreshedAt: Schema.String,
   packages: Schema.Array(NpmPackageSchema),
@@ -70,14 +78,14 @@ const startPackagesRefresh = Effect.fn("startPackagesRefresh")(
 /** Reads the latest package snapshot and starts a Workflow when it is stale. */
 export const loadPackages = Effect.fn("loadPackages")(function* loadPackages(
   bindings?: AppEnv
-) {
+): Effect.fn.Return<PackagesData> {
   const env = bindings ?? (yield* getAppEnv());
   const kv = env.OPEN_SOURCE_KV;
 
   if (!kv) {
     console.error("[packages] The KV snapshot binding is not configured.");
 
-    return [];
+    return emptyPackages;
   }
 
   const stored = yield* Effect.result(
@@ -91,7 +99,7 @@ export const loadPackages = Effect.fn("loadPackages")(function* loadPackages(
   if (stored._tag === "Failure") {
     console.error("[packages] Unable to read the package snapshot.");
 
-    return [];
+    return emptyPackages;
   }
 
   const storedText = stored.success;
@@ -99,7 +107,7 @@ export const loadPackages = Effect.fn("loadPackages")(function* loadPackages(
   if (storedText === null) {
     yield* startPackagesRefresh(env);
 
-    return [];
+    return emptyPackages;
   }
 
   const decoded = yield* Effect.result(
@@ -112,7 +120,7 @@ export const loadPackages = Effect.fn("loadPackages")(function* loadPackages(
     console.error("[packages] The package snapshot is invalid.");
     yield* startPackagesRefresh(env);
 
-    return [];
+    return emptyPackages;
   }
 
   const refreshedAt = Date.parse(decoded.success.refreshedAt);
@@ -125,7 +133,12 @@ export const loadPackages = Effect.fn("loadPackages")(function* loadPackages(
     yield* startPackagesRefresh(env);
   }
 
-  return decoded.success.packages;
+  return {
+    packages: decoded.success.packages,
+    refreshedAt: Number.isFinite(refreshedAt)
+      ? decoded.success.refreshedAt
+      : null,
+  };
 });
 
 /** Fetches npm metadata and publishes one complete snapshot to KV. */

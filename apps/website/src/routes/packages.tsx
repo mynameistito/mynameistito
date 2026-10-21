@@ -1,12 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ExternalLink } from "lucide-react";
 
-import type { NpmPackage } from "@/features/packages/packages";
+import type { PackagesData } from "@/features/packages/packages";
 import { socialMeta } from "@/features/social/meta";
 import { getPackages } from "@/server/functions/packages";
 
 const PackagesPage = () => {
-  const packages = Route.useLoaderData();
+  const { packages, refreshedAt } = Route.useLoaderData();
+  const refreshedDate = refreshedAt === null ? null : new Date(refreshedAt);
+
+  const lastUpdated =
+    refreshedDate !== null && Number.isFinite(refreshedDate.getTime())
+      ? refreshedDate.toISOString()
+      : null;
 
   const weeklyDownloads = packages.reduce(
     (total, item) => total + item.weeklyDownloads,
@@ -37,6 +43,14 @@ const PackagesPage = () => {
             weekly downloads
           </span>
         </div>
+        {lastUpdated !== null && (
+          <p className="mt-0 mb-3 text-xs text-muted">
+            Data last updated{" "}
+            <time dateTime={lastUpdated}>
+              {lastUpdated.slice(0, 10)} at {lastUpdated.slice(11, 16)} UTC
+            </time>
+          </p>
+        )}
         {packages.length > 0 ? (
           <ul className="m-0 list-none border-t border-line p-0">
             {packages.map((item) => (
@@ -95,11 +109,11 @@ const PackagesPage = () => {
 };
 
 export const Route = createFileRoute("/packages")({
-  loader: async (): Promise<readonly NpmPackage[]> => {
+  loader: async (): Promise<PackagesData> => {
     try {
       return await getPackages();
     } catch {
-      return [];
+      return { packages: [], refreshedAt: null };
     }
   },
   component: PackagesPage,
