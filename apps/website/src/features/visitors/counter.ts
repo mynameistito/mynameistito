@@ -7,10 +7,58 @@ import {
   heartbeatMs,
   keysForVisitor,
   liveCountAfterVisit,
+  liveWindowMs,
   postViewCountAfterVisit,
   totalCountAfterVisit,
 } from "./counting";
 import type { VisitorCounts } from "./counting";
+
+const liveCountKey = "liveCount";
+const liveCountInitializedKey = "liveCountInitialized";
+
+interface VisitorCounterTransaction {
+  readonly delete: (key: string) => Promise<boolean>;
+  readonly get: <Value>(key: string) => Promise<Value | undefined>;
+  readonly getAlarm: () => Promise<number | null>;
+  readonly list: <Value>(options?: {
+    readonly prefix?: string;
+  }) => Promise<Map<string, Value>>;
+  readonly put: (key: string, value: boolean | number) => Promise<void>;
+  readonly setAlarm: (time: number) => Promise<void>;
+}
+
+/** Initializes the aggregate once while preserving leases created by older code.
+ * @param transaction - The active Durable Object transaction.
+ * @param now - Current Unix timestamp in milliseconds.
+ * @returns The aggregate and migrated leases when this call performed migration.
+ */
+const initializeLiveCount = async (
+  transaction: VisitorCounterTransaction,
+  now: number
+): Promise<{
+  readonly count: number;
+  readonly liveEntries?: Map<string, number>;
+}> => {
+  if ((await transaction.get<boolean>(liveCountInitializedKey)) === true) {
+    return { count: (await transaction.get<number>(liveCountKey)) ?? 0 };
+  }
+
+  const liveEntries = await transaction.list<number>({ prefix: "live:" });
+  const expired = new Set(expiredLiveVisitorKeys(liveEntries, now));
+
+  await Promise.all(
+    [...expired].map(async (key) => await transaction.delete(key))
+  );
+
+  const count = liveEntries.size - expired.size;
+  await transaction.put(liveCountKey, count);
+  await transaction.put(liveCountInitializedKey, true);
+
+  return {
+    count,
+    liveEntries: new Map([...liveEntries].filter(([key]) => !expired.has(key))),
+  };
+};
 
 /** Persistent visitor counter hosted by the website Worker. */
 export class VisitorCounter extends DurableObject {
@@ -55,7 +103,7 @@ export class VisitorCounter extends DurableObject {
     const keys = keysForVisitor(now, visitorId);
     const { storage } = this.ctx;
 
-    const counts = await storage.transaction(async (transaction) => {
+    return await storage.transaction(async (transaction) => {
       const storedToday = await transaction.get<string>("today");
 
       if (storedToday !== keys.today) {
@@ -73,19 +121,15 @@ export class VisitorCounter extends DurableObject {
         await Promise.all(
           expired.map(async (key) => await transaction.delete(key))
         );
+
         await transaction.put("today", keys.today);
       }
 
-      const active = await transaction.list<number>({ prefix: "live:" });
-      const expiredLive = expiredLiveVisitorKeys(active, now);
-      const expiredLiveSet = new Set(expiredLive);
-
-      const visitorWasActive =
-        active.has(keys.live) && !expiredLiveSet.has(keys.live);
-
-      await Promise.all(
-        expiredLive.map(async (key) => await transaction.delete(key))
-      );
+      const aggregate = await initializeLiveCount(transaction, now);
+      const lastSeen = await transaction.get<number>(keys.live);
+      const hasLease = lastSeen !== undefined;
+      const visitorWasActive = hasLease && now - lastSeen <= liveWindowMs;
+      const expiredOwnLease = hasLease && !visitorWasActive;
 
       const [seen, joined, dailyCount, totalCount] = await Promise.all([
         transaction.get<boolean>(keys.seen),
@@ -115,32 +159,55 @@ export class VisitorCounter extends DurableObject {
       );
       await transaction.put(keys.live, now);
 
+      const liveCount = liveCountAfterVisit(
+        aggregate.count,
+        expiredOwnLease ? 1 : 0,
+        visitorWasActive
+      );
+
+      await transaction.put(liveCountKey, liveCount);
+
+      const currentAlarm = await transaction.getAlarm();
+      const nextAlarm = now + heartbeatMs;
+
+      if (currentAlarm === null || currentAlarm > nextAlarm) {
+        await transaction.setAlarm(nextAlarm);
+      }
+
       return {
         daily: (await transaction.get<number>(keys.daily)) ?? 0,
-        live: liveCountAfterVisit(
-          active.size,
-          expiredLive.length,
-          visitorWasActive
-        ),
+        live: liveCount,
         total: (await transaction.get<number>("total")) ?? 0,
       } satisfies VisitorCounts;
     });
-
-    await storage.setAlarm(now + heartbeatMs);
-
-    return counts;
   }
 
   /** Remove expired live visitor leases and schedule the next cleanup. */
   async alarm(): Promise<void> {
     const now = Date.now();
     const { storage } = this.ctx;
-    const active = await storage.list<number>({ prefix: "live:" });
-    const expired = expiredLiveVisitorKeys(active, now);
-    await Promise.all(expired.map(async (key) => await storage.delete(key)));
-    const remaining = await storage.list({ prefix: "live:" });
 
-    if (remaining.size > 0) {
+    const remaining = await storage.transaction(async (transaction) => {
+      const aggregate = await initializeLiveCount(transaction, now);
+
+      const active =
+        aggregate.liveEntries ??
+        (await transaction.list<number>({ prefix: "live:" }));
+
+      const expired = expiredLiveVisitorKeys(active, now);
+
+      await Promise.all(
+        expired.map(async (key) => await transaction.delete(key))
+      );
+
+      const remainingCount = active.size - expired.length;
+
+      await transaction.put(liveCountKey, remainingCount);
+
+      return remainingCount;
+    });
+
+    if (remaining > 0) {
       await storage.setAlarm(now + heartbeatMs);
     }
   }
