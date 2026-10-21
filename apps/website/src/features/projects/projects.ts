@@ -21,6 +21,7 @@ import type { Repository } from "@/integrations/github/client";
 import { collectRepositoryPages } from "@/integrations/github/repository-pages";
 
 const cacheDuration = "1 hour";
+const fetchTimeout = "8 seconds";
 
 const overrides = new Map<string, Partial<Project>>([
   [".github", { showInProjects: false }],
@@ -113,6 +114,7 @@ const fetchProjects = Effect.gen(function* fetchProjects() {
 
 interface ProjectsDependencies {
   readonly fetch: () => Effect.Effect<readonly Project[], GitHubRequestError>;
+  readonly timeout?: Duration.Input;
 }
 
 const projectsAfterFetchFailure = (
@@ -136,7 +138,10 @@ export class Projects extends Context.Service<
  * @param dependencies - The GitHub lookup used on cache misses.
  * @returns A service layer with a shared one-hour cache.
  */
-export const makeProjectsLayer = ({ fetch }: ProjectsDependencies) =>
+export const makeProjectsLayer = ({
+  fetch,
+  timeout = fetchTimeout,
+}: ProjectsDependencies) =>
   Layer.effect(
     Projects,
     Effect.gen(function* makeProjects() {
@@ -149,6 +154,10 @@ export const makeProjectsLayer = ({ fetch }: ProjectsDependencies) =>
             Effect.catchTag("GitHubRequestError", () =>
               projectsAfterFetchFailure(lastKnown)
             ),
+            Effect.timeoutOrElse({
+              duration: timeout,
+              orElse: () => projectsAfterFetchFailure(lastKnown),
+            }),
             Effect.tap(({ cacheable, projects }) =>
               cacheable ? Ref.set(lastKnown, projects) : Effect.void
             )
