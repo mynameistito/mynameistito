@@ -30,7 +30,7 @@
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
 
-🔷 **[hamilton-bin-day](https://github.com/mynameistito/hamilton-bin-day)** ⭐1 — TypeScript client for Hamilton City Council Fight the Landfill bin-day lookup API.
+🔷 **[BankGlass](https://github.com/mynameistito/BankGlass)** ⭐1 — A self-hosted, read-only banking API and MCP server for securely connecting applications and AI agents to personal financial data. BankGlass runs entirely on Cloudflare Workers
 <!-- AUTO-PROJECTS:END -->
 
 ---
