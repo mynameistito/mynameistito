@@ -16,7 +16,7 @@
 
 🔷 **[create-cf-token](https://github.com/mynameistito/create-cf-token)** ⭐46 — A CLI for creating Cloudflare API tokens (User Tokens) with an interactive, guided prompt flow.
 
-🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐22 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
+🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐23 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
 
 🔷 **[oc-usage-limits-plugin](https://github.com/mynameistito/oc-usage-limits-plugin)** ⭐10 — OpenCode TUI plugin for usage limits of AI Providers
 
