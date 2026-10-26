@@ -1,5 +1,11 @@
 # mynameistito
 
+## 0.3.5
+
+### Patch Changes
+
+- f3bf92f: Update the CLI's Effect runtime dependency.
+
 ## 0.3.4
 
 ### Patch Changes
