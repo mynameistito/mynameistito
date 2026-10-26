@@ -18,7 +18,7 @@
 
 🔷 **[justfuckingusecloudflare](https://github.com/mynameistito/justfuckingusecloudflare)** ⭐23 — Stop paying SEVENTEEN DIFFERENT BILLS for your shitty todo app. Stop pretending you're an infra genius when you're just bleeding money.
 
-🔷 **[oc-usage-limits-plugin](https://github.com/mynameistito/oc-usage-limits-plugin)** ⭐10 — OpenCode TUI plugin for usage limits of AI Providers
+🔷 **[oc-usage-limits-plugin](https://github.com/mynameistito/oc-usage-limits-plugin)** ⭐11 — OpenCode TUI plugin for usage limits of AI Providers
 
 🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐6 — A CLI tool that update deps across multiple repos with auto commits and pull requests.
 
@@ -30,7 +30,7 @@
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
 
-🔷 **[BankGlass](https://github.com/mynameistito/BankGlass)** ⭐1 — A self-hosted, read-only banking API and MCP server for securely connecting applications and AI agents to personal financial data. BankGlass runs entirely on Cloudflare Workers
+💙 **[skills](https://github.com/mynameistito/skills)** ⭐1 — skills
 <!-- AUTO-PROJECTS:END -->
 
 ---
