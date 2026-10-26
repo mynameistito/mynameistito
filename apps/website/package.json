@@ -42,14 +42,14 @@
     "yaml": "^2.9.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20261018.1",
+    "@cloudflare/workers-types": "5.20261026.1",
     "@tanstack/devtools-vite": "0.8.5",
     "@types/node": "catalog:",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "typescript": "catalog:",
-    "vite": "^8.3.4"
+    "vite": "^8.3.5"
   },
   "packageManager": "bun@1.4.2",
   "pnpm": {

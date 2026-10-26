@@ -32,15 +32,16 @@
     "prepare": "lefthook install"
   },
   "devDependencies": {
+    "@alchemy.run/cloudflare": "2.0.0-beta.84",
     "@changesets/cli": "^3.0.3",
-    "@effect/platform-bun": "^4.0.5",
-    "@effect/platform-node": "^4.0.5",
+    "@effect/platform-bun": "^4.0.6",
+    "@effect/platform-node": "^4.0.6",
     "@shadcn/lint": "^0.2.0",
     "@types/node": "catalog:",
     "@typescript/native": "catalog:",
     "@varlock/1password-plugin": "2.0.5",
     "@vitest/coverage-v8": "^5.0.5",
-    "alchemy": "2.0.0-beta.83",
+    "alchemy": "2.0.0-beta.84",
     "effect": "catalog:",
     "eslint-plugin-github": "6.1.2",
     "eslint-plugin-jsdoc": "^65.1.0",
@@ -62,7 +63,7 @@
   "catalog": {
     "@types/node": "^26.6.5",
     "@typescript/native": "npm:typescript@^7.0.2",
-    "effect": "4.0.5",
+    "effect": "4.0.6",
     "typescript": "npm:@typescript/typescript6@^6.0.2"
   },
   "patchedDependencies": {
