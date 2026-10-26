@@ -1,4 +1,3 @@
-import { Stack } from "alchemy";
 import {
   DurableObject as DurableObjectResource,
   KV,
@@ -7,7 +6,8 @@ import {
   Turnstile,
   Website,
   Workflow,
-} from "alchemy/Cloudflare";
+} from "@alchemy.run/cloudflare";
+import { Stack } from "alchemy";
 import {
   Redacted as ConfigRedacted,
   String as ConfigString,
