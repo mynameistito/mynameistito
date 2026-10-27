@@ -30,7 +30,7 @@
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
 
-🔷 **[x-lookup](https://github.com/mynameistito/x-lookup)** ⭐1 — Read-only, no-auth Cloudflare Worker that turns public X/Twitter statuses, threads, profiles, search, and social graphs into compact Markdown or JSON for AI agents
+🔷 **[discord-announcement-email-bridge](https://github.com/mynameistito/discord-announcement-email-bridge)** ⭐1 — discord-announcement-email-bridge
 <!-- AUTO-PROJECTS:END -->
 
 ---
