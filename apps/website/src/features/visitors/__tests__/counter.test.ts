@@ -14,7 +14,7 @@ const createStorage = (
 ) => {
   const values = new Map(initial);
   let livePrefixListCalls = 0;
-  let transactionTail: Promise<unknown> = Promise.resolve();
+  let transactionTail: Promise<null> = Promise.resolve(null);
 
   const storage = {
     delete: async (key: string) => await Promise.resolve(values.delete(key)),
@@ -64,11 +64,17 @@ const createStorage = (
       run: (transaction: DurableObjectStorage) => Promise<T>
     ): Promise<T> {
       // SAFETY: A promise tail serializes this in-memory Durable Object transaction adapter.
-      const result = transactionTail.then(async () => await run(storage));
+      const previousTransaction = transactionTail;
+      const transactionGate = Promise.withResolvers<null>();
+      transactionTail = transactionGate.promise;
 
-      transactionTail = result.catch(() => {});
+      await previousTransaction;
 
-      return await result;
+      try {
+        return await run(storage);
+      } finally {
+        transactionGate.resolve(null);
+      }
     },
   } satisfies DurableObjectStorage & {
     readonly getAlarm: () => Promise<number | null>;
