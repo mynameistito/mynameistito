@@ -64,10 +64,8 @@ const createStorage = (
       run: (transaction: DurableObjectStorage) => Promise<T>
     ): Promise<T> {
       // SAFETY: A promise tail serializes this in-memory Durable Object transaction adapter.
-      // eslint-disable-next-line github/no-then -- SAFETY: The queue runs one transaction after its predecessor.
       const result = transactionTail.then(async () => await run(storage));
 
-      // eslint-disable-next-line github/no-then -- SAFETY: Failed transactions must not block the next queued transaction.
       transactionTail = result.catch(() => {});
 
       return await result;
