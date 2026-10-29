@@ -30,7 +30,7 @@
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
 
-🔷 **[discord-announcement-email-bridge](https://github.com/mynameistito/discord-announcement-email-bridge)** ⭐1 — discord-announcement-email-bridge
+🔷 **[BankGlass](https://github.com/mynameistito/BankGlass)** ⭐1 — A self-hosted, read-only banking API and MCP server for securely connecting applications and AI agents to personal financial data. BankGlass runs entirely on Cloudflare Workers
 <!-- AUTO-PROJECTS:END -->
 
 ---
