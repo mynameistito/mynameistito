@@ -83,7 +83,7 @@ const RepositoryList = ({
               </span>
             </span>
             <span className="hidden shrink-0 text-micro text-muted sm:inline">
-              ★ {repository.stars.toLocaleString()}
+              ★ {repository.stars.toLocaleString("en-US")}
             </span>
             <span className="shrink-0 text-micro text-muted">
               {repository.pullRequests.length} PR
@@ -289,7 +289,7 @@ export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
               />
             ) : (
               <p className="m-0 border-t border-line py-3 text-xs text-muted">
-                No featured repositories yet.
+                No featured repositories match the current filters.
               </p>
             )}
             <h3 className="mt-6 mb-2 text-xs font-semibold text-text">
@@ -311,7 +311,9 @@ export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
           </>
         ) : (
           <p className="m-0 border-t border-line py-5 text-sm text-muted">
-            No pull requests match “{query}”. Try another search or state.
+            {normalizedQuery
+              ? `No pull requests match “${query.trim()}”. Try another search or state.`
+              : "No pull requests match the selected state. Try another state."}
           </p>
         )}
       </section>

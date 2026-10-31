@@ -4,6 +4,7 @@ import { getAppEnv } from "@/env";
 import type { AppEnv } from "@/env";
 import type { NpmPackage } from "@/features/packages/package";
 import { NpmRegistry } from "@/integrations/npm/client";
+import { NpmRegistryError } from "@/integrations/npm/errors";
 
 export type { NpmPackage } from "@/features/packages/package";
 
@@ -163,6 +164,16 @@ export const refreshPackages = Effect.fn("refreshPackages")(
         return Effect.fail(error);
       })
     );
+
+    if (packages.length === 0) {
+      return yield* Effect.fail(
+        new NpmRegistryError({
+          cause: new Error(
+            "The npm registry returned no packages; retaining the previous snapshot."
+          ),
+        })
+      );
+    }
 
     const now = yield* DateTime.now;
 

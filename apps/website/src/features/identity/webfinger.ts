@@ -144,7 +144,21 @@ const isWebfingerUri = (
   }
 
   if (/^acct:/iu.test(resource)) {
-    return /^acct:[^@\s]+@[^@\s]+$/iu.test(resource);
+    const parts = resource.slice(5).split("@");
+    const [user, host] = parts;
+
+    if (parts.length !== 2 || user === undefined || host === undefined) {
+      return false;
+    }
+
+    return (
+      /^[a-z\d._~!$&'()*+,;=-](?:[a-z\d._~!$&'()*+,;=-]|%[\da-f]{2})*$/iu.test(
+        user
+      ) &&
+      /^(?:(?:[a-z\d._~!$&'()*+,;=-]|%[\da-f]{2})+|\[[\da-f:.]+\])$/iu.test(
+        host
+      )
+    );
   }
 
   return URL.canParse(resource);

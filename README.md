@@ -39,7 +39,7 @@
 
 <div align="center">
 
-<img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=mynameistito&theme=apprentice" />
+<img alt="GitHub profile statistics for mynameistito" src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=mynameistito&theme=apprentice" />
 
 </div>
 

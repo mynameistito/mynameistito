@@ -7,7 +7,7 @@ pre-commit:
   jobs:
     - run: bun run fix
       glob:
-        - "***.js"
+        - "*.js"
         - "*.jsx"
         - "*.ts"
         - "*.tsx"

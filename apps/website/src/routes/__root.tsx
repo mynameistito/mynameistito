@@ -34,7 +34,7 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
   const headerLabel = isProjectIndex ? "Portfolio" : backLabel;
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
@@ -98,6 +98,10 @@ export const Route = createRootRoute({
       ),
     ],
     scripts: [
+      {
+        children:
+          "try{document.documentElement.dataset.theme=localStorage.getItem('theme')==='light'?'light':'dark'}catch{}",
+      },
       {
         async: true,
         defer: true,

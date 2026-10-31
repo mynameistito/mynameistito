@@ -8,7 +8,7 @@ The schemas use Varlock's `op(op://...)` resolver; importing a plain `.env.tpl` 
 
 ## CI and deployment
 
-CI has no production credentials. Gitleaks scans repository history; the build artifact is credential-free. Run `bun run env:scan` after a build with production 1Password access to scan source and output for resolved sensitive values.
+Routine CI jobs have no production credentials. Privileged deployment and reconciliation jobs receive the credentials required for their path, as described below. Gitleaks scans repository history; the build artifact is credential-free. Run `bun run env:scan` after a build with production 1Password access to scan source and output for resolved sensitive values.
 
 The pinned 1Password action loads Cloudflare credentials for deploy/reconciliation and application credentials only for successful `main` pushes. Preview, cleanup, and reconciliation paths do not load app secrets. The pinned Alchemy action retains production authorization, preview-SHA validation, and lifecycle management; preview lifecycle still requires the account-scoped Cloudflare token.
 

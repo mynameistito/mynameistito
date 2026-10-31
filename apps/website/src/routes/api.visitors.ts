@@ -16,7 +16,7 @@ const VisitorRequest = Struct({
   path: SchemaString.pipe(
     check(
       isPattern(
-        /^\/(?:about|contact|links|open-source|packages|privacy|projects(?:\/[a-z0-9-]+)?)?$/u
+        /^\/(?:about|ai|contact|links|open-source|packages|privacy|projects(?:\/[a-z0-9-]+)?)?$/u
       )
     )
   ),

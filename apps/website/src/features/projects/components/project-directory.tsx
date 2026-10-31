@@ -111,35 +111,41 @@ export const ProjectDirectory = ({
         </div>
       ) : (
         <>
-          <section aria-labelledby="featured-title" className="mt-section">
-            <div className="mb-3 flex items-center justify-between gap-6">
-              <h2
-                className="m-0 text-base font-semibold text-text"
-                id="featured-title"
-              >
-                Featured projects
-              </h2>
-              <span className="text-xs text-muted">
-                {featuredProjects.length} projects
-              </span>
-            </div>
-            <ProjectList items={featuredProjects} showImages />
-          </section>
+          {featuredProjects.length > 0 && (
+            <section aria-labelledby="featured-title" className="mt-section">
+              <div className="mb-3 flex items-center justify-between gap-6">
+                <h2
+                  className="m-0 text-base font-semibold text-text"
+                  id="featured-title"
+                >
+                  Featured projects
+                </h2>
+                <span className="text-xs text-muted">
+                  {featuredProjects.length}{" "}
+                  {featuredProjects.length === 1 ? "project" : "projects"}
+                </span>
+              </div>
+              <ProjectList items={featuredProjects} showImages />
+            </section>
+          )}
 
-          <section aria-labelledby="other-title" className="mt-section">
-            <div className="mb-3 flex items-center justify-between gap-6">
-              <h2
-                className="m-0 text-base font-semibold text-text"
-                id="other-title"
-              >
-                Other projects
-              </h2>
-              <span className="text-xs text-muted">
-                {otherProjects.length} projects
-              </span>
-            </div>
-            <ProjectList items={otherProjects} showImages />
-          </section>
+          {otherProjects.length > 0 && (
+            <section aria-labelledby="other-title" className="mt-section">
+              <div className="mb-3 flex items-center justify-between gap-6">
+                <h2
+                  className="m-0 text-base font-semibold text-text"
+                  id="other-title"
+                >
+                  Other projects
+                </h2>
+                <span className="text-xs text-muted">
+                  {otherProjects.length}{" "}
+                  {otherProjects.length === 1 ? "project" : "projects"}
+                </span>
+              </div>
+              <ProjectList items={otherProjects} showImages />
+            </section>
+          )}
         </>
       )}
     </main>

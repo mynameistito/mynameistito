@@ -12,11 +12,13 @@ export const env: MutableRuntimeBindings = {};
 export { WorkflowEntrypoint } from "./workflow-entrypoint";
 
 /** Minimal base class for Worker-only Durable Objects in Node tests. */
-export class DurableObject {
+export class DurableObject<Env = unknown> {
   readonly ctx: DurableObjectState;
+  readonly env: Env | undefined;
 
   /** Creates the test double with a supplied Durable Object context. */
-  constructor(ctx: DurableObjectState) {
+  constructor(ctx: DurableObjectState, bindings?: Env) {
     this.ctx = ctx;
+    this.env = bindings;
   }
 }
