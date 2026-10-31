@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "mynameistito-workspace",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "bun run dev:website",
+    "dev:all": "turbo run dev --ui=tui",
+    "dev:cli": "bun run --cwd packages/mynameistito dev",
+    "dev:secure": "bun dev",
+    "dev:website": "bun run --cwd apps/website dev",
+    "env:check": "bun run --cwd apps/website env:check",
+    "env:check:prod": "bun run --cwd apps/website env:check:prod",
+    "env:scan": "bun run --cwd apps/website env:scan",
+    "changeset": "changeset",
+    "changeset-add": "bun run scripts/changeset-add.ts",
+    "changeset-version": "changeset version && bun install --lockfile-only",
+    "check": "ultracite check",
+    "knip": "knip",
+    "release:stage": "bun scripts/cicd/stage-packages.ts",
+    "release:tag": "bun scripts/cicd/git-tag.ts",
+    "test": "turbo run test:root",
+    "test:root": "vitest run --coverage --reporter=default --reporter=junit --outputFile.junit=test-report.junit.xml",
+    "typecheck": "turbo run typecheck typecheck:root",
+    "typecheck:root": "tsrs --noEmit",
+    "fix": "ultracite fix",
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@alchemy.run/cloudflare": "2.0.0-beta.84",
+    "@changesets/cli": "^3.0.3",
+    "@effect/platform-bun": "^4.0.6",
+    "@effect/platform-node": "^4.0.6",
+    "@shadcn/lint": "^0.2.0",
+    "@types/node": "catalog:",
+    "@varlock/1password-plugin": "2.0.5",
+    "@vitest/coverage-v8": "^5.0.5",
+    "alchemy": "2.0.0-beta.84",
+    "effect": "catalog:",
+    "eslint-plugin-github": "6.1.2",
+    "eslint-plugin-jsdoc": "^65.1.0",
+    "eslint-plugin-sonarjs": "^4.2.2",
+    "eslint-plugin-tsdoc": "^0.5.4",
+    "knip": "6.42.0",
+    "lefthook": "^2.2.2",
+    "oxfmt": "^0.71.0",
+    "oxlint": "^1.86.0",
+    "oxlint-plugin-react-doctor": "^0.9.16",
+    "oxlint-tsgolint": "^7.0.2004",
+    "tsrs": "catalog:",
+    "turbo": "^2.11.9",
+    "ultracite": "8.0.1",
+    "varlock": "1.23.0",
+    "vitest": "5.0.5"
+  },
+  "packageManager": "bun@1.4.2",
+  "catalog": {
+    "@types/node": "^26.6.5",
+    "effect": "4.0.6",
+    "tsrs": "0.20.0-ts7.1.0-beta"
+  },
+  "patchedDependencies": {
+    "react-grab@0.2.0": "patches/react-grab@0.2.0.patch"
+  },
+  "_patchNotes": {
+    "react-grab@0.2.0": "https://github.com/aidenybai/react-grab/issues/638"
+  }
+}
