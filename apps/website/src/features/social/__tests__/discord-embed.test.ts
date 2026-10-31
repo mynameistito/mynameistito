@@ -1,0 +1,22 @@
+import { describe, expect, it } from "vitest";
+
+import { homepageDiscordEmbed } from "@/features/social/discord-embed";
+
+describe("homepage Discord component embed", () => {
+  it("stays within Discord's 3,000-byte payload limit", () => {
+    expect(
+      new TextEncoder().encode(JSON.stringify(homepageDiscordEmbed)).byteLength
+    ).toBeLessThanOrEqual(3000);
+  });
+
+  it("uses only link-style buttons with valid HTTPS destinations", () => {
+    const [, actionRow] = homepageDiscordEmbed.component.components;
+
+    expect(actionRow.type).toBe(1);
+
+    for (const button of actionRow.components) {
+      expect(button.style).toBe(5);
+      expect(new URL(button.url).protocol).toBe("https:");
+    }
+  });
+});

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "@mynameistito/website",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "scripts": {
+    "fix": "ultracite fix",
+    "check": "ultracite check",
+    "dev": "varlock run --inject vars -- bun run --cwd ../.. alchemy dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "bun --env-file=.env.production run varlock run --inject vars -- bun run --cwd ../.. alchemy deploy --stage prod --yes",
+    "env:check": "varlock load --agent",
+    "env:check:prod": "bun --env-file=.env.production run varlock load --agent",
+    "env:scan": "bun --env-file=.env.production run varlock load --agent && bun --env-file=.env.production run varlock scan src dist",
+    "typecheck": "tsrs --noEmit && tsrs --noEmit -p tsconfig.worker.json"
+  },
+  "dependencies": {
+    "@distilled.cloud/github": "1.0.0-rc.15",
+    "@distilled.cloud/resend": "1.0.0-rc.15",
+    "@fontsource-variable/source-sans-3": "^5.3.1",
+    "@fontsource-variable/syne": "^5.3.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@takumi-rs/wasm": "2.16.3",
+    "@tanstack/react-router": "1.170.45",
+    "@tanstack/react-start": "1.169.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "effect": "catalog:",
+    "lucide-react": "^1.59.0",
+    "radix-ui": "^1.8.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-grab": "^0.2.0",
+    "react-markdown": "^10.1.0",
+    "tailwind-merge": "^3.7.0",
+    "tailwindcss": "^4.3.3",
+    "takumi-js": "^2.16.3",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261026.1",
+    "@tanstack/devtools-vite": "0.8.5",
+    "@types/node": "catalog:",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "tsrs": "catalog:",
+    "vite": "^8.3.5"
+  },
+  "packageManager": "bun@1.4.2",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "lightningcss"
+    ]
+  }
+}
