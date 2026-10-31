@@ -1,0 +1,49 @@
+import { describe, expect, it, vi } from "vitest";
+
+import { formatProfile } from "../src/cli-output.js";
+import { links, profile } from "../src/index.js";
+
+describe("profile data", () => {
+  it("exposes the profile metadata", () => {
+    expect(profile).toStrictEqual({
+      description:
+        "Tito builds TypeScript CLIs, Cloudflare tools, browser extensions, and small useful internet things.",
+      name: "My Name is Tito",
+    });
+  });
+
+  it("exposes labeled portfolio links", () => {
+    expect(links).toStrictEqual([
+      { label: "Website", url: "https://mynameistito.com" },
+      { label: "GitHub", url: "https://github.com/mynameistito" },
+      { label: "npm", url: "https://www.npmjs.com/~mynameistito" },
+      { label: "X", url: "https://x.com/mynameistito" },
+    ]);
+  });
+
+  it("formats a profile card with labeled links", () => {
+    expect(formatProfile(profile, links)).toBe(
+      [
+        "# My Name is Tito",
+        "",
+        "Tito builds TypeScript CLIs, Cloudflare tools, browser extensions, and small useful internet things.",
+        "",
+        "- Website: https://mynameistito.com",
+        "- GitHub: https://github.com/mynameistito",
+        "- npm: https://www.npmjs.com/~mynameistito",
+        "- X: https://x.com/mynameistito",
+      ].join("\n")
+    );
+  });
+
+  it("prints the profile card through the Effect runtime", async () => {
+    const write = vi.spyOn(process.stdout, "write").mockReturnValue(true);
+
+    try {
+      await import("../src/cli.js");
+      expect(write).toHaveBeenCalledWith(`${formatProfile(profile, links)}\n`);
+    } finally {
+      write.mockRestore();
+    }
+  });
+});
