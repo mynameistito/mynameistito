@@ -5,6 +5,7 @@ import type {
 } from "cloudflare:workers";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { DurableObject } from "@/__tests__/cloudflare-workers";
 import type { RuntimeBindings } from "@/env";
 import { VisitorCounter } from "@/features/visitors/counter";
 import { heartbeatMs, liveWindowMs } from "@/features/visitors/counting";
@@ -100,6 +101,15 @@ const createCounter = (storage: DurableObjectStorage): VisitorCounter => {
 describe("visitor counter live-count aggregate", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it("preserves bindings supplied to the Durable Object test seam", () => {
+    const database = createStorage();
+    const bindings = { name: "test-binding" };
+    const object = new DurableObject({ storage: database.storage }, bindings);
+
+    expect(object.env).toBe(bindings);
+    expect(object.ctx.storage).toBe(database.storage);
   });
 
   it("migrates active and expired legacy leases once, then heartbeats without listing", async () => {
