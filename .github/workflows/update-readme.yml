@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://www.schemastore.org/github-workflow.json
+name: Update README Projects
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # Every day at midnight UTC
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 26.10.0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate projects list
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/scripts/update-projects.mjs
+
+      - name: Format README
+        run: bun run fix README.md
+
+      - name: Commit changes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- README.md; then
+            echo "README is already up to date; nothing to commit."
+            exit 0
+          fi
+          # main requires verified commits, so commit through the API: a commit
+          # created by the Actions bot with no custom author or committer is
+          # signed by GitHub and satisfies the required_signatures rule.
+          base_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${GITHUB_REF_NAME}" --jq .object.sha)"
+          base_tree="$(gh api "repos/${GITHUB_REPOSITORY}/git/commits/${base_sha}" --jq .tree.sha)"
+          blob_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/blobs" -f content="$(base64 -w0 README.md)" -f encoding=base64 --jq .sha)"
+          tree_sha="$(printf '{"base_tree":"%s","tree":[{"path":"README.md","mode":"100644","type":"blob","sha":"%s"}]}' "${base_tree}" "${blob_sha}" | gh api "repos/${GITHUB_REPOSITORY}/git/trees" --input - --jq .sha)"
+          commit_sha="$(printf '{"message":"chore: auto-update projects list","tree":"%s","parents":["%s"]}' "${tree_sha}" "${base_sha}" | gh api "repos/${GITHUB_REPOSITORY}/git/commits" --input - --jq .sha)"
+          gh api -X PATCH "repos/${GITHUB_REPOSITORY}/git/refs/heads/${GITHUB_REF_NAME}" -f sha="${commit_sha}"
+          echo "Committed README update as ${commit_sha}"

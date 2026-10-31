@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/evilmartians/lefthook/master/schema.json
+no_tty: false
+output:
+  - failure
+
+pre-commit:
+  jobs:
+    - run: bun run fix
+      glob:
+        - "***.js"
+        - "*.jsx"
+        - "*.ts"
+        - "*.tsx"
+        - "*.json"
+        - "*.jsonc"
+        - "*.css"
+        - "*.md"
+      stage_fixed: true
+pre-push:
+  parallel: false
+  jobs:
+    - name: fix-formatting
+      run: bun run fix
+    - name: check-formatting
+      run: bun run check
+    - run: bun run knip
+    - run: bun run test -- --ui=stream --output-logs=errors-only
+    - name: build-and-typecheck
+      group:
+        piped: true
+        jobs:
+          - run: bun run build -- --ui=stream --output-logs=errors-only
+          - run: bun run typecheck -- --ui=stream --output-logs=errors-only
