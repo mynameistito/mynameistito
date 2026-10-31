@@ -75,11 +75,13 @@ Authentication: the `authenticate` hook gets the Puppeteer `Page` as its first a
 import { defineUnlighthouseConfig } from "unlighthouse/config";
 
 export default defineUnlighthouseConfig({
-  auth: { username: "admin", password: process.env.AUTH_PASS! },
   hooks: {
     async authenticate(page) {
+      const password = process.env.AUTH_PASS;
+      if (!password) throw new Error("AUTH_PASS is required for form login");
       await page.goto("https://example.com/login");
       await page.type('input[name="email"]', "test@example.com");
+      await page.type('input[name="password"]', password);
       await Promise.all([
         page.waitForNavigation(),
         page.click('button[type="submit"]'),
@@ -141,7 +143,7 @@ await unlighthouse.start();
 
 ## Config
 
-- `scanner.device` (`'mobile'`), `scanner.samples` (1, runs per page, averaged), `scanner.throttle` (on for remote sites, off for local ones).
+- `scanner.device` (`'mobile'`), `scanner.samples` (1, runs per page; multiple samples select a representative median run), `scanner.throttle` (on for remote sites, off for local ones).
 - `scanner.dynamicSampling` (8), `scanner.maxRoutes` (200), `scanner.crawler`, `scanner.sitemap`, `scanner.robotsTxt`.
 - `puppeteerClusterOptions.maxConcurrency` (half the CPU cores). Set 1 for stable performance scores.
 - `lighthouseOptions` passes through to Lighthouse. `onlyAudits` replaces `onlyCategories`.

@@ -22,11 +22,9 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
     title: `mynameistito-${stack.stage}-open-source-contributions`,
   });
 
-  const turnstileDomains = ["localhost", "127.0.0.1", "mynameistito.com"];
-
-  if (!isProduction) {
-    turnstileDomains.push("mynameistito.mynameistito.workers.dev");
-  }
+  const turnstileDomains = isProduction
+    ? ["mynameistito.com"]
+    : ["localhost", "127.0.0.1", "mynameistito.mynameistito.workers.dev"];
 
   const contactTurnstile = yield* Turnstile.Widget("ContactTurnstile", {
     domains: turnstileDomains,

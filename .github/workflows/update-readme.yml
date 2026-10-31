@@ -16,6 +16,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 26.10.0
@@ -46,6 +48,10 @@ jobs:
           # created by the Actions bot with no custom author or committer is
           # signed by GitHub and satisfies the required_signatures rule.
           base_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${GITHUB_REF_NAME}" --jq .object.sha)"
+          if [ "${base_sha}" != "$(git rev-parse HEAD)" ]; then
+            echo "The branch changed after checkout; skipping this stale README update."
+            exit 0
+          fi
           base_tree="$(gh api "repos/${GITHUB_REPOSITORY}/git/commits/${base_sha}" --jq .tree.sha)"
           blob_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/blobs" -f content="$(base64 -w0 README.md)" -f encoding=base64 --jq .sha)"
           tree_sha="$(printf '{"base_tree":"%s","tree":[{"path":"README.md","mode":"100644","type":"blob","sha":"%s"}]}' "${base_tree}" "${blob_sha}" | gh api "repos/${GITHUB_REPOSITORY}/git/trees" --input - --jq .sha)"
