@@ -16,7 +16,7 @@ const statusMessages: Record<SubmissionStatus, string> = {
   idle: "Messages go straight to my inbox.",
   submitting: "Sending your message.",
   success: "Thanks. I'll get back to you soon.",
-  error: "Verification failed. Try again.",
+  error: "Your message could not be sent. Try again.",
 };
 
 const directMessages = [

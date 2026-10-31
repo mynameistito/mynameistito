@@ -104,8 +104,14 @@ const fetchProjects = Effect.gen(function* fetchProjects() {
         ? project
         : { ...project, previewImage: override.image };
 
-    if (repository.homepage !== null && override?.demo === undefined) {
-      return { ...projectWithPreview, demo: repository.homepage };
+    const homepage = repository.homepage?.trim();
+
+    if (
+      homepage !== undefined &&
+      homepage.length > 0 &&
+      override?.demo === undefined
+    ) {
+      return { ...projectWithPreview, demo: homepage };
     }
 
     return projectWithPreview;

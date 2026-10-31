@@ -145,7 +145,7 @@ describe("project directory rendering", () => {
     )?.[0];
 
     expect(featured).toMatch(
-      /Featured projects.*1 projects.*href="\/projects\/featured-zeta"/su
+      /Featured projects.*1 project.*href="\/projects\/featured-zeta"/su
     );
     expect(featured).not.toContain('href="/projects/other-alpha"');
     expect(other).toMatch(
@@ -168,7 +168,7 @@ describe("project directory rendering", () => {
     expect(html).not.toMatch(
       /href="\/projects\/(?:other-alpha|restored-archive)"/u
     );
-    expect(html).toContain("0 projects");
+    expect(html).not.toContain('aria-labelledby="other-title"');
   });
 
   it("renders a no-results message and clear-filters button when combined filters exclude all rows", async () => {

@@ -14,6 +14,16 @@ const responseFor = async (resource?: string) => {
 };
 
 describe("WebFinger response", () => {
+  it.each([
+    "acct:contact@mynameistito.com?x",
+    "acct:contact@mynameistito.com#fragment",
+    "acct:contact@mynameistito.com/path",
+    "acct:contact@mynameistito.com:443",
+  ])("rejects malformed account resources: %s", async (resource) => {
+    const response = await responseFor(resource);
+    expect(response.status).toBe(400);
+  });
+
   it("returns the JRD for a supported account URI", async () => {
     const response = await responseFor("acct:contact@mynameistito.com");
 

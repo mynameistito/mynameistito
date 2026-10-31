@@ -39,8 +39,8 @@ export const PackagesView = ({ packages, refreshedAt }: PackagesData) => {
             Published packages
           </h2>
           <span className="text-xs text-muted">
-            {packages.length} packages · {weeklyDownloads.toLocaleString()}{" "}
-            weekly downloads
+            {packages.length} packages ·{" "}
+            {weeklyDownloads.toLocaleString("en-US")} weekly downloads
           </span>
         </div>
         {lastUpdated !== null && (
@@ -81,7 +81,8 @@ export const PackagesView = ({ packages, refreshedAt }: PackagesData) => {
                   </div>
                   <div className="flex items-center gap-3 text-micro text-muted">
                     <span>
-                      {item.weeklyDownloads.toLocaleString()} weekly downloads
+                      {item.weeklyDownloads.toLocaleString("en-US")} weekly
+                      downloads
                     </span>
                     {item.repositoryUrl !== undefined && (
                       <a

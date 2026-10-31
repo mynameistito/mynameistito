@@ -8,7 +8,10 @@ import {
   summarizeModels,
   toHeatmapLevel,
 } from "@/features/ai-usage/analytics";
-import { decodeTokscaleResponse } from "@/integrations/tokscale/client";
+import {
+  decodeTokscaleResponse,
+  TokscaleProfileSchema,
+} from "@/integrations/tokscale/client";
 import type { DailyUsage } from "@/integrations/tokscale/client";
 
 const createDay = (
@@ -145,6 +148,20 @@ describe("Tokscale analytics", () => {
     );
 
     expect(decoded.stats.totalTokens).toBe(40);
+
+    await Promise.all(
+      ["invalid", "2026-13-01", "2026-02-30", "2026-1-02"].map(async (date) => {
+        await expect(
+          Effect.runPromise(
+            Schema.decodeUnknownEffect(TokscaleProfileSchema)({
+              ...decoded,
+              contributions: [createDay(date, "codex", "gpt-6-luna", 40, 0.2)],
+            })
+          )
+        ).rejects.toThrow(/date/u);
+      })
+    );
+
     expect(decoded.contributions[0]?.clients[0]?.client).toBe("codex");
     await expect(
       Effect.runPromise(

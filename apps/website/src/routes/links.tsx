@@ -22,7 +22,7 @@ const links = [
   {
     label: "Writing",
     detail: "Notes and longer-form writing",
-    href: "https://mynameistito.com/writing",
+    href: "/blog",
     mark: "W",
   },
   {
@@ -88,8 +88,8 @@ const LinksPage = () => (
           className="grid min-h-[58px] grid-cols-[38px_minmax(0,1fr)_auto] items-center gap-3 rounded-control border border-line bg-surface px-3 transition-colors hover:border-line-strong hover:bg-surface-hover active:scale-[0.99]"
           href={link.href}
           key={link.label}
-          rel="noreferrer"
-          target="_blank"
+          rel={link.href.startsWith("/") ? undefined : "noreferrer"}
+          target={link.href.startsWith("/") ? undefined : "_blank"}
         >
           <span
             aria-hidden="true"

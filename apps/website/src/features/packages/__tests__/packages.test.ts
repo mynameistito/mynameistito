@@ -237,6 +237,25 @@ describe("npm package snapshots", () => {
     expect(create).not.toHaveBeenCalled();
   });
 
+  it("retains the last good snapshot when npm returns no packages", async () => {
+    const previous = JSON.stringify({
+      refreshedAt: "2026-10-20T00:00:00Z",
+      packages: [npmPackage],
+    });
+
+    const { binding, values } = createKV(previous);
+
+    await expect(
+      runWithClock(
+        refreshPackages(createAppEnv({ OPEN_SOURCE_KV: binding })).pipe(
+          Effect.provide(createRegistryLayer([]))
+        )
+      )
+    ).rejects.toMatchObject({ _tag: "NpmRegistryError" });
+
+    expect(values.get(snapshotKey)).toBe(previous);
+  });
+
   it("publishes a complete snapshot after a successful registry fetch", async () => {
     const { binding, values } = createKV();
 

@@ -65,7 +65,7 @@ jobs:
           preview-artifact: alchemy-worker
           preview-entrypoint: server/server.js
           preview-assets-directory: client
-          preview-compatibility-date: "2026-10-07"
+          preview-compatibility-date: "2026-09-25"
           preview-compatibility-flags: '["nodejs_compat"]'
           use-adopt: false
 
@@ -100,6 +100,6 @@ jobs:
           destroy-command: bunx --no-install alchemy destroy --stage "$STAGE" --yes
           production-stage: prod
           production-url: https://mynameistito.com
-          preview-compatibility-date: "2026-10-07"
+          preview-compatibility-date: "2026-09-25"
           preview-compatibility-flags: '["nodejs_compat"]'
           reconcile: true

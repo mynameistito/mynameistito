@@ -15,16 +15,29 @@ const subscribeToSettings = (onChange: () => void) => {
   };
 };
 
-const getTheme = (): Theme =>
-  window.localStorage.getItem("theme") === "light" ? "light" : "dark";
+const readSetting = (key: string): string | null => {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
 
-const getSound = () => window.localStorage.getItem("sound") === "on";
+const getTheme = (): Theme =>
+  readSetting("theme") === "light" ? "light" : "dark";
+
+const getSound = () => readSetting("sound") === "on";
 const getServerTheme = (): Theme => "dark";
 const getServerSound = () => false;
 let audioContext: AudioContext | undefined;
 
 const updateSetting = (key: string, value: string) => {
-  window.localStorage.setItem(key, value);
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    return;
+  }
+
   window.dispatchEvent(new Event(settingsEvent));
 };
 
@@ -61,7 +74,10 @@ export const SiteControls = () => {
   );
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
+    // The hydration snapshot is dark; preserve the stored theme until it updates.
+    if (theme === getTheme()) {
+      document.documentElement.dataset.theme = theme;
+    }
   }, [theme]);
 
   useEffect(() => {
