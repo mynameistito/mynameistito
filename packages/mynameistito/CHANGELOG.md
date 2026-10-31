@@ -1,5 +1,11 @@
 # mynameistito
 
+## 0.3.6
+
+### Patch Changes
+
+- fdd5cf2: Switch declaration generation to tsrs
+
 ## 0.3.5
 
 ### Patch Changes
