@@ -29,7 +29,11 @@ const PrivacyPage = () => (
         are sent to my inbox through Resend.
       </p>
       <p className="m-0 text-base leading-6 text-muted">
-        For privacy questions, use the <Link to="/contact">contact page</Link>.
+        For privacy questions, use the{" "}
+        <Link className="text-text underline" to="/contact">
+          contact page
+        </Link>
+        .
       </p>
     </section>
   </main>

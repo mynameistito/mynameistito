@@ -5,11 +5,13 @@ import { blogPosts } from "@/features/blog/posts";
 const publicPaths = [
   "/",
   "/about",
+  "/ai",
   "/blog",
   "/contact",
   "/links",
   "/open-source",
   "/packages",
+  "/privacy",
   "/projects",
 ];
 
