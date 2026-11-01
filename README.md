@@ -24,13 +24,13 @@
 
 🔷 **[opencode-plugins](https://github.com/mynameistito/opencode-plugins)** ⭐4 — My Personal OpenCode v2 Plugins
 
+🔷 **[BankGlass](https://github.com/mynameistito/BankGlass)** ⭐2 — A self-hosted, read-only banking API and MCP server for securely connecting applications and AI agents to personal financial data. BankGlass runs entirely on Cloudflare Workers
+
 🔷 **[fxinstagram](https://github.com/mynameistito/fxinstagram)** ⭐2 — Effect and Alchemy service for fixing Instagram embeds in Discord
 
 🔷 **[volume-master](https://github.com/mynameistito/volume-master)** ⭐2 — Per-tab volume control with up to 600% boost. Cross-browser (Chrome + Firefox).
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
-
-🔷 **[BankGlass](https://github.com/mynameistito/BankGlass)** ⭐1 — A self-hosted, read-only banking API and MCP server for securely connecting applications and AI agents to personal financial data. BankGlass runs entirely on Cloudflare Workers
 <!-- AUTO-PROJECTS:END -->
 
 ---
