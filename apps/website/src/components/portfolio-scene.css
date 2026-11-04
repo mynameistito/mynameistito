@@ -1,0 +1,173 @@
+/* Adapted from stageshow's static-card: bottom bleed, quiet chrome and one satellite.
+   Fluid layout replaces fixed-size scaling so copy stays readable in phone columns. */
+.portfolio-scene {
+  margin: 28px 0 0;
+}
+
+.portfolio-scene-stage {
+  position: relative;
+  height: 258px;
+  overflow: hidden;
+  isolation: isolate;
+  border-bottom: 1px solid var(--line);
+}
+
+.portfolio-scene-window {
+  position: absolute;
+  inset: 12px 12% auto 0;
+  min-height: 310px;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 12%);
+}
+
+.portfolio-scene-chrome {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 38px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--subtle);
+  font: 11px var(--font-mono);
+}
+
+.portfolio-scene-lights {
+  display: flex;
+  flex: none;
+  gap: 6px;
+}
+
+.portfolio-scene-lights > span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.portfolio-scene-content {
+  padding: 22px 26px;
+}
+
+.portfolio-scene-eyebrow,
+.portfolio-scene-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.portfolio-scene-command {
+  display: flex;
+  gap: 12px;
+  margin: 15px 0 12px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.portfolio-scene-command > span {
+  color: var(--accent);
+}
+
+.portfolio-scene-command code {
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+}
+
+.portfolio-scene-content strong {
+  color: var(--text);
+  font: 600 23px/1.25 var(--font-display);
+  letter-spacing: -0.6px;
+}
+
+.portfolio-scene-content p {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.portfolio-scene-rule {
+  height: 1px;
+  margin-bottom: 14px;
+  background: var(--line);
+}
+
+.portfolio-scene-footer svg:first-child {
+  color: var(--accent);
+}
+
+.portfolio-scene-footer svg:last-child {
+  margin-left: auto;
+}
+
+.portfolio-scene-filler {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.portfolio-scene-filler span {
+  width: 55%;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--line);
+}
+
+.portfolio-scene-filler span:last-child {
+  width: 35%;
+}
+
+.portfolio-scene-note {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 230px;
+  padding: 13px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface-raised);
+  color: var(--text);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+  font-size: 12px;
+}
+
+.portfolio-scene-note svg {
+  flex: none;
+  color: var(--accent);
+}
+
+.portfolio-scene figcaption {
+  margin-top: 10px;
+  color: var(--subtle);
+  font-size: 12px;
+}
+
+@media (max-width: 600px) {
+  .portfolio-scene-stage {
+    height: 300px;
+  }
+  .portfolio-scene-window {
+    top: 0;
+    right: 0;
+  }
+  .portfolio-scene-content {
+    padding: 20px;
+  }
+  .portfolio-scene-content strong {
+    font-size: 21px;
+  }
+  .portfolio-scene-note {
+    top: 236px;
+    right: 16px;
+    max-width: calc(100% - 32px);
+  }
+  .portfolio-scene-chrome {
+    gap: 14px;
+  }
+}
