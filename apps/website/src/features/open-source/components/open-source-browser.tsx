@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { PortfolioScene } from "@/components/portfolio-scene";
 import type {
   ContributionRepository,
   PullRequestState,
@@ -216,6 +217,8 @@ export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
           Contributions to the tools and communities I use.
         </p>
       </section>
+
+      <PortfolioScene scene="contributions" />
 
       <section
         aria-labelledby="pull-requests-title"

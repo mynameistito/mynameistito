@@ -1,0 +1,47 @@
+.portfolio-scene {
+  margin-top: 24px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.portfolio-scene-chrome {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--subtle);
+  font: 11px var(--font-mono);
+}
+
+.portfolio-scene-content {
+  padding: 16px;
+}
+
+.portfolio-scene-command {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.portfolio-scene-command > span {
+  color: var(--accent);
+}
+
+.portfolio-scene-command code {
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+}
+
+.portfolio-scene-content strong {
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.portfolio-scene-content p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
