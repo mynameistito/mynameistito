@@ -1,5 +1,6 @@
 import { ExternalLink } from "lucide-react";
 
+import { PortfolioScene } from "@/components/portfolio-scene";
 import type { PackagesData } from "@/features/packages/packages";
 
 /**
@@ -29,6 +30,8 @@ export const PackagesView = ({ packages, refreshedAt }: PackagesData) => {
           Packages and tools I&apos;ve published to npm.
         </p>
       </section>
+
+      <PortfolioScene scene="packages" />
 
       <section aria-labelledby="packages-title" className="mt-section">
         <div className="mb-3 flex items-center justify-between gap-6">
