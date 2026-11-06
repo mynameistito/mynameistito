@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { PortfolioScene } from "@/components/portfolio-scene";
 import { profile } from "@/domain/profile";
 import { socialMeta } from "@/features/social/meta";
 
@@ -17,7 +16,6 @@ const AboutPage = () => (
         </p>
       ))}
     </section>
-    <PortfolioScene scene="profile" />
   </main>
 );
 

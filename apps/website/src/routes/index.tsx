@@ -1,7 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 
 import { ExperienceSection } from "@/components/experience-section";
-import { PortfolioScene } from "@/components/portfolio-scene";
 import { HomeProfile, SiteHeader } from "@/components/site-header";
 import { profile } from "@/domain/profile";
 import { ProjectList } from "@/features/projects/components/project-list";
@@ -47,8 +46,6 @@ const HomeContent = () => {
           .
         </p>
       </section>
-      <PortfolioScene scene="profile" />
-
       <ExperienceSection />
 
       <section

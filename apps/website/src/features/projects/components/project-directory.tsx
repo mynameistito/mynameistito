@@ -1,4 +1,3 @@
-import { PortfolioScene } from "@/components/portfolio-scene";
 import { ProjectList } from "@/features/projects/components/project-list";
 import { isProjectVisible } from "@/features/projects/project";
 import type { Project } from "@/features/projects/project";
@@ -55,8 +54,6 @@ export const ProjectDirectory = ({
           Things I&apos;ve built and shipped.
         </p>
       </section>
-
-      <PortfolioScene scene="projects" />
 
       <div className="mt-section grid items-end gap-3 sm:grid-cols-2">
         <label
