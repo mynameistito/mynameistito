@@ -6,8 +6,6 @@ import {
   Terminal,
 } from "lucide-react";
 
-import { SceneWindow } from "./scene-window";
-
 type Scene = "profile" | "projects" | "packages" | "contributions";
 
 const stories = {
@@ -61,9 +59,17 @@ export const PortfolioScene = ({ scene }: { readonly scene: Scene }) => {
   const { Icon } = story;
 
   return (
-    <figure className="portfolio-scene" aria-label={story.label}>
+    <figure className="portfolio-scene">
       <div className="portfolio-scene-stage" aria-hidden="true">
-        <SceneWindow title={story.title}>
+        <div className="portfolio-scene-window">
+          <div className="portfolio-scene-chrome">
+            <span className="portfolio-scene-lights">
+              <span />
+              <span />
+              <span />
+            </span>
+            <span>{story.title}</span>
+          </div>
           <div className="portfolio-scene-content">
             <div className="portfolio-scene-eyebrow">
               <Icon size={14} />
@@ -90,7 +96,7 @@ export const PortfolioScene = ({ scene }: { readonly scene: Scene }) => {
               <span />
             </div>
           </div>
-        </SceneWindow>
+        </div>
         <div className="portfolio-scene-note">
           <Icon size={16} />
           <span>{story.note}</span>
