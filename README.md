@@ -24,11 +24,11 @@
 
 🔷 **[opencode-plugins](https://github.com/mynameistito/opencode-plugins)** ⭐4 — My Personal OpenCode v2 Plugins
 
+🔷 **[fxinstagram](https://github.com/mynameistito/fxinstagram)** ⭐3 — Effect and Alchemy service for fixing Instagram embeds in Discord
+
 🔷 **[BankGlass](https://github.com/mynameistito/BankGlass)** ⭐2 — A self-hosted, read-only banking API and MCP server for securely connecting applications and AI agents to personal financial data. BankGlass runs entirely on Cloudflare Workers
 
-🔷 **[fxinstagram](https://github.com/mynameistito/fxinstagram)** ⭐2 — Effect and Alchemy service for fixing Instagram embeds in Discord
-
-🔷 **[volume-master](https://github.com/mynameistito/volume-master)** ⭐2 — Per-tab volume control with up to 600% boost. Cross-browser (Chrome + Firefox).
+🔷 **[hamilton-bin-day](https://github.com/mynameistito/hamilton-bin-day)** ⭐2 — TypeScript client for Hamilton City Council Fight the Landfill bin-day lookup API.
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
 <!-- AUTO-PROJECTS:END -->
