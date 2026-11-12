@@ -1,7 +1,7 @@
 {
   "name": "mynameistito",
   "version": "0.3.6",
-  "description": "A tiny terminal profile card for Tito.",
+  "description": "Tito's live portfolio website in your terminal, built with OpenTUI.",
   "keywords": [
     "github",
     "npm",
@@ -38,9 +38,12 @@
     "fix": "ultracite fix",
     "check": "ultracite check",
     "typecheck": "tsrs --noEmit",
+    "test:terminal": "bun __tests__/terminal.check.ts",
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
+    "@opentui/core": "^0.8.4",
+    "cheerio": "^1.2.0",
     "effect": "catalog:"
   },
   "devDependencies": {
