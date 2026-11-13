@@ -36,7 +36,9 @@ const routes = [
 
 const dark = {
   accent: "#7196c8",
+  code: "#181b1d",
   line: "#303438",
+  match: "#1b2026",
   muted: "#a1a4a6",
   page: "#101112",
   text: "#f1f2f2",
@@ -44,7 +46,9 @@ const dark = {
 
 const light = {
   accent: "#3f6798",
+  code: "#eceff1",
   line: "#e0e3e4",
+  match: "#dce7f3",
   muted: "#5f6568",
   page: "#f7f8f8",
   text: "#17191a",
@@ -242,12 +246,17 @@ export const startTerminal = async (
   let currentUrl = `${siteOrigin}/`;
   const history = [{ scroll: 0, url: currentUrl }];
   let historyIndex = 0;
+
+  let displayedEntry: { scroll: number; url: string } | undefined =
+    history.at(0);
+
   let selectedLink = -1;
 
   let linkTargets: { url: string; browser?: boolean; row: TextRenderable }[] =
     [];
 
   let rows: { block: WebsiteBlock; row: TextRenderable }[] = [];
+  let dockRows: { label: string; row: TextRenderable; url: string }[] = [];
   let reflowPage: (() => void) | undefined;
   let displayedBlocks: readonly WebsiteBlock[] = [];
   let displayedLayout: WebsiteLayout | undefined;
@@ -267,7 +276,7 @@ export const startTerminal = async (
       const match =
         query !== "" && row.plainText.toLocaleLowerCase().includes(query);
 
-      row.bg = match ? "#1b2026" : colors.page;
+      row.bg = match ? colors.match : colors.page;
 
       if (match) {
         matches.push(row);
@@ -387,6 +396,13 @@ export const startTerminal = async (
         })
       );
     }
+
+    for (const { label, row } of dockRows) {
+      row.content =
+        selected?.row === row
+          ? new StyledText([underline(bold(fg(colors.text)(label)))])
+          : label;
+    }
   };
 
   const display = (blocks: readonly WebsiteBlock[], layout?: WebsiteLayout) => {
@@ -405,7 +421,7 @@ export const startTerminal = async (
       const heading = block.kind === "heading" || block.kind === "subheading";
 
       const row = new TextRenderable(renderer, {
-        bg: block.kind === "code" ? "#181b1d" : colors.page,
+        bg: block.kind === "code" ? colors.code : colors.page,
         marginBottom: block.compact === true ? 0 : 1,
         marginTop: heading && block.compact !== true ? 1 : 0,
         onMouseUp: (event) => {
@@ -449,6 +465,8 @@ export const startTerminal = async (
         }
       }
     }
+
+    linkTargets.push(...dockRows.map(({ row, url }) => ({ row, url })));
 
     reflowPage =
       layout === undefined
@@ -514,6 +532,15 @@ export const startTerminal = async (
     scroll.scrollTo(position);
   };
 
+  const clearDock = () => {
+    for (const child of dock.getChildren()) {
+      child.destroyRecursively();
+    }
+
+    dockRows = [];
+    dock.visible = false;
+  };
+
   const navigate = async (url: string, refresh = false) => {
     requestController.abort();
     requestController = new AbortController();
@@ -560,6 +587,9 @@ export const startTerminal = async (
       return;
     }
 
+    displayedEntry = history.at(historyIndex);
+    clearDock();
+
     if (result._tag === "Failure") {
       display([
         { kind: "heading", spans: [{ text: profile.name }] },
@@ -575,27 +605,26 @@ export const startTerminal = async (
       ]);
     } else {
       pageCache.set(url, result.success);
-      display(result.success.blocks, result.success.layout);
-
-      for (const child of dock.getChildren()) {
-        child.destroyRecursively();
-      }
 
       for (const item of result.success.dock) {
-        dock.add(
-          new TextRenderable(renderer, {
-            content: item.label === "Tokscale" ? "AI" : item.label,
-            fg: colors.muted,
-            height: 1,
-            onMouseUp: () => {
-              // oxlint-disable-next-line no-use-before-define -- Callbacks run after initialization.
-              follow(item.url);
-            },
-          })
-        );
+        const label = item.label === "Tokscale" ? "AI" : item.label;
+
+        const row = new TextRenderable(renderer, {
+          content: item.label === "Tokscale" ? "AI" : item.label,
+          fg: colors.muted,
+          height: 1,
+          onMouseUp: () => {
+            // oxlint-disable-next-line no-use-before-define -- Callbacks run after initialization.
+            follow(item.url);
+          },
+        });
+
+        dock.add(row);
+        dockRows.push({ label, row, url: item.url });
       }
 
       dock.visible = result.success.dock.length > 0;
+      display(result.success.blocks, result.success.layout);
     }
 
     status.content = "Tab links · / find · m pages · t theme · ? help · q quit";
@@ -611,7 +640,7 @@ export const startTerminal = async (
 
     if (url !== currentUrl) {
       history.splice(historyIndex + 1);
-      const previous = history.at(historyIndex);
+      const previous = displayedEntry;
 
       if (previous !== undefined) {
         previous.scroll = scroll.scrollTop;
@@ -637,7 +666,7 @@ export const startTerminal = async (
     const entry = history.at(next);
 
     if (next >= 0 && next < history.length && entry !== undefined) {
-      const previous = history.at(historyIndex);
+      const previous = displayedEntry;
 
       if (previous !== undefined) {
         previous.scroll = scroll.scrollTop;
@@ -672,7 +701,10 @@ export const startTerminal = async (
     updateRows();
 
     if (target !== undefined) {
-      scroll.scrollChildIntoView(target.row, { inset: 1 });
+      if (!dockRows.some(({ row }) => row === target.row)) {
+        scroll.scrollChildIntoView(target.row, { inset: 1 });
+      }
+
       status.content = `${target.url}    Enter to open`;
     }
 

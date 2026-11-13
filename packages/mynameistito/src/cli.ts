@@ -39,7 +39,7 @@ if (process.argv.includes("--help")) {
 } else {
   const launch = interactive
     ? // oxlint-disable-next-line sonarjs/no-os-command-from-path -- Resolve the user's installed Bun runtime in the same way as the documented bunx command.
-      spawnSync("bun", [import.meta.filename, ...process.argv.slice(2)], {
+      spawnSync("bun", [process.argv[1], ...process.argv.slice(2)], {
         stdio: "inherit",
         windowsHide: true,
       })

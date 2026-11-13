@@ -154,11 +154,11 @@ export const parseWebsitePage = (
       const first = spans.at(0);
       const last = spans.at(-1);
 
-      if (first !== undefined) {
+      if (kind !== "code" && first !== undefined) {
         first.text = first.text.trimStart();
       }
 
-      if (last !== undefined) {
+      if (kind !== "code" && last !== undefined) {
         last.text = last.text.trimEnd();
       }
 
@@ -417,7 +417,7 @@ export const fetchWebsitePage = Effect.fn("Portfolio.fetchPage")(
           return null;
         }
 
-        return parseWebsitePage(await response.text(), url);
+        return parseWebsitePage(await response.text(), response.url);
       },
     }).pipe(
       Effect.flatMap((page) =>
