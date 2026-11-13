@@ -38,7 +38,7 @@
     "fix": "ultracite fix",
     "check": "ultracite check",
     "typecheck": "tsrs --noEmit",
-    "test:terminal": "bun __tests__/terminal.check.ts",
+    "test:terminal": "bun test ./__tests__/terminal.check.ts",
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
