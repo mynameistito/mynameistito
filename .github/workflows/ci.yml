@@ -71,6 +71,10 @@ jobs:
       - name: Run task
         run: bun run ${{ matrix.task }}
 
+      - name: Run native terminal interaction checks with coverage
+        if: matrix.task == 'test'
+        run: bun test --coverage --coverage-reporter=lcov --coverage-dir=coverage/terminal ./packages/mynameistito/__tests__/terminal.check.ts
+
       - name: Upload Alchemy Worker preview bundle
         if: matrix.task == 'build'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -96,6 +100,6 @@ jobs:
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           disable_search: true
-          files: coverage/lcov.info
+          files: coverage/lcov.info,coverage/terminal/lcov.info
           flags: mynameistito
           token: ${{ secrets.CODECOV_TOKEN }}
