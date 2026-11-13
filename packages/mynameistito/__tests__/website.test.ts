@@ -3,6 +3,17 @@ import { describe, expect, it } from "vitest";
 import { parseWebsitePage } from "../src/website.js";
 
 describe("terminal website translation", () => {
+  it("preserves indentation at both code block boundaries", () => {
+    const page = parseWebsitePage(
+      "<main><pre>  first\n    last  </pre></main>",
+      "https://mynameistito.com/"
+    );
+
+    expect(page?.blocks[0]?.spans.map((span) => span.text).join("")).toBe(
+      "  first\n    last  "
+    );
+  });
+
   it("preserves heading hierarchy, emphasis, and inline link punctuation", () => {
     const page = parseWebsitePage(
       '<main><h1>Tito</h1><p>I build <strong>tools</strong>. Read the <a href="/blog">blog</a>.</p><h2>Experience</h2><p>New Zealand</p></main>',

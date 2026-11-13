@@ -101,6 +101,16 @@ try {
     )
   );
   assert.match(terminal.captureCharFrame(), /GitHub\s+Links/u);
+  terminal.mockInput.pressTab({ shift: true });
+  await terminal.flush();
+  assert.match(
+    terminal.captureCharFrame(),
+    /https:\/\/mynameistito.com\/links/u
+  );
+  terminal.mockInput.pressTab({ shift: true });
+  terminal.mockInput.pressEnter();
+  await terminal.flush();
+  assert.equal(opened.at(-1), "https://github.com/mynameistito");
   terminal.mockInput.pressKey("t");
   await terminal.flush();
   assert.match(terminal.captureCharFrame(), /☾/u);
