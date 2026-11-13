@@ -358,7 +358,10 @@ export const startTerminal = async (
 
   const updateRows = () => {
     const palette = colors;
-    const selected = linkTargets.at(selectedLink);
+
+    const selected =
+      selectedLink < 0 ? undefined : linkTargets.at(selectedLink);
+
     const selection = selectedLink;
 
     for (const { block, row } of rows) {
