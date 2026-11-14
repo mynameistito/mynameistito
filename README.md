@@ -26,9 +26,9 @@
 
 🔷 **[fxinstagram](https://github.com/mynameistito/fxinstagram)** ⭐3 — Effect and Alchemy service for fixing Instagram embeds in Discord
 
-🔷 **[BankGlass](https://github.com/mynameistito/BankGlass)** ⭐2 — A self-hosted, read-only banking API and MCP server for securely connecting applications and AI agents to personal financial data. BankGlass runs entirely on Cloudflare Workers
+🔷 **[x-lookup](https://github.com/mynameistito/x-lookup)** ⭐2 — Read-only, no-auth Cloudflare Worker that turns public X/Twitter statuses, threads, profiles, search, and social graphs into compact Markdown or JSON for AI agents
 
-🔷 **[hamilton-bin-day](https://github.com/mynameistito/hamilton-bin-day)** ⭐2 — TypeScript client for Hamilton City Council Fight the Landfill bin-day lookup API.
+🔷 **[BankGlass](https://github.com/mynameistito/BankGlass)** ⭐2 — A self-hosted, read-only banking API and MCP server for securely connecting applications and AI agents to personal financial data. BankGlass runs entirely on Cloudflare Workers
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
 <!-- AUTO-PROJECTS:END -->
