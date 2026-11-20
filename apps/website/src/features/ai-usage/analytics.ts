@@ -1,5 +1,50 @@
 import type { DailyUsage } from "@/integrations/tokscale/client";
 
+const millisecondsPerDay = 86_400_000;
+const recentPeriods = [7, 30, 90] as const;
+
+/**
+ * Summarizes rolling calendar-day windows through the snapshot's UTC date.
+ * @param contributions - Daily usage records from Tokscale.
+ * @param refreshedAt - The time when the snapshot was refreshed.
+ * @returns Totals and daily averages, or an empty list for an invalid timestamp.
+ */
+export const summarizeRecentUsage = (
+  contributions: readonly DailyUsage[],
+  refreshedAt: Date
+) => {
+  if (!Number.isFinite(refreshedAt.getTime())) {
+    return [];
+  }
+
+  const endDate = refreshedAt.toISOString().slice(0, 10);
+  const end = Date.parse(endDate);
+
+  return recentPeriods.map((days) => {
+    const startDate = new Date(end - (days - 1) * millisecondsPerDay)
+      .toISOString()
+      .slice(0, 10);
+
+    let tokens = 0;
+    let cost = 0;
+
+    for (const day of contributions) {
+      if (day.date >= startDate && day.date <= endDate) {
+        tokens += day.totals.tokens;
+        cost += day.totals.cost;
+      }
+    }
+
+    return {
+      days,
+      tokens,
+      cost,
+      dailyTokens: tokens / days,
+      dailyCost: cost / days,
+    };
+  });
+};
+
 /** One daily contribution as shown in the year-view heatmap. */
 export interface CalendarDay {
   readonly date: string;

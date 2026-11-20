@@ -26,6 +26,7 @@ import {
   latestUsageDay,
   summarizeHarnesses,
   summarizeModels,
+  summarizeRecentUsage,
 } from "@/features/ai-usage/analytics";
 import type { CalendarDay, CalendarWeek } from "@/features/ai-usage/analytics";
 import type { TokscaleSnapshot } from "@/features/ai-usage/snapshot";
@@ -87,6 +88,69 @@ const monthLabels = (weeks: readonly CalendarWeek[]) => {
   }
 
   return labels;
+};
+
+const RecentUsage = ({
+  contributions,
+  refreshedAt,
+}: {
+  readonly contributions: NonNullable<TokscaleSnapshot>["data"]["contributions"];
+  readonly refreshedAt: Date;
+}) => {
+  const periods = summarizeRecentUsage(contributions, refreshedAt);
+
+  if (periods.length === 0) {
+    return null;
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Recent usage</CardTitle>
+        <CardDescription>
+          Through {refreshedDateFormat.format(refreshedAt)} (UTC). Daily
+          averages include days with no recorded usage. Spend is estimated in
+          USD.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="overflow-x-auto">
+        <table aria-label="Recent AI usage" className="w-full text-sm">
+          <thead className="text-muted">
+            <tr>
+              <th className="text-left font-medium" scope="col">
+                Period
+              </th>
+              <th className="px-2 text-right font-medium" scope="col">
+                Tokens
+              </th>
+              <th className="px-2 text-right font-medium" scope="col">
+                Tokens/day
+              </th>
+              <th className="px-2 text-right font-medium" scope="col">
+                Spend
+              </th>
+              <th className="text-right font-medium" scope="col">
+                Spend/day
+              </th>
+            </tr>
+          </thead>
+          <tbody className="text-right tabular-nums">
+            {periods.map(({ days, tokens, cost, dailyTokens, dailyCost }) => (
+              <tr key={days}>
+                <th className="py-2 text-left font-medium" scope="row">
+                  Last {days} days
+                </th>
+                <td className="px-2">{compactTokens(tokens)}</td>
+                <td className="px-2">{compactTokens(dailyTokens)}</td>
+                <td className="px-2">{currencyFormat.format(cost)}</td>
+                <td>{currencyFormat.format(dailyCost)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </CardContent>
+    </Card>
+  );
 };
 
 const ActivityCalendar = ({
@@ -348,6 +412,10 @@ export const AiUsageDashboard = ({
       </section>
 
       <div className="grid gap-6">
+        <RecentUsage
+          contributions={data.contributions}
+          refreshedAt={latestUpdate}
+        />
         <ActivityCalendar contributions={data.contributions} />
         <section
           aria-label="Most-used harnesses and models"
@@ -381,9 +449,11 @@ export const AiUsageDashboard = ({
             ? `Most recent usage: ${formatDate(latestDay.date)}`
             : "No daily usage recorded"}
         </span>
-        <span>
-          Snapshot refreshed {refreshedDateFormat.format(latestUpdate)}
-        </span>
+        {Number.isFinite(latestUpdate.getTime()) && (
+          <span>
+            Snapshot refreshed {refreshedDateFormat.format(latestUpdate)}
+          </span>
+        )}
       </footer>
     </main>
   );
