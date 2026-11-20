@@ -56,7 +56,22 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           worker-name: mynameistito
-          deploy-command: bun run --cwd apps/website build && bunx --no-install alchemy deploy --stage "$STAGE" --yes
+          deploy-command: |
+            set -o pipefail
+            bun run --cwd apps/website build || exit $?
+            deploy_log="$(mktemp)"
+            trap 'rm -f "$deploy_log"' EXIT
+            if bunx --no-install alchemy deploy --stage "$STAGE" --yes 2>&1 | tee "$deploy_log"; then
+              exit 0
+            else
+              deploy_status="${PIPESTATUS[0]}"
+            fi
+            if [[ "$deploy_status" == 0 || "$STAGE" != prod ]] ||
+              ! grep -Fq 'Planning failed' "$deploy_log" ||
+              ! grep -Fq 'State store failed to getState (RpcCallError)' "$deploy_log"; then
+              exit "${deploy_status/#0/1}"
+            fi
+            bun scripts/cicd/deploy-website-code.ts
           destroy-command: bunx --no-install alchemy destroy --stage "$STAGE" --yes
           production-stage: prod
           production-url: https://mynameistito.com
