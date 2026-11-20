@@ -51,6 +51,7 @@ jobs:
       - name: Run Alchemy deployment
         uses: mynameistito/alchemy-deploy@b5565a63329935468f3f465c32998a4cb4668975 # v4.0.2
         env:
+          ALCHEMY_V8_DEPLOY_RECOVERY: ${{ vars.ALCHEMY_V8_DEPLOY_RECOVERY }}
           CLOUDFLARE_ACCOUNT_ID: ${{ steps.onepassword.outputs.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ steps.onepassword.outputs.CLOUDFLARE_API_TOKEN }}
           GITHUB_TOKEN: ${{ github.token }}
@@ -66,7 +67,7 @@ jobs:
             else
               deploy_status="${PIPESTATUS[0]}"
             fi
-            if [[ "$deploy_status" == 0 || "$STAGE" != prod ]] ||
+            if [[ "$deploy_status" == 0 || "$STAGE" != prod || "$ALCHEMY_V8_DEPLOY_RECOVERY" != true ]] ||
               ! grep -Fq 'Planning failed' "$deploy_log" ||
               ! grep -Fq 'State store failed to getState (RpcCallError)' "$deploy_log"; then
               exit "${deploy_status/#0/1}"

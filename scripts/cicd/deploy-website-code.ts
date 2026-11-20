@@ -18,6 +18,7 @@ import {
 } from "@distilled.cloud/cloudflare/workers";
 import type {
   GetScriptSettingResponse,
+  GetScriptVersionResponse,
   PutScriptMetadataObservability,
 } from "@distilled.cloud/cloudflare/workers";
 import { BunServices } from "@effect/platform-bun";
@@ -43,6 +44,7 @@ const VersionSource = Schema.Struct({
   result: Schema.Struct({
     annotations: Schema.Struct({
       "workers/commit_sha": Schema.optional(Schema.String),
+      "workers/message": Schema.optional(Schema.String),
       "workers/tag": Schema.optional(Schema.String),
     }),
   }),
@@ -147,7 +149,7 @@ const activeVersion = Effect.gen(function* readActiveVersion() {
   return current.versionId;
 });
 
-const verifySource = async (versionId: string, head: string) => {
+const readVersionSource = async (versionId: string) => {
   const endpoint = `https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/scripts/${scriptName}/versions/${versionId}`;
 
   const response = await fetch(endpoint, {
@@ -165,9 +167,14 @@ const verifySource = async (versionId: string, head: string) => {
     await response.json()
   );
 
+  return result.annotations;
+};
+
+const verifySource = async (versionId: string, head: string) => {
+  const annotations = await readVersionSource(versionId);
+
   const previous =
-    result.annotations["workers/commit_sha"] ??
-    result.annotations["workers/tag"];
+    annotations["workers/commit_sha"] ?? annotations["workers/tag"];
 
   if (previous === undefined || !/^[a-f\d]{40}$/u.test(previous)) {
     throw new Error("The active version has no verified source commit.");
@@ -186,31 +193,15 @@ const verifySource = async (versionId: string, head: string) => {
   }
 };
 
-await Effect.runPromise(
-  Effect.gen(function* deployWebsiteCode() {
-    const priorId = yield* activeVersion;
-    const { items } = yield* listScriptVersions(target);
+const recoveryMessage = (priorId: string) =>
+  `Alchemy v8 website recovery from ${priorId}`;
 
-    // Strict inheritance resolves against the latest upload.
-    if (items?.[0]?.id !== priorId) {
-      return yield* Effect.fail(
-        new Error(
-          "The latest Worker upload is not the active production version."
-        )
-      );
-    }
-
-    const head = git("rev-parse", "HEAD");
-
-    yield* Effect.tryPromise(async () => {
-      await verifySource(priorId, head);
-    });
-
-    const { resources: prior } = yield* getScriptVersion({
-      ...target,
-      versionId: priorId,
-    });
-
+const stageVersion = Effect.fn("stageWebsiteVersion")(
+  function* stageWebsiteVersion(
+    priorId: string,
+    prior: GetScriptVersionResponse["resources"],
+    head: string
+  ) {
     const settings = yield* getScriptSetting(target);
     const { scriptRuntime: runtime } = prior;
     const bindings = parseBindings(prior.bindings);
@@ -263,8 +254,7 @@ await Effect.runPromise(
       files: bundle.files.map(toModule),
       metadata: {
         annotations: {
-          workersMessage:
-            "Website code deploy after an Alchemy state read failure",
+          workersMessage: recoveryMessage(priorId),
           workersTag: head,
         },
         assets: { config: assets.config, jwt },
@@ -291,9 +281,64 @@ await Effect.runPromise(
       );
     }
 
+    return uploaded.id;
+  }
+);
+
+await Effect.runPromise(
+  Effect.gen(function* deployWebsiteCode() {
+    const priorId = yield* activeVersion;
+    const { items } = yield* listScriptVersions(target);
+
+    const head = git("rev-parse", "HEAD");
+
+    yield* Effect.tryPromise(async () => {
+      await verifySource(priorId, head);
+    });
+
+    const { resources: prior } = yield* getScriptVersion({
+      ...target,
+      versionId: priorId,
+    });
+
+    const latest = items?.[0]?.id;
+
+    if (latest === undefined || latest === null || latest === "") {
+      return yield* Effect.fail(
+        new Error("Cloudflare returned no latest Worker version.")
+      );
+    }
+
+    // Strict inheritance resolves against the latest upload. Resume our own
+    // candidate if a previous run stopped after upload, then verify it again.
+    let candidateId = latest;
+
+    if (latest === priorId) {
+      candidateId = yield* stageVersion(priorId, prior, head);
+    } else {
+      const annotations = yield* Effect.tryPromise(
+        async () => await readVersionSource(latest)
+      );
+
+      if (
+        annotations["workers/tag"] !== head ||
+        annotations["workers/message"] !== recoveryMessage(priorId)
+      ) {
+        return yield* Effect.fail(
+          new Error(
+            "The latest Worker upload cannot be resumed for this deployment."
+          )
+        );
+      }
+    }
+
+    const bindings = parseBindings(prior.bindings);
+    const { scriptRuntime: runtime } = prior;
+    const compatibility = Schema.decodeUnknownSync(Runtime)(runtime);
+
     const { resources: candidate } = yield* getScriptVersion({
       ...target,
-      versionId: uploaded.id,
+      versionId: candidateId,
     }).pipe(Effect.retry({ schedule: Schedule.spaced("1 second"), times: 4 }));
 
     assert.deepEqual(
@@ -323,14 +368,14 @@ await Effect.runPromise(
     yield* createScriptDeployment({
       ...target,
       strategy: "percentage",
-      versions: [{ percentage: 100, versionId: uploaded.id }],
+      versions: [{ percentage: 100, versionId: candidateId }],
     });
 
     console.log(
-      `Deployed Worker version ${uploaded.id} from ${head} after the Alchemy state read failure.`
+      `Deployed Worker version ${candidateId} from ${head} after the Alchemy state read failure.`
     );
 
-    return uploaded.id;
+    return candidateId;
   }).pipe(
     Effect.provide(fromApiToken({ accountId, apiToken })),
     Effect.provide(httpLayer),
