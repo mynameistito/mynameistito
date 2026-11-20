@@ -1,4 +1,6 @@
 import { Effect, Schema } from "effect";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -9,11 +11,15 @@ import {
   summarizeRecentUsage,
   toHeatmapLevel,
 } from "@/features/ai-usage/analytics";
+import { AiUsageDashboard } from "@/features/ai-usage/components/dashboard";
 import {
   decodeTokscaleResponse,
   TokscaleProfileSchema,
 } from "@/integrations/tokscale/client";
-import type { DailyUsage } from "@/integrations/tokscale/client";
+import type {
+  DailyUsage,
+  TokscaleProfile,
+} from "@/integrations/tokscale/client";
 
 const createDay = (
   date: string,
@@ -60,6 +66,65 @@ const createDay = (
       messages: 1,
     },
   ],
+});
+
+const dashboardProfile: TokscaleProfile = {
+  stats: {
+    totalTokens: 9000,
+    totalCost: 180,
+    inputTokens: 9000,
+    outputTokens: 0,
+    cacheReadTokens: 0,
+    cacheWriteTokens: 0,
+    reasoningTokens: 0,
+    submissionCount: 3,
+    activeDays: 3,
+    sessionCount: 3,
+  },
+  updatedAt: "2026-11-21T20:00:00Z",
+  modelUsage: [],
+  contributions: [
+    createDay("2026-11-21", "codex", "gpt-6-luna", 700, 14),
+    createDay("2026-10-23", "codex", "gpt-6-luna", 2300, 46),
+    createDay("2026-08-24", "codex", "gpt-6-luna", 6000, 120),
+  ],
+};
+
+describe("AI usage dashboard", () => {
+  it("renders totals and per-day averages together for each recent window", () => {
+    const markup = renderToStaticMarkup(
+      createElement(AiUsageDashboard, {
+        snapshot: {
+          data: dashboardProfile,
+          refreshedAt: "2026-11-22T09:00:00+13:00",
+        },
+      })
+    );
+
+    const table = markup.split("<table ", 2)[1]?.split("</table>", 1)[0];
+
+    expect(table).toBeDefined();
+    expect(
+      table?.replaceAll(/<[^<>]+>/gu, " ").replaceAll(/\s+/gu, " ")
+    ).toContain(
+      "Last 7 days 700 100 $14.00 $2.00 Last 30 days 3K 100 $60.00 $2.00 Last 90 days 9K 100 $180.00 $2.00"
+    );
+    expect(markup).toContain("Through 21 Nov 2026 (UTC)");
+    expect(markup).toContain("Snapshot refreshed 21 Nov 2026");
+  });
+
+  it("keeps recorded usage visible when the snapshot date is invalid", () => {
+    const markup = renderToStaticMarkup(
+      createElement(AiUsageDashboard, {
+        snapshot: { data: dashboardProfile, refreshedAt: "invalid" },
+      })
+    );
+
+    expect(markup).toContain("Daily token usage");
+    expect(markup).toContain("Most recent usage");
+    expect(markup).not.toContain("Recent usage");
+    expect(markup).not.toContain("Snapshot refreshed");
+  });
 });
 
 describe("Tokscale analytics", () => {
