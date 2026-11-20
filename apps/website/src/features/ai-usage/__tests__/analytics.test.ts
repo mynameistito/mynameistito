@@ -6,6 +6,7 @@ import {
   latestUsageDay,
   summarizeHarnesses,
   summarizeModels,
+  summarizeRecentUsage,
   toHeatmapLevel,
 } from "@/features/ai-usage/analytics";
 import {
@@ -62,6 +63,27 @@ const createDay = (
 });
 
 describe("Tokscale analytics", () => {
+  it("averages over calendar days through the snapshot's UTC date", () => {
+    const contributions = [
+      createDay("2026-11-22", "codex", "gpt-6-luna", 1000, 100),
+      createDay("2026-11-21", "codex", "gpt-6-luna", 35, 7),
+      createDay("2026-11-15", "codex", "gpt-6-luna", 35, 7),
+      createDay("2026-11-14", "codex", "gpt-6-luna", 80, 16),
+      createDay("2026-10-23", "codex", "gpt-6-luna", 150, 30),
+      createDay("2026-10-22", "codex", "gpt-6-luna", 300, 60),
+      createDay("2026-08-24", "codex", "gpt-6-luna", 300, 60),
+      createDay("2026-08-23", "codex", "gpt-6-luna", 1000, 100),
+    ];
+
+    expect(
+      summarizeRecentUsage(contributions, new Date("2026-11-22T09:00:00+13:00"))
+    ).toStrictEqual([
+      { days: 7, tokens: 70, cost: 14, dailyTokens: 10, dailyCost: 2 },
+      { days: 30, tokens: 300, cost: 60, dailyTokens: 10, dailyCost: 2 },
+      { days: 90, tokens: 900, cost: 180, dailyTokens: 10, dailyCost: 2 },
+    ]);
+  });
+
   it("builds a year calendar with Sunday-first weeks and empty-day gaps", () => {
     const calendar = buildCalendar([
       createDay("2026-10-13", "opencode", "gpt-6-luna", 20, 0.1, 2),
