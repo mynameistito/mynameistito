@@ -50,11 +50,8 @@ const totalMonthlyNzd = subscriptions.reduce(
   0
 );
 
-const subscriptionPriceFormat = new Intl.NumberFormat("en-NZ", {
-  currency: "NZD",
-  style: "currency",
-  trailingZeroDisplay: "stripIfInteger",
-});
+// Reserve Bank of New Zealand reference rate for 20 November 2026.
+const usdPerNzd = 0.54885;
 
 const compactNumberFormat = new Intl.NumberFormat("en-US", {
   notation: "compact",
@@ -321,7 +318,8 @@ const CurrentSubscriptions = () => (
     <CardHeader>
       <CardTitle>Current subscriptions</CardTitle>
       <CardDescription>
-        {subscriptionPriceFormat.format(totalMonthlyNzd)} NZD per month total
+        Approx. {currencyFormat.format(totalMonthlyNzd * usdPerNzd)} USD per
+        month total (converted at the 20 November 2026 rate)
       </CardDescription>
     </CardHeader>
     <CardContent>
@@ -330,7 +328,7 @@ const CurrentSubscriptions = () => (
           <li className="grid gap-1" key={name}>
             <span className="text-sm font-medium text-text">{name}</span>
             <span className="text-sm text-muted">
-              {plan} · {subscriptionPriceFormat.format(monthlyNzd)}/month
+              {plan} · {currencyFormat.format(monthlyNzd * usdPerNzd)} USD/month
             </span>
           </li>
         ))}
@@ -350,6 +348,7 @@ export const AiUsageDashboard = ({
   if (!snapshot) {
     return (
       <main className="page-shell grid gap-6 pt-page-top-header pb-page-bottom">
+        <CurrentSubscriptions />
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -362,7 +361,6 @@ export const AiUsageDashboard = ({
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
-        <CurrentSubscriptions />
       </main>
     );
   }
@@ -398,6 +396,10 @@ export const AiUsageDashboard = ({
           Tokscale profile <ArrowUpRight aria-hidden="true" size={14} />
         </a>
       </header>
+
+      <div className="mb-6">
+        <CurrentSubscriptions />
+      </div>
 
       <section
         aria-label="Lifetime usage summary"
@@ -483,7 +485,6 @@ export const AiUsageDashboard = ({
             title="Favorite models"
           />
         </section>
-        <CurrentSubscriptions />
       </div>
       <footer className="mt-6 flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
         <span>
