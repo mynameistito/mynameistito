@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "./components/portfolio-scene.css";
 @import "@fontsource-variable/syne";
 @import "@fontsource-variable/source-sans-3";
 
@@ -32,7 +31,6 @@
   --color-pr-closed: #ff6174;
   --font-sans: "Source Sans 3 Variable", system-ui, sans-serif;
   --font-display: "Syne Variable", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   --text-page-title: 32px;
   --text-meta: 14px;
   --text-small: 12px;
