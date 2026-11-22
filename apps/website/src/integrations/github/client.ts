@@ -1,5 +1,6 @@
 import { GithubProtocol, credentials, repos } from "@distilled.cloud/github";
 import type { GithubOpContext } from "@distilled.cloud/github";
+import { Unauthorized } from "@distilled.cloud/github/Errors";
 import { Context, Effect, Layer, Redacted, Schema } from "effect";
 import {
   FetchHttpClient,
@@ -44,13 +45,14 @@ const getSearchRateLimitKey = async (
 };
 
 const runGitHubSdk = <A, E>(
+  httpClient: HttpClient.HttpClient,
   token: string,
   operation: Effect.Effect<A, E, GithubOpContext>
 ) =>
   Effect.provide(
     operation,
     Layer.mergeAll(
-      FetchHttpClient.layer,
+      Layer.succeed(HttpClient.HttpClient, httpClient),
       credentials({ token: Redacted.make(token), userAgent: githubUserAgent }),
       GithubProtocol
     )
@@ -281,7 +283,7 @@ export class GitHub extends Context.Service<
           HttpClient.filterStatusOk
         );
 
-        const profilePageClient = baseHttpClient.pipe(
+        const publicClient = baseHttpClient.pipe(
           HttpClient.mapRequest((request) =>
             HttpClientRequest.setHeader(request, "User-Agent", githubUserAgent)
           ),
@@ -291,13 +293,14 @@ export class GitHub extends Context.Service<
         const readJson = <S extends Schema.Constraint>(
           operation: string,
           schema: S,
-          request: HttpClientRequest.HttpClientRequest
+          request: HttpClientRequest.HttpClientRequest,
+          client = apiClient
         ): Effect.Effect<
           S["Type"],
           GitHubRequestError,
           S["DecodingServices"]
         > =>
-          apiClient.execute(request).pipe(
+          client.execute(request).pipe(
             Effect.flatMap(HttpClientResponse.schemaBodyJson(schema)),
             Effect.mapError(
               (cause) => new GitHubRequestError({ operation, cause })
@@ -356,6 +359,7 @@ export class GitHub extends Context.Service<
           function* listRepositories(page: number, perPage: number) {
             if (token) {
               const repositories = yield* runGitHubSdk(
+                baseHttpClient,
                 Redacted.value(token),
                 repos.listForUser({
                   username,
@@ -363,20 +367,30 @@ export class GitHub extends Context.Service<
                   per_page: perPage,
                   page,
                 })
+              ).pipe(
+                Effect.catchTag("GitHubRequestError", (error) =>
+                  error.cause instanceof Unauthorized
+                    ? Effect.logWarning(
+                        "GitHub rejected the repository list credential. Using the public API."
+                      ).pipe(Effect.as(null))
+                    : Effect.fail(error)
+                )
               );
 
-              return repositories.map((repository) => ({
-                name: repository.name,
-                full_name: repository.full_name,
-                html_url: repository.html_url,
-                description: repository.description ?? null,
-                language: repository.language,
-                homepage: repository.homepage,
-                archived: repository.archived ?? false,
-                fork: repository.fork,
-                private: repository.private,
-                owner_avatar_url: repository.owner.avatar_url,
-              }));
+              if (repositories !== null) {
+                return repositories.map((repository) => ({
+                  name: repository.name,
+                  full_name: repository.full_name,
+                  html_url: repository.html_url,
+                  description: repository.description ?? null,
+                  language: repository.language,
+                  homepage: repository.homepage,
+                  archived: repository.archived ?? false,
+                  fork: repository.fork,
+                  private: repository.private,
+                  owner_avatar_url: repository.owner.avatar_url,
+                }));
+              }
             }
 
             const repositories = yield* readJson(
@@ -384,7 +398,8 @@ export class GitHub extends Context.Service<
               Schema.Array(RepositorySchema),
               HttpClientRequest.get(
                 `https://api.github.com/users/${encodeURIComponent(username)}/repos?per_page=${perPage}&page=${page}&type=owner`
-              )
+              ),
+              publicClient
             );
 
             return repositories.map(({ owner, ...repository }) => ({
@@ -394,7 +409,7 @@ export class GitHub extends Context.Service<
           }
         );
 
-        const profilePage = profilePageClient
+        const profilePage = publicClient
           .get(`https://github.com/${encodeURIComponent(username)}`)
           .pipe(
             Effect.flatMap((response) => response.text),
@@ -486,6 +501,7 @@ export class GitHub extends Context.Service<
         ) {
           if (token) {
             const response = yield* runGitHubSdk(
+              baseHttpClient,
               Redacted.value(token),
               repos.get({ owner, repo: name })
             );

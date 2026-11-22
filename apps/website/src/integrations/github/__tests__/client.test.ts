@@ -55,6 +55,51 @@ const searchPullRequests = async (token?: Redacted.Redacted) => {
 };
 
 describe("GitHub client", () => {
+  it("loads public repositories when GitHub rejects the credential", async () => {
+    const { owner, ...repository } = {
+      name: "example",
+      full_name: "octocat/example",
+      html_url: "https://github.com/octocat/example",
+      description: null,
+      archived: false,
+      fork: false,
+      private: false,
+      owner: { avatar_url: "https://example.com/octocat.png" },
+    };
+
+    const authorizationHeaders: (string | undefined)[] = [];
+
+    const httpClient = HttpClient.make((request) => {
+      const { authorization } = request.headers;
+      authorizationHeaders.push(authorization);
+
+      const response = authorization
+        ? Response.json({ message: "Bad credentials" }, { status: 401 })
+        : Response.json([{ ...repository, owner }]);
+
+      return Effect.succeed(HttpClientResponse.fromWeb(request, response));
+    });
+
+    const githubLayer = GitHub.layerWithoutDependencies({
+      username: "octocat",
+      token: Redacted.make("expired-test-token"),
+    }).pipe(Layer.provide(Layer.succeed(HttpClient.HttpClient, httpClient)));
+
+    const repositories = await Effect.runPromise(
+      GitHub.use((github) => github.listRepositories(1, 100)).pipe(
+        Effect.provide(githubLayer)
+      )
+    );
+
+    expect(authorizationHeaders).toStrictEqual([
+      "Bearer expired-test-token",
+      undefined,
+    ]);
+    expect(repositories).toStrictEqual([
+      { ...repository, owner_avatar_url: owner.avatar_url },
+    ]);
+  });
+
   it("uses the shared anonymous Search API quota", async () => {
     const { rateLimitIntervals, rateLimitNames, results, searchRequests } =
       await searchPullRequests();
