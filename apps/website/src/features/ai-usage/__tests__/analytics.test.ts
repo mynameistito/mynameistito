@@ -111,6 +111,7 @@ describe("AI usage dashboard", () => {
     );
     expect(markup).toContain("Through 21 Nov 2026 (UTC)");
     expect(markup).toContain("Snapshot refreshed 21 Nov 2026");
+    expect(markup).toMatch(/Current subscriptions.*Tokens tracked/u);
   });
 
   it("keeps recorded usage visible when the snapshot date is invalid", () => {
