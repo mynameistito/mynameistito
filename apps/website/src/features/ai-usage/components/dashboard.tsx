@@ -39,6 +39,23 @@ const currencyFormat = new Intl.NumberFormat("en-US", {
   style: "currency",
 });
 
+const subscriptions = [
+  { name: "ChatGPT", plan: "PRO100", monthlyNzd: 160 },
+  { name: "AntiGravity", plan: "PRO", monthlyNzd: 36 },
+  { name: "Grok", plan: "Premium", monthlyNzd: 60 },
+] as const;
+
+const totalMonthlyNzd = subscriptions.reduce(
+  (total, { monthlyNzd }) => total + monthlyNzd,
+  0
+);
+
+const subscriptionPriceFormat = new Intl.NumberFormat("en-NZ", {
+  currency: "NZD",
+  style: "currency",
+  trailingZeroDisplay: "stripIfInteger",
+});
+
 const compactNumberFormat = new Intl.NumberFormat("en-US", {
   notation: "compact",
   maximumFractionDigits: 1,
@@ -299,8 +316,31 @@ const UsageRanking = ({
   );
 };
 
-/** Renders a responsive usage overview sourced from the published snapshot.
- * @returns The analytics dashboard or its not-yet-published empty state.
+const CurrentSubscriptions = () => (
+  <Card>
+    <CardHeader>
+      <CardTitle>Current subscriptions</CardTitle>
+      <CardDescription>
+        {subscriptionPriceFormat.format(totalMonthlyNzd)} NZD per month total
+      </CardDescription>
+    </CardHeader>
+    <CardContent>
+      <ul className="m-0 grid list-none gap-4 p-0 sm:grid-cols-3">
+        {subscriptions.map(({ name, plan, monthlyNzd }) => (
+          <li className="grid gap-1" key={name}>
+            <span className="text-sm font-medium text-text">{name}</span>
+            <span className="text-sm text-muted">
+              {plan} · {subscriptionPriceFormat.format(monthlyNzd)}/month
+            </span>
+          </li>
+        ))}
+      </ul>
+    </CardContent>
+  </Card>
+);
+
+/** Renders AI usage and current subscriptions.
+ * @returns The dashboard with an empty state when usage data is unavailable.
  */
 export const AiUsageDashboard = ({
   snapshot,
@@ -309,7 +349,7 @@ export const AiUsageDashboard = ({
 }) => {
   if (!snapshot) {
     return (
-      <main className="page-shell pt-page-top-header pb-page-bottom">
+      <main className="page-shell grid gap-6 pt-page-top-header pb-page-bottom">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -322,6 +362,7 @@ export const AiUsageDashboard = ({
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
+        <CurrentSubscriptions />
       </main>
     );
   }
@@ -442,6 +483,7 @@ export const AiUsageDashboard = ({
             title="Favorite models"
           />
         </section>
+        <CurrentSubscriptions />
       </div>
       <footer className="mt-6 flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
         <span>
