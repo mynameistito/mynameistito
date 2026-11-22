@@ -3,7 +3,7 @@
   "ignoreDependencies": ["cloudflare"],
   "workspaces": {
     ".": {
-      "entry": ["alchemy.run.ts", "scripts/cicd/deploy-website-code.ts"]
+      "entry": ["alchemy.run.ts"]
     },
     "apps/website": {
       "entry": ["src/shared/classnames.ts", "worker.ts"]
