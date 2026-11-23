@@ -24,9 +24,9 @@
 
 🔷 **[opencode-plugins](https://github.com/mynameistito/opencode-plugins)** ⭐3 — My Personal OpenCode v2 Plugins
 
-🔷 **[fxinstagram](https://github.com/mynameistito/fxinstagram)** ⭐3 — Effect and Alchemy service for fixing Instagram embeds in Discord
+🔷 **[x-lookup](https://github.com/mynameistito/x-lookup)** ⭐3 — Read-only, no-auth Cloudflare Worker that turns public X/Twitter statuses, threads, profiles, search, and social graphs into compact Markdown or JSON for AI agents
 
-🔷 **[x-lookup](https://github.com/mynameistito/x-lookup)** ⭐2 — Read-only, no-auth Cloudflare Worker that turns public X/Twitter statuses, threads, profiles, search, and social graphs into compact Markdown or JSON for AI agents
+🔷 **[fxinstagram](https://github.com/mynameistito/fxinstagram)** ⭐3 — Effect and Alchemy service for fixing Instagram embeds in Discord
 
 🔷 **[BankGlass](https://github.com/mynameistito/BankGlass)** ⭐2 — A self-hosted, read-only banking API and MCP server for securely connecting applications and AI agents to personal financial data. BankGlass runs entirely on Cloudflare Workers
 
