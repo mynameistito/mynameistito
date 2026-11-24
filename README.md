@@ -22,9 +22,9 @@
 
 🔷 **[repo-updater](https://github.com/mynameistito/repo-updater)** ⭐6 — A CLI tool that update deps across multiple repos with auto commits and pull requests.
 
-🔷 **[opencode-plugins](https://github.com/mynameistito/opencode-plugins)** ⭐3 — My Personal OpenCode v2 Plugins
+🔷 **[x-lookup](https://github.com/mynameistito/x-lookup)** ⭐4 — Read-only, no-auth Cloudflare Worker that turns public X/Twitter statuses, threads, profiles, search, and social graphs into compact Markdown or JSON for AI agents
 
-🔷 **[x-lookup](https://github.com/mynameistito/x-lookup)** ⭐3 — Read-only, no-auth Cloudflare Worker that turns public X/Twitter statuses, threads, profiles, search, and social graphs into compact Markdown or JSON for AI agents
+🔷 **[opencode-plugins](https://github.com/mynameistito/opencode-plugins)** ⭐3 — My Personal OpenCode v2 Plugins
 
 🔷 **[fxinstagram](https://github.com/mynameistito/fxinstagram)** ⭐3 — Effect and Alchemy service for fixing Instagram embeds in Discord
 
