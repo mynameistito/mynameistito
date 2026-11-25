@@ -12,6 +12,13 @@ const program = Effect.gen(function* cliProgram() {
   );
 });
 
+const printInteractiveFallback = () => {
+  Effect.runSync(program);
+  process.stderr.write(
+    "\nFor the interactive website, run: bunx --bun mynameistito\n"
+  );
+};
+
 const interactive =
   process.stdin.isTTY &&
   process.stdout.isTTY &&
@@ -31,10 +38,19 @@ if (process.argv.includes("--help")) {
     const { startTerminal } = await import("./terminal.js");
     await startTerminal();
   } catch (error) {
-    process.stderr.write(
-      `Could not start the terminal interface: ${error instanceof Error ? error.message : String(error)}\n`
-    );
-    process.exitCode = 1;
+    if (
+      error instanceof Error &&
+      "code" in error &&
+      (error.code === "ERR_MODULE_NOT_FOUND" ||
+        error.code === "MODULE_NOT_FOUND")
+    ) {
+      printInteractiveFallback();
+    } else {
+      process.stderr.write(
+        `Could not start the terminal interface: ${error instanceof Error ? error.message : String(error)}\n`
+      );
+      process.exitCode = 1;
+    }
   }
 } else {
   const launch = interactive
@@ -47,13 +63,9 @@ if (process.argv.includes("--help")) {
 
   if (launch !== undefined && launch.error === undefined) {
     process.exitCode = launch.status ?? 1;
+  } else if (interactive) {
+    printInteractiveFallback();
   } else {
     Effect.runSync(program);
-
-    if (interactive) {
-      process.stderr.write(
-        "\nFor the interactive website, run: bunx --bun mynameistito\n"
-      );
-    }
   }
 }

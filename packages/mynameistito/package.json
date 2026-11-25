@@ -42,14 +42,17 @@
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
-    "@opentui/core": "^0.8.4",
-    "cheerio": "^1.2.0",
     "effect": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",
     "tsdown": "^0.23.1",
     "tsrs": "catalog:"
+  },
+  "optionalDependencies": {
+    "@opentui/core": "^0.8.4",
+    "cheerio": "^1.2.0",
+    "sharp": "^0.35.5"
   },
   "engines": {
     "node": ">=20"

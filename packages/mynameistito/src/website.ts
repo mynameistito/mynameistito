@@ -9,6 +9,7 @@ export const siteOrigin = "https://mynameistito.com";
 
 /** A readable website page and its navigable links. */
 export interface WebsitePage {
+  readonly back?: { readonly label: string; readonly url: string };
   readonly dock: readonly { readonly label: string; readonly url: string }[];
   readonly layout: WebsiteLayout;
   readonly blocks: readonly WebsiteBlock[];
@@ -20,6 +21,7 @@ export interface WebsitePage {
 /** A semantic page block with inline emphasis and links preserved. */
 export interface WebsiteBlock {
   readonly compact?: boolean;
+  readonly experienceDetail?: boolean;
   readonly tone?: "text" | "muted" | "subtle";
   // oxlint-disable-next-line sonarjs/max-union-size -- These are the distinct HTML presentation roles used by the renderer.
   readonly kind: "heading" | "subheading" | "paragraph" | "list" | "code";
@@ -28,6 +30,9 @@ export interface WebsiteBlock {
     readonly url?: string;
     readonly strong?: boolean;
     readonly browser?: boolean;
+    readonly action?: "experience" | "theme";
+    readonly tone?: "text" | "muted" | "subtle";
+    readonly underline?: boolean;
   }[];
 }
 
@@ -46,6 +51,15 @@ const cleanText = (text: string) =>
     .join("\n")
     .replaceAll(/\n{3,}/gu, "\n\n")
     .trim();
+
+const groupPresentationFor = (
+  tag: string,
+  classes: string,
+  isBlock: boolean
+) =>
+  isBlock && /^(?:div|section|article|li|ul|ol|nav|header|span|a)$/u.test(tag)
+    ? readWebsitePresentation(classes)
+    : undefined;
 
 /** Translate server-rendered portfolio HTML, excluding scripts and hidden UI.
  * @param html - The website response body.
@@ -85,6 +99,58 @@ export const parseWebsitePage = (
     return null;
   }
 
+  const header = main.find("header.fixed").first();
+  const backLink = header.find("a[href]").first();
+  const backHref = backLink.attr("href");
+
+  const back =
+    backHref?.startsWith("/") === true && !backHref.startsWith("//")
+      ? { label: cleanText(backLink.text()), url: new URL(backHref, url).href }
+      : undefined;
+
+  header.remove();
+
+  const experience = main.find('section[aria-labelledby="experience-title"]');
+  const highlights = experience.find("[data-experience-highlights]");
+  experience
+    .find("button[aria-expanded]")
+    .replaceWith(
+      highlights.length > 0
+        ? '<span data-terminal-action="experience">See more</span>'
+        : '<span data-browser-action="true">See more in browser</span>'
+    );
+  highlights.each((_index, element) => {
+    const list = $(element);
+    const summary = list.parent();
+    const details = $('<p class="m-0" data-experience-detail></p>');
+    details.text(
+      list
+        .children("li")
+        .toArray()
+        .map((item) => $(item).text())
+        .join("\n")
+    );
+    list.remove();
+    summary.wrap('<div class="grid min-w-0"></div>');
+    summary.after(details);
+  });
+
+  main
+    .find("label[for=project-search]")
+    .parent()
+    .replaceWith(
+      '<p data-browser-action="true">Filter projects in browser</p>'
+    );
+  const theme = main.find('button[aria-label="Toggle color theme"]');
+  theme
+    .parents(".flex")
+    .filter((_index, element) => $(element).find('img[width="46"]').length > 0)
+    .first()
+    .addClass("justify-between");
+  theme.replaceWith('<span data-terminal-action="theme">☾</span>');
+  main
+    .find("svg.lucide-arrow-up-right")
+    .replaceWith('<span class="text-muted">↗</span>');
   main
     .find(
       'script, style, svg, canvas, nav[aria-label="Page controls"], [aria-hidden="true"], [hidden], .sr-only, button, input, textarea, label, select'
@@ -139,7 +205,12 @@ export const parseWebsitePage = (
 
   type ContentNode = (typeof nodes)[number];
 
-  let spans: { text: string; url?: string; strong?: boolean }[] = [];
+  let spans: {
+    -readonly [
+      Key in keyof WebsiteBlock["spans"][number]
+    ]: WebsiteBlock["spans"][number][Key];
+  }[] = [];
+
   let kind: WebsiteBlock["kind"] = "paragraph";
   let compact = false;
   let tone: WebsiteBlock["tone"] = "muted";
@@ -171,7 +242,8 @@ export const parseWebsitePage = (
   const appendText = (
     data: string,
     href: string | undefined,
-    strong: boolean
+    strong: boolean,
+    underlined = false
   ) => {
     if (kind === "code") {
       spans.push({
@@ -192,6 +264,8 @@ export const parseWebsitePage = (
       spans.push({
         strong,
         text: `${raw.startsWith(" ") ? " " : ""}${text}${raw.endsWith(" ") ? " " : ""}`,
+        tone,
+        underline: underlined,
         url: href,
       });
     } else if (raw !== "" && spans.length > 0) {
@@ -212,6 +286,32 @@ export const parseWebsitePage = (
   };
 
   const specialElement = (node: ContentNode, tag: string): boolean => {
+    const action = $(node).attr("data-terminal-action");
+
+    if (action === "experience" || action === "theme") {
+      flush();
+      const target = new URL(url);
+      target.hash = `terminal-${action}`;
+      addBlock({
+        compact: true,
+        kind: "paragraph",
+        spans: [{ action, text: $(node).text(), url: target.href }],
+      });
+
+      return true;
+    }
+
+    if ($(node).attr("data-experience-detail") !== undefined) {
+      flush();
+      addBlock({
+        experienceDetail: true,
+        kind: "paragraph",
+        spans: [{ text: cleanText($(node).text()) }],
+      });
+
+      return true;
+    }
+
     if (tag === "br") {
       spans.push({ text: "\n" });
 
@@ -221,7 +321,7 @@ export const parseWebsitePage = (
     if (tag === "img") {
       const source = resolveHref($(node).attr("src"));
 
-      if (source !== undefined && !new URL(source).pathname.endsWith(".svg")) {
+      if (source !== undefined && !$(node).hasClass("experience-logo-light")) {
         flush();
         const pixels = Number($(node).attr("width")) || 48;
         const width = Math.min(76, Math.max(4, Math.round(pixels / 8)));
@@ -238,6 +338,9 @@ export const parseWebsitePage = (
           alt: $(node).attr("alt") ?? "",
           height,
           kind: "image",
+          lightSource: resolveHref(
+            $(node).siblings(".experience-logo-light").attr("src")
+          ),
           source,
           width,
         });
@@ -280,10 +383,15 @@ export const parseWebsitePage = (
     }
   };
 
-  const visit = (node: ContentNode, href?: string, strong = false): void => {
+  const visit = (
+    node: ContentNode,
+    href?: string,
+    strong = false,
+    underlined = false
+  ): void => {
     // oxlint-disable-next-line typescript/no-unsafe-enum-comparison -- domhandler represents text nodes with this serialized enum value.
     if ("data" in node && node.type === "text") {
-      appendText(node.data, href, strong);
+      appendText(node.data, href, strong, underlined);
 
       return;
     }
@@ -314,15 +422,13 @@ export const parseWebsitePage = (
     const previousTone = tone;
     const classes = $(node).attr("class") ?? "";
 
-    const grouping =
-      /^(?:div|section|article|li|ul|ol|nav|header|span|a)$/u.test(tag) &&
-      isBlock;
+    const groupPresentation = groupPresentationFor(tag, classes, isBlock);
 
-    if (grouping) {
+    if (groupPresentation !== undefined) {
       const group: LayoutGroup = {
         children: [],
         kind: "group",
-        presentation: readWebsitePresentation(classes),
+        presentation: groupPresentation,
       };
 
       container.children.push(group);
@@ -339,9 +445,17 @@ export const parseWebsitePage = (
     const emphasized = strong || /font-(?:semibold|bold|medium)/u.test(classes);
 
     for (const child of $(node).contents().toArray()) {
-      visit(child, target, emphasized || tag === "strong" || tag === "b");
+      visit(
+        child,
+        target,
+        emphasized || /^(?:strong|b)$/u.test(tag),
+        underlined || classes.split(/\s+/u).includes("underline")
+      );
 
-      if (grouping && container.presentation.direction === "row") {
+      if (
+        container !== previousContainer &&
+        container.presentation.direction === "row"
+      ) {
         flush();
       }
     }
@@ -378,6 +492,7 @@ export const parseWebsitePage = (
   main.find("br").replaceWith("\n");
 
   return {
+    back,
     blocks,
     dock,
     layout,

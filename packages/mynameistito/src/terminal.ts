@@ -37,20 +37,26 @@ const routes = [
 const dark = {
   accent: "#7196c8",
   code: "#181b1d",
-  line: "#303438",
+  light: false,
+  line: "#292c2e",
   match: "#1b2026",
   muted: "#a1a4a6",
   page: "#101112",
+  subtle: "#8b9093",
+  surface: "#151718",
   text: "#f1f2f2",
 };
 
 const light = {
   accent: "#3f6798",
   code: "#eceff1",
+  light: true,
   line: "#e0e3e4",
   match: "#dce7f3",
   muted: "#5f6568",
   page: "#f7f8f8",
+  subtle: "#686f72",
+  surface: "#ffffff",
   text: "#17191a",
 };
 
@@ -111,6 +117,8 @@ export const startTerminal = async (
 
   shell.add(chrome);
 
+  let backUrl = `${siteOrigin}/`;
+
   const address = new TextRenderable(renderer, {
     content: "",
     fg: colors.muted,
@@ -118,7 +126,7 @@ export const startTerminal = async (
     height: 1,
     onMouseUp: () => {
       // oxlint-disable-next-line no-use-before-define -- Callbacks run after initialization.
-      follow(`${siteOrigin}/`);
+      follow(backUrl);
     },
   });
 
@@ -131,7 +139,7 @@ export const startTerminal = async (
   toolbar.add(address);
 
   const themeControl = new TextRenderable(renderer, {
-    content: "☀",
+    content: "☾",
     fg: colors.muted,
     height: 1,
     onMouseUp: () => {
@@ -252,10 +260,16 @@ export const startTerminal = async (
 
   let selectedLink = -1;
 
-  let linkTargets: { url: string; browser?: boolean; row: TextRenderable }[] =
-    [];
+  let linkTargets: {
+    url: string;
+    action?: "experience" | "theme";
+    browser?: boolean;
+    row: TextRenderable;
+  }[] = [];
 
   let rows: { block: WebsiteBlock; row: TextRenderable }[] = [];
+  let experienceExpanded = false;
+  const pageActions = new Map<string, () => void>();
   let dockRows: { label: string; row: TextRenderable; url: string }[] = [];
   let reflowPage: (() => void) | undefined;
   let displayedBlocks: readonly WebsiteBlock[] = [];
@@ -267,16 +281,19 @@ export const startTerminal = async (
   let inputMode: "find" | "address" | null = null;
   let matches: TextRenderable[] = [];
   let matchIndex = -1;
+  let findQuery = "";
 
-  const find = () => {
-    const query = search.value.trim().toLocaleLowerCase();
+  const find = (query: string) => {
+    findQuery = query;
     matches = [];
 
     for (const { row } of rows) {
       const match =
-        query !== "" && row.plainText.toLocaleLowerCase().includes(query);
+        row.visible &&
+        query !== "" &&
+        row.plainText.toLocaleLowerCase().includes(query);
 
-      row.bg = match ? colors.match : colors.page;
+      row.bg = match ? colors.match : "transparent";
 
       if (match) {
         matches.push(row);
@@ -298,7 +315,7 @@ export const startTerminal = async (
 
   search.on("input", () => {
     if (inputMode === "find") {
-      find();
+      find(search.value.trim().toLocaleLowerCase());
     }
   });
 
@@ -358,6 +375,7 @@ export const startTerminal = async (
 
   const updateRows = () => {
     const palette = colors;
+    const expanded = experienceExpanded;
 
     const selected =
       selectedLink < 0 ? undefined : linkTargets.at(selectedLink);
@@ -367,20 +385,27 @@ export const startTerminal = async (
     for (const { block, row } of rows) {
       row.content = new StyledText(
         block.spans.map((span) => {
-          let color = block.tone === "text" ? palette.text : palette.muted;
+          const tone = span.tone ?? block.tone ?? "muted";
+          let label = span.text;
 
-          if (span.url !== undefined) {
-            color = palette.accent;
+          if (span.action === "experience" && expanded) {
+            label = "See less";
+          } else if (span.action === "theme" && palette.light) {
+            label = "☀";
           }
 
-          let chunk = fg(color)(span.text);
+          let chunk = fg(palette[tone])(label);
 
           if (
             block.kind === "heading" ||
             block.kind === "subheading" ||
             span.strong === true
           ) {
-            chunk = bold(fg(palette.text)(chunk));
+            chunk = bold(chunk);
+          }
+
+          if (span.underline === true) {
+            chunk = underline(chunk);
           }
 
           if (span.url !== undefined) {
@@ -424,11 +449,18 @@ export const startTerminal = async (
       const heading = block.kind === "heading" || block.kind === "subheading";
 
       const row = new TextRenderable(renderer, {
-        bg: block.kind === "code" ? colors.code : colors.page,
+        bg: block.kind === "code" ? colors.code : "transparent",
         marginBottom: block.compact === true ? 0 : 1,
         marginTop: heading && block.compact !== true ? 1 : 0,
         onMouseUp: (event) => {
-          if (event.isDragging === true || event.button !== 0) {
+          const selection = renderer.getSelection();
+
+          const hasRange =
+            selection !== null &&
+            (selection.anchor.x !== selection.focus.x ||
+              selection.anchor.y !== selection.focus.y);
+
+          if (event.button !== 0 || (event.isDragging === true && hasRange)) {
             return;
           }
 
@@ -436,6 +468,12 @@ export const startTerminal = async (
 
           if (target !== null) {
             const span = block.spans.find((item) => item.url === target);
+
+            if (span?.action !== undefined) {
+              pageActions.get(span.action)?.();
+
+              return;
+            }
 
             if (span?.browser === true) {
               openBrowser(target);
@@ -447,6 +485,8 @@ export const startTerminal = async (
             follow(target);
           }
         },
+        selectable: block.spans.every((span) => span.action === undefined),
+        visible: block.experienceDetail !== true || experienceExpanded,
         width: "100%",
         wrapMode: "word",
       });
@@ -464,7 +504,12 @@ export const startTerminal = async (
             (target) => target.row === row && target.url === span.url
           )
         ) {
-          linkTargets.push({ browser: span.browser, row, url: span.url });
+          linkTargets.push({
+            action: span.action,
+            browser: span.browser,
+            row,
+            url: span.url,
+          });
         }
       }
     }
@@ -528,12 +573,34 @@ export const startTerminal = async (
     search.backgroundColor = colors.page;
     search.focusedBackgroundColor = colors.page;
     search.focusedTextColor = colors.text;
-    themeControl.content = colors === dark ? "☀" : "☾";
+    themeControl.content = colors === dark ? "☾" : "☀";
     matches = [];
     matchIndex = -1;
     display(displayedBlocks, displayedLayout);
+
+    if (findQuery !== "") {
+      find(findQuery);
+    }
+
     scroll.scrollTo(position);
   };
+
+  pageActions.set("theme", toggleTheme);
+  pageActions.set("experience", () => {
+    experienceExpanded = !experienceExpanded;
+
+    for (const { block, row } of rows) {
+      if (block.experienceDetail === true) {
+        row.visible = experienceExpanded;
+      }
+    }
+
+    updateRows();
+
+    if (findQuery !== "") {
+      find(findQuery);
+    }
+  });
 
   const clearDock = () => {
     for (const child of dock.getChildren()) {
@@ -544,17 +611,25 @@ export const startTerminal = async (
     dock.visible = false;
   };
 
+  const updateBackLink = (back: WebsitePage["back"], home: boolean) => {
+    backUrl = back?.url ?? `${siteOrigin}/`;
+    address.content = `← ${back?.label ?? "Home"}`;
+    toolbar.visible = back !== undefined || !home;
+  };
+
   const navigate = async (url: string, refresh = false) => {
     requestController.abort();
     requestController = new AbortController();
     closeInput();
     matches = [];
     matchIndex = -1;
+    findQuery = "";
     currentUrl = url;
     revision += 1;
     const request = revision;
     const path = new URL(url).pathname;
-    address.content = path === "/" ? "" : "← Home";
+    experienceExpanded = false;
+    updateBackLink(undefined, path === "/");
 
     const routeIndex = routes.findIndex(
       ([, route]) =>
@@ -608,6 +683,8 @@ export const startTerminal = async (
       ]);
     } else {
       pageCache.set(url, result.success);
+
+      updateBackLink(result.success.back, path === "/");
 
       for (const item of result.success.dock) {
         const label = item.label === "Tokscale" ? "AI" : item.label;
@@ -708,7 +785,10 @@ export const startTerminal = async (
         scroll.scrollChildIntoView(target.row, { inset: 1 });
       }
 
-      status.content = `${target.url}    Enter to open`;
+      status.content =
+        target.action === undefined
+          ? `${target.url}    Enter to open`
+          : `${target.row.plainText}    Enter to toggle`;
     }
 
     scroll.focus();
@@ -722,6 +802,12 @@ export const startTerminal = async (
     const target = linkTargets.at(selectedLink);
 
     if (target !== undefined) {
+      if (target.action !== undefined) {
+        pageActions.get(target.action)?.();
+
+        return;
+      }
+
       if (target.browser === true) {
         openBrowser(target.url);
 

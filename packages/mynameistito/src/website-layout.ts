@@ -9,6 +9,9 @@ export interface WebsitePresentation {
   readonly card: boolean;
   readonly justifyBetween: boolean;
   readonly responsive: boolean;
+  readonly grid: boolean;
+  readonly fixedLead: boolean;
+  readonly grow: boolean;
 }
 
 /** The website hierarchy, referencing semantic text blocks by their index. */
@@ -17,6 +20,7 @@ export type WebsiteLayout =
   | {
       readonly kind: "image";
       readonly source: string;
+      readonly lightSource?: string;
       readonly alt: string;
       readonly width: number;
       readonly height: number;
@@ -49,10 +53,13 @@ export const readWebsitePresentation = (
       names.has("border") &&
       (names.has("bg-surface") || names.has("rounded-control")),
     direction: row ? "row" : "column",
+    fixedLead: /grid-cols-\[\d+px_/u.test(classes),
     gap:
       names.has("gap-6") || names.has("gap-4")
         ? 2
         : Number(/(?:^|\s)gap-(?:x-)?[235](?:\s|$)/u.test(classes)),
+    grid: /(?:^|\s|:)grid-cols-/u.test(classes),
+    grow: names.has("flex-1"),
     justifyBetween:
       names.has("justify-between") || /grid-cols-\[.*_auto\]/u.test(classes),
     marginTop: names.has("mt-section") || names.has("mt-8") ? 2 : 0,

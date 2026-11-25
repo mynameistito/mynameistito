@@ -2,9 +2,11 @@ import { BoxRenderable, ImageRenderable, TextRenderable } from "@opentui/core";
 import type { CliRenderer, Renderable } from "@opentui/core";
 
 import type { WebsiteLayout, WebsitePresentation } from "./website-layout.js";
+import { siteOrigin } from "./website.js";
 
 interface Palette {
-  readonly page: string;
+  readonly surface: string;
+  readonly light: boolean;
   readonly line: string;
   readonly muted: string;
 }
@@ -22,7 +24,9 @@ const place = (
   grow = true
 ) => {
   child.width = inRow ? "auto" : "100%";
+  child.minWidth = 0;
   child.flexGrow = Number(inRow && !trailing && grow);
+  child.flexBasis = inRow && !trailing && grow ? 0 : "auto";
   child.flexShrink = Number(!trailing);
 
   if (inRow && child instanceof TextRenderable) {
@@ -37,7 +41,7 @@ const groupBox = (
   palette: Palette
 ) =>
   new BoxRenderable(renderer, {
-    backgroundColor: palette.page,
+    backgroundColor: p.card ? palette.surface : "transparent",
     border: p.card
       ? true
       : [
@@ -72,10 +76,11 @@ export const mountWebsiteLayout = (
   rows: ReadonlyMap<number, TextRenderable>,
   palette: Palette
 ): (() => void) => {
-  const groups: { box: BoxRenderable; presentation: WebsitePresentation }[] =
-    [];
-
-  const fixed = new Set<Renderable>();
+  const groups: {
+    box: BoxRenderable;
+    presentation: WebsitePresentation;
+    children: { renderable: Renderable; grow: boolean }[];
+  }[] = [];
 
   const images: {
     image: ImageRenderable;
@@ -96,88 +101,150 @@ export const mountWebsiteLayout = (
       width: node.width,
     });
 
+    const source = new URL(
+      (palette.light ? node.lightSource : undefined) ?? node.source
+    );
+
+    const vector = source.pathname.endsWith(".svg");
+
     const image = new ImageRenderable(renderer, {
       fit: "cover",
       flexShrink: 0,
       height: node.height,
-      onError: () => {
-        image.visible = false;
-        fallback.visible = true;
-      },
-      source: new URL(node.source),
       width: node.width,
     });
 
+    const showFallback = () => {
+      image.visible = false;
+      fallback.visible = true;
+    };
+
+    image.onError = showFallback;
+
+    if (!vector) {
+      image.source = source;
+    }
+
     owner.add(image);
     owner.add(fallback);
-    fixed.add(image);
-    fixed.add(fallback);
     images.push({ fallback, height: node.height, image, width: node.width });
+
+    if (vector) {
+      const controller = new AbortController();
+      image.once("destroyed", () => {
+        controller.abort();
+      });
+
+      const rasterize = async () => {
+        try {
+          if (source.origin !== siteOrigin) {
+            throw new Error("The SVG is outside the portfolio.");
+          }
+
+          const response = await fetch(source, {
+            redirect: "error",
+            signal: AbortSignal.any([
+              controller.signal,
+              AbortSignal.timeout(5000),
+            ]),
+          });
+
+          if (!response.ok) {
+            throw new Error("The SVG could not be loaded.");
+          }
+
+          const { default: sharp } = await import("sharp");
+
+          const png = await sharp(await response.arrayBuffer())
+            .resize(128, 128, { fit: "inside" })
+            .png()
+            .toBuffer();
+
+          if (!image.isDestroyed) {
+            image.source = png;
+          }
+        } catch {
+          if (!image.isDestroyed) {
+            showFallback();
+          }
+        }
+      };
+
+      void rasterize();
+    }
   };
 
   const mount = (
     node: WebsiteLayout,
-    owner: BoxRenderable,
-    inRow = false,
-    trailing = false
-  ): void => {
+    owner: BoxRenderable
+  ): Renderable | undefined => {
     if (!hasContent(node)) {
-      return;
+      return undefined;
     }
 
     if (node.kind === "block") {
       const row = rows.get(node.index);
 
       if (row === undefined) {
-        return;
+        return undefined;
       }
 
-      place(row, inRow, trailing);
       owner.add(row);
 
-      return;
+      return row;
     }
 
     if (node.kind === "image") {
       mountImage(node, owner);
 
-      return;
+      return undefined;
     }
 
     const p = node.presentation;
-    const direction = directionFor(p, renderer.width);
     const box = groupBox(renderer, p, palette);
-    place(box, inRow, trailing);
     owner.add(box);
-    groups.push({ box, presentation: p });
-    const children = node.children.filter(hasContent);
 
-    for (const [index, child] of children.entries()) {
-      mount(
-        child,
-        box,
-        direction === "row",
-        p.justifyBetween && index === children.length - 1
-      );
-    }
+    const children = node.children.flatMap((child) => {
+      const renderable = mount(child, box);
+
+      return renderable === undefined
+        ? []
+        : [
+            {
+              grow: child.kind === "group" && child.presentation.grow,
+              renderable,
+            },
+          ];
+    });
+
+    groups.push({ box, children, presentation: p });
+
+    return box;
   };
 
   mount(layout, parent);
 
   const reflow = () => {
-    for (const { box, presentation } of groups) {
+    for (const { box, children, presentation } of groups) {
       const direction = directionFor(presentation, renderer.width);
       box.flexDirection = direction;
       box.alignItems = direction === "row" ? "center" : "stretch";
       box.rowGap = direction === "row" ? 0 : presentation.gap;
-      const children = box.getChildren().filter((child) => !fixed.has(child));
 
       for (const [index, child] of children.entries()) {
+        const trailing =
+          presentation.justifyBetween &&
+          children.length > 1 &&
+          index === children.length - 1;
+
+        const flexible =
+          child.grow || presentation.grid || presentation.justifyBetween;
+
         place(
-          child,
+          child.renderable,
           direction === "row",
-          presentation.justifyBetween && index === children.length - 1,
-          presentation.justifyBetween || child instanceof BoxRenderable
+          trailing,
+          (!presentation.fixedLead || index > 0) && flexible
         );
       }
     }
