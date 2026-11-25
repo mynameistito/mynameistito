@@ -7,7 +7,7 @@ import {
   Website,
   Workflow,
 } from "@alchemy.run/cloudflare";
-import { AlchemyContext, localState, Stack } from "alchemy";
+import { AlchemyContext, inMemoryState, Stack } from "alchemy";
 import {
   Redacted as ConfigRedacted,
   String as ConfigString,
@@ -15,11 +15,14 @@ import {
 import { gen } from "effect/Effect";
 import { unwrap } from "effect/Layer";
 
+// A dev server's URL belongs to the process that opened its port.
+const devWebsiteState = inMemoryState();
+
 const websiteState = unwrap(
   gen(function* selectWebsiteState() {
     const { dev } = yield* AlchemyContext;
 
-    return dev ? localState() : state();
+    return dev ? devWebsiteState : state();
   })
 );
 
