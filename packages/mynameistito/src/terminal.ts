@@ -122,6 +122,7 @@ export const startTerminal = async (
     options.renderer ??
     (await createCliRenderer({
       backgroundColor: colors.page,
+      enableMouseMovement: true,
       exitOnCtrlC: true,
       onDestroy: () => {
         closed = true;
@@ -295,12 +296,11 @@ export const startTerminal = async (
     border: true,
     borderColor: colors.line,
     borderStyle: "rounded",
-    columnGap: 3,
     flexDirection: "row",
     flexShrink: 0,
     marginBottom: 1,
-    paddingLeft: 2,
-    paddingRight: 2,
+    paddingLeft: 1,
+    paddingRight: 1,
     visible: false,
   });
 
@@ -944,6 +944,21 @@ export const startTerminal = async (
     dock.visible = false;
   };
 
+  const bindDockHover = (entry: (typeof dockRows)[number]) => {
+    const { row } = entry;
+    row.onMouseOver = () => {
+      row.bg = colors.surfaceHover;
+      row.fg = colors.text;
+      void showPreview(entry);
+    };
+
+    row.onMouseOut = () => {
+      row.bg = "transparent";
+      row.fg = colors.muted;
+      schedulePreviewClose();
+    };
+  };
+
   const updateBackLink = (back: WebsitePage["back"], home: boolean) => {
     backUrl = back?.url ?? `${origin}/`;
     address.content = `← ${back?.label ?? "Home"}`;
@@ -1041,7 +1056,7 @@ export const startTerminal = async (
       previewSource = result.success.dockPreviews;
 
       for (const item of result.success.dock) {
-        const mark = dockMarks.get(item.label) ?? item.label;
+        const mark = `  ${dockMarks.get(item.label) ?? item.label}  `;
 
         const row = new TextRenderable(renderer, {
           content: mark,
@@ -1050,11 +1065,8 @@ export const startTerminal = async (
         });
 
         const entry = { ...item, mark, row };
-        row.onMouseOver = () => {
-          void showPreview(entry);
-        };
+        bindDockHover(entry);
 
-        row.onMouseOut = schedulePreviewClose;
         row.onMouseUp = () => {
           closePreview();
           // oxlint-disable-next-line no-use-before-define -- Callbacks run after initialization.

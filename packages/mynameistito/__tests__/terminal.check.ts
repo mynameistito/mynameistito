@@ -58,7 +58,7 @@ await nativeTest(
       const x = lines.at(y)?.indexOf("◉") ?? -1;
       assert.ok(y !== -1);
       assert.ok(x >= 0);
-      await terminal.mockMouse.moveTo(x, y);
+      await terminal.mockMouse.moveTo(x - 1, y);
       await terminal.waitForFrame((frame) => frame.includes("Example profile"));
       terminal.mockInput.pressTab({ shift: true });
       await terminal.waitForFrame(
