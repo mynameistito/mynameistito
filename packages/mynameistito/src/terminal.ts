@@ -60,6 +60,9 @@ const light = {
   text: "#17191a",
 };
 
+const blockBackground = (kind: WebsiteBlock["kind"], codeColor: string) =>
+  kind === "code" ? codeColor : "transparent";
+
 /** Start the terminal portfolio with semantic page content and browser navigation.
  * @param options - Optional renderer and page loader for embedded terminals and deterministic checks.
  * @returns A promise resolved when the first page has loaded.
@@ -287,13 +290,13 @@ export const startTerminal = async (
     findQuery = query;
     matches = [];
 
-    for (const { row } of rows) {
+    for (const { block, row } of rows) {
       const match =
         row.visible &&
         query !== "" &&
         row.plainText.toLocaleLowerCase().includes(query);
 
-      row.bg = match ? colors.match : "transparent";
+      row.bg = match ? colors.match : blockBackground(block.kind, colors.code);
 
       if (match) {
         matches.push(row);
@@ -449,7 +452,7 @@ export const startTerminal = async (
       const heading = block.kind === "heading" || block.kind === "subheading";
 
       const row = new TextRenderable(renderer, {
-        bg: block.kind === "code" ? colors.code : "transparent",
+        bg: blockBackground(block.kind, colors.code),
         marginBottom: block.compact === true ? 0 : 1,
         marginTop: heading && block.compact !== true ? 1 : 0,
         onMouseUp: (event) => {

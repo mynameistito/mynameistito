@@ -24,7 +24,8 @@ await nativeTest(
       </section>
       <section><h2>Projects</h2><a href="/projects/example" class="grid grid-cols-[minmax(0,1fr)_auto]">
       <span class="grid"><span class="flex">Example project</span><span>A long project description that wraps through to the final words.</span></span>
-      <svg class="lucide-arrow-up-right" aria-hidden="true"></svg></a></section></main>`;
+      <svg class="lucide-arrow-up-right" aria-hidden="true"></svg></a></section>
+      <pre>sample command</pre></main>`;
 
     try {
       await startTerminal({
@@ -46,6 +47,13 @@ await nativeTest(
       await terminal.mockInput.typeText("systems around");
       await terminal.flush();
       assert.match(terminal.captureCharFrame(), /0 matches/u);
+
+      const codeStyle = terminal
+        .captureSpans()
+        .lines.flatMap((line) => line.spans)
+        .find((span) => span.text.includes("sample command"));
+
+      assert.deepEqual(codeStyle?.bg.toInts().slice(0, 3), [24, 27, 29]);
       terminal.mockInput.pressEnter();
       await terminal.flush();
       const lines = terminal.captureCharFrame().split("\n");
