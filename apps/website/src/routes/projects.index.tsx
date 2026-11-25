@@ -22,6 +22,7 @@ const decodeSearch = Schema.decodeUnknownOption(
 
 const ProjectsPage = () => {
   const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [query, setQuery] = useState(search.q ?? "");
 
   const [selectedLanguage, setSelectedLanguage] = useState(
@@ -33,6 +34,10 @@ const ProjectsPage = () => {
       onClearFilters={() => {
         setQuery("");
         setSelectedLanguage("");
+
+        if (search.q !== undefined || search.language !== undefined) {
+          void navigate({ replace: true, search: {} });
+        }
       }}
       onLanguageChange={setSelectedLanguage}
       onQueryChange={setQuery}
@@ -66,4 +71,5 @@ export const Route = createFileRoute("/projects/")({
       ...socialMeta("Projects | Tito", "Projects Tito has built and shipped."),
     ],
   }),
+  remountDeps: ({ search }) => search,
 });

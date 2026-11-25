@@ -49,4 +49,5 @@ export const Route = createFileRoute("/open-source")({
       ...socialMeta("Open source | Tito", "Open-source contributions by Tito."),
     ],
   }),
+  remountDeps: ({ search }) => search,
 });
