@@ -3,10 +3,12 @@ export interface WebsitePresentation {
   readonly direction: "column" | "row";
   readonly gap: number;
   readonly marginTop: number;
-  readonly paddingY: number;
+  readonly paddingTop: number;
+  readonly paddingBottom: number;
   readonly borderTop: boolean;
   readonly borderBottom: boolean;
   readonly card: boolean;
+  readonly hover: boolean;
   readonly justifyBetween: boolean;
   readonly responsive: boolean;
   readonly grid: boolean;
@@ -63,10 +65,12 @@ export const readWebsitePresentation = (
         : Number(/(?:^|\s)gap-(?:x-)?[235](?:\s|$)/u.test(classes)),
     grid: /(?:^|\s|:)grid-cols-/u.test(classes),
     grow: names.has("flex-1"),
+    hover: names.has("hover:bg-surface-hover"),
     justifyBetween:
       names.has("justify-between") || /grid-cols-\[.*_auto\]/u.test(classes),
     marginTop: names.has("mt-section") || names.has("mt-8") ? 2 : 0,
-    paddingY: /(?:^|\s)py-(?:3|3\.5|4|5)(?:\s|$)/u.test(classes) ? 1 : 0,
+    paddingBottom: Number(/(?:^|\s)py-[45](?:\s|$)/u.test(classes)),
+    paddingTop: Number(/(?:^|\s)py-(?:3|3\.5|4|5)(?:\s|$)/u.test(classes)),
     responsive,
   };
 };

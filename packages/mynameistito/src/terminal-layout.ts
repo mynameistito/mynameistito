@@ -7,6 +7,7 @@ interface Palette {
   readonly openDisclosures: ReadonlySet<string>;
   readonly origin: string;
   readonly surface: string;
+  readonly surfaceHover: string;
   readonly light: boolean;
   readonly line: string;
   readonly muted: string;
@@ -50,15 +51,16 @@ const groupBox = (
           ...(p.borderBottom ? ["bottom" as const] : []),
         ],
     borderColor: palette.line,
+    borderStyle: p.card ? "rounded" : "single",
     columnGap: p.gap,
     flexDirection: directionFor(p, renderer.width),
     justifyContent: p.justifyBetween ? "space-between" : "flex-start",
     marginTop: p.marginTop,
     minWidth: 0,
-    paddingBottom: p.paddingY,
+    paddingBottom: p.paddingBottom,
     paddingLeft: Number(p.card),
     paddingRight: Number(p.card),
-    paddingTop: p.paddingY,
+    paddingTop: p.paddingTop,
     width: "100%",
   });
 
@@ -81,12 +83,11 @@ export const mountWebsiteLayout = (
     box: BoxRenderable;
     disclosure?: string;
     presentation: WebsitePresentation;
-    children: { renderable: Renderable; grow: boolean }[];
+    children: { renderable: Renderable; grow: boolean; image: boolean }[];
   }[] = [];
 
   const images: {
-    image: ImageRenderable;
-    fallback: TextRenderable;
+    box: BoxRenderable;
     width: number;
     height: number;
   }[] = [];
@@ -95,12 +96,18 @@ export const mountWebsiteLayout = (
     node: Extract<WebsiteLayout, { kind: "image" }>,
     owner: BoxRenderable
   ) => {
+    const box = new BoxRenderable(renderer, {
+      flexShrink: 0,
+      height: node.height,
+      width: node.width,
+    });
+
     const fallback = new TextRenderable(renderer, {
       content: node.alt || "◉",
       fg: palette.muted,
-      height: node.height,
+      height: "100%",
       visible: false,
-      width: node.width,
+      width: "100%",
     });
 
     const source = new URL(
@@ -112,8 +119,8 @@ export const mountWebsiteLayout = (
     const image = new ImageRenderable(renderer, {
       fit: "cover",
       flexShrink: 0,
-      height: node.height,
-      width: node.width,
+      height: "100%",
+      width: "100%",
     });
 
     const showFallback = () => {
@@ -127,9 +134,10 @@ export const mountWebsiteLayout = (
       image.source = source;
     }
 
-    owner.add(image);
-    owner.add(fallback);
-    images.push({ fallback, height: node.height, image, width: node.width });
+    box.add(image);
+    box.add(fallback);
+    owner.add(box);
+    images.push({ box, height: node.height, width: node.width });
 
     if (vector) {
       const controller = new AbortController();
@@ -174,6 +182,8 @@ export const mountWebsiteLayout = (
 
       void rasterize();
     }
+
+    return box;
   };
 
   const mount = (
@@ -197,13 +207,22 @@ export const mountWebsiteLayout = (
     }
 
     if (node.kind === "image") {
-      mountImage(node, owner);
-
-      return undefined;
+      return mountImage(node, owner);
     }
 
     const p = node.presentation;
     const box = groupBox(renderer, p, palette);
+
+    if (p.hover) {
+      box.onMouseOver = () => {
+        box.backgroundColor = palette.surfaceHover;
+      };
+
+      box.onMouseOut = () => {
+        box.backgroundColor = "transparent";
+      };
+    }
+
     owner.add(box);
 
     const children = node.children.flatMap((child) => {
@@ -214,6 +233,7 @@ export const mountWebsiteLayout = (
         : [
             {
               grow: child.kind === "group" && child.presentation.grow,
+              image: child.kind === "image",
               renderable,
             },
           ];
@@ -241,6 +261,10 @@ export const mountWebsiteLayout = (
       box.rowGap = direction === "row" ? 0 : presentation.gap;
 
       for (const [index, child] of children.entries()) {
+        if (child.image) {
+          continue;
+        }
+
         const trailing =
           presentation.justifyBetween &&
           children.length > 1 &&
@@ -258,11 +282,10 @@ export const mountWebsiteLayout = (
       }
     }
 
-    for (const { image, fallback, width, height } of images) {
+    for (const { box, width, height } of images) {
       const visibleWidth = Math.min(width, Math.max(1, renderer.width - 4));
-      image.width = visibleWidth;
-      image.height = Math.max(1, Math.round((height * visibleWidth) / width));
-      fallback.width = visibleWidth;
+      box.width = visibleWidth;
+      box.height = Math.max(1, Math.round((height * visibleWidth) / width));
     }
   };
 

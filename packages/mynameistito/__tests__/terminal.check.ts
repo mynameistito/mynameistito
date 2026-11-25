@@ -291,16 +291,16 @@ await nativeTest(
       await terminal.mockInput.typeText("test");
       terminal.mockInput.pressEnter();
       await terminal.waitForFrame((text) =>
-        text.includes("Search projects: test")
+        text
+          .split("\n")
+          .some((line) => line.trim() === "│ test" || /│ test\s*│/u.test(line))
       );
       terminal.mockInput.pressTab();
       terminal.mockInput.pressTab();
       terminal.mockInput.pressEnter();
       terminal.mockInput.pressArrow("down");
       terminal.mockInput.pressEnter();
-      await terminal.waitForFrame((text) =>
-        text.includes("Language: TypeScript")
-      );
+      await terminal.waitForFrame((text) => text.includes("TypeScript ▾"));
       terminal.mockInput.pressKey("l", { ctrl: true });
       await terminal.mockInput.typeText("/open-source");
       terminal.mockInput.pressEnter();

@@ -381,7 +381,7 @@ export const parseWebsitePage = (
           18,
           Math.max(
             2,
-            Math.round((Number($(node).attr("height")) || pixels) / 16)
+            Math.round((Number($(node).attr("height")) || pixels) / 18)
           )
         );
 

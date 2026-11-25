@@ -1,6 +1,7 @@
 import type { CheerioAPI } from "cheerio";
 
 const usageLevels = ["·", "░", "▒", "▓", "█"];
+const terminalActionAttribute = "data-terminal-action";
 
 const prepareUsageChart = ($: CheerioAPI) => {
   $("main figure.tokscale-heatmap").each((_index, element) => {
@@ -47,7 +48,7 @@ const prepareForms = ($: CheerioAPI) => {
       const field = label.attr("for") ?? "";
 
       const control = $("<span></span>").attr(
-        "data-terminal-action",
+        terminalActionAttribute,
         `contact-${field}`
       );
 
@@ -62,6 +63,29 @@ const prepareForms = ($: CheerioAPI) => {
       .text("Message verification is unavailable in this terminal.");
     submit.replaceWith("<span>Send message</span>");
   }
+};
+
+const filterField = (
+  $: CheerioAPI,
+  label: string,
+  action: string,
+  value: string
+) => {
+  const group = $('<div class="grid min-w-0"></div>');
+  const caption = $('<p class="m-0 text-subtle"></p>').text(label);
+
+  const frame = $(
+    '<div class="border border-line rounded-control bg-surface"></div>'
+  );
+
+  const control = $("<span></span>")
+    .attr(terminalActionAttribute, action)
+    .text(value);
+
+  frame.append(control);
+  group.append(caption, frame);
+
+  return group;
 };
 
 /** Convert server-rendered search fields and filters into terminal controls.
@@ -86,10 +110,15 @@ export const prepareWebsiteControls = ($: CheerioAPI, url: string) => {
   const label = field.closest("label");
 
   if (label.length > 0) {
-    const search = $('<span data-terminal-action="filter-query"></span>');
-    const name = label.text().trim();
-    search.text(query === "" ? name : `${name}: ${query}`);
-    label.replaceWith(search);
+    const placeholder = field.attr("placeholder") ?? "Search";
+    label.replaceWith(
+      filterField(
+        $,
+        label.text().trim(),
+        "filter-query",
+        query === "" ? placeholder : query
+      )
+    );
   }
 
   const languages = $("main #project-language");
@@ -104,9 +133,16 @@ export const prepareWebsiteControls = ($: CheerioAPI, url: string) => {
     }));
 
   if (languages.length > 0) {
-    const select = $('<span data-terminal-action="filter-language"></span>');
-    select.text(`Language: ${language ?? "All languages"}`);
-    languages.closest("label").replaceWith(select);
+    languages
+      .closest("label")
+      .replaceWith(
+        filterField(
+          $,
+          "Language",
+          "filter-language",
+          `${language ?? "All languages"} ▾`
+        )
+      );
   }
 
   const stateButtons = $("main button[data-contribution-state]");
@@ -143,7 +179,7 @@ export const prepareWebsiteControls = ($: CheerioAPI, url: string) => {
     const details = $(element);
     const summary = details.children("summary");
     const action = `disclosure-${index}`;
-    const toggle = $("<span>▸</span>").attr("data-terminal-action", action);
+    const toggle = $("<span>▸</span>").attr(terminalActionAttribute, action);
     const content = $("<div></div>").attr("data-terminal-disclosure", action);
 
     if (details.attr("open") !== undefined) {

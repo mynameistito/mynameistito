@@ -44,6 +44,7 @@ const dark = {
   page: "#101112",
   subtle: "#8b9093",
   surface: "#151718",
+  surfaceHover: "#141617",
   text: "#f1f2f2",
 };
 
@@ -57,11 +58,21 @@ const light = {
   page: "#f7f8f8",
   subtle: "#686f72",
   surface: "#ffffff",
+  surfaceHover: "#edf0f1",
   text: "#17191a",
 };
 
 const blockBackground = (kind: WebsiteBlock["kind"], codeColor: string) =>
   kind === "code" ? codeColor : "transparent";
+
+const wholeBlockTarget = (block: WebsiteBlock) => {
+  const url = block.spans.find((span) => span.url !== undefined)?.url;
+
+  return url !== undefined &&
+    block.spans.every((span) => span.url === url || span.text.trim() === "")
+    ? url
+    : undefined;
+};
 
 const encodeSearchQuery = (query: string) => {
   // TanStack Router parses JSON-shaped query values before validation.
@@ -153,6 +164,9 @@ export const startTerminal = async (
   });
 
   const toolbar = new BoxRenderable(renderer, {
+    border: ["bottom"],
+    borderColor: colors.line,
+    columnGap: 1,
     flexDirection: "row",
     height: 2,
     width: "100%",
@@ -160,8 +174,25 @@ export const startTerminal = async (
 
   toolbar.add(address);
 
+  const headerVisitors = new TextRenderable(renderer, {
+    bg: colors.surface,
+    content: " ♙ ",
+    fg: colors.muted,
+    height: 1,
+    width: 3,
+  });
+
+  const headerSound = new TextRenderable(renderer, {
+    bg: colors.surface,
+    content: " ♪×",
+    fg: colors.muted,
+    height: 1,
+    width: 3,
+  });
+
   const themeControl = new TextRenderable(renderer, {
-    content: "☾",
+    bg: colors.surface,
+    content: " ☾ ",
     fg: colors.muted,
     height: 1,
     onMouseUp: () => {
@@ -171,7 +202,10 @@ export const startTerminal = async (
     width: 3,
   });
 
-  toolbar.add(themeControl);
+  for (const control of [headerVisitors, headerSound, themeControl]) {
+    toolbar.add(control);
+  }
+
   chrome.add(toolbar);
 
   const menu = new BoxRenderable(renderer, {
@@ -295,15 +329,21 @@ export const startTerminal = async (
         : `${target.row.plainText}    Enter to activate`;
   };
 
-  let rows: { block: WebsiteBlock; row: TextRenderable }[] = [];
+  let rows: { block: WebsiteBlock; row: TextRenderable; target?: string }[] =
+    [];
+
   let experienceExpanded = false;
   let loadingPage = false;
   const contactFields = new Map<string, string>();
   let soundEnabled = false;
   const openDisclosures = new Set<string>();
-  const pageActions = new Map<string, (action: string) => void>();
 
-  const activatePageAction = (action: string) => {
+  const pageActions = new Map<
+    string,
+    (action: string, row?: TextRenderable) => void
+  >();
+
+  const activatePageAction = (action: string, row?: TextRenderable) => {
     if (loadingPage) {
       return;
     }
@@ -313,7 +353,7 @@ export const startTerminal = async (
     }
 
     const key = action.startsWith("disclosure-") ? "disclosure" : action;
-    pageActions.get(key)?.(action);
+    pageActions.get(key)?.(action, row);
   };
 
   const blockIsVisible = (block: WebsiteBlock) =>
@@ -334,6 +374,8 @@ export const startTerminal = async (
     readonly submit?: (value: string) => void;
     readonly onKey?: (key: KeyEvent) => boolean;
   } | null = null;
+
+  let inlineInput: { frame: BoxRenderable; row: TextRenderable } | null = null;
 
   let languageOptions: NonNullable<WebsitePage["languages"]> = [];
   let filterQuery = "";
@@ -376,12 +418,34 @@ export const startTerminal = async (
     inputSession?.change?.(search.value);
   });
 
+  const restoreInlineInput = () => {
+    if (inlineInput !== null) {
+      inlineInput.frame.remove(search);
+      inlineInput.row.visible = true;
+      chrome.add(search);
+      search.focusedBackgroundColor = colors.page;
+      inlineInput = null;
+    }
+  };
+
   const startInput = (
     session: NonNullable<typeof inputSession>,
     placeholder: string,
-    value = ""
+    value = "",
+    row?: TextRenderable
   ) => {
+    restoreInlineInput();
     inputSession = session;
+    const frame = row?.parent;
+
+    if (row !== undefined && frame instanceof BoxRenderable) {
+      chrome.remove(search);
+      row.visible = false;
+      frame.add(search);
+      search.focusedBackgroundColor = colors.surface;
+      inlineInput = { frame, row };
+    }
+
     search.visible = true;
     search.placeholder = placeholder;
     search.value = value;
@@ -391,6 +455,7 @@ export const startTerminal = async (
   const closeInput = () => {
     inputSession = null;
     search.visible = false;
+    restoreInlineInput();
     scroll.focus();
   };
 
@@ -467,7 +532,7 @@ export const startTerminal = async (
 
     const selection = selectedLink;
 
-    for (const { block, row } of rows) {
+    for (const { block, row, target } of rows) {
       row.content = new StyledText(
         block.spans.map((span) => {
           const tone = span.tone ?? block.tone ?? "muted";
@@ -486,7 +551,9 @@ export const startTerminal = async (
           }
 
           if (span.url !== undefined) {
-            chunk = link(span.url)(chunk);
+            if (target === undefined) {
+              chunk = link(span.url)(chunk);
+            }
 
             if (
               selection >= 0 &&
@@ -524,49 +591,51 @@ export const startTerminal = async (
 
     for (const block of blocks) {
       const heading = block.kind === "heading" || block.kind === "subheading";
+      const targetUrl = wholeBlockTarget(block);
 
       const row = new TextRenderable(renderer, {
         bg: blockBackground(block.kind, colors.code),
         marginBottom: block.compact === true ? 0 : 1,
         marginTop: heading && block.compact !== true ? 1 : 0,
-        onMouseUp: (event) => {
-          const selection = renderer.getSelection();
-
-          const hasRange =
-            selection !== null &&
-            (selection.anchor.x !== selection.focus.x ||
-              selection.anchor.y !== selection.focus.y);
-
-          if (event.button !== 0 || (event.isDragging === true && hasRange)) {
-            return;
-          }
-
-          const target = renderer.getLinkAt(event.x, event.y);
-
-          if (target !== null) {
-            const span = block.spans.find((item) => item.url === target);
-
-            if (span?.action !== undefined) {
-              activatePageAction(span.action);
-
-              return;
-            }
-
-            // oxlint-disable-next-line no-use-before-define -- Installed callbacks run after navigation and rendering have both been initialized.
-            follow(target);
-          }
-        },
         selectable: block.spans.every((span) => span.action === undefined),
         visible: blockIsVisible(block),
         width: "100%",
         wrapMode: "word",
       });
 
+      row.onMouseUp = (event) => {
+        const selection = renderer.getSelection();
+
+        const hasRange =
+          selection !== null &&
+          (selection.anchor.x !== selection.focus.x ||
+            selection.anchor.y !== selection.focus.y);
+
+        if (event.button !== 0 || (event.isDragging === true && hasRange)) {
+          return;
+        }
+
+        const target = targetUrl ?? renderer.getLinkAt(event.x, event.y);
+
+        if (target !== null) {
+          const span = block.spans.find((item) => item.url === target);
+
+          if (span?.action !== undefined) {
+            activatePageAction(span.action, row);
+
+            return;
+          }
+
+          // oxlint-disable-next-line no-use-before-define -- Installed callbacks run after navigation and rendering have both been initialized.
+          follow(target);
+        }
+      };
+
       if (layout === undefined) {
         article.add(row);
       }
 
-      rows.push({ block, row });
+      rows.push({ block, row, target: targetUrl });
 
       for (const span of block.spans) {
         if (
@@ -602,6 +671,7 @@ export const startTerminal = async (
   };
 
   const toggleTheme = () => {
+    closeInput();
     const position = scroll.scrollTop;
     colors = colors === dark ? light : dark;
     renderer.setBackgroundColor(colors.page);
@@ -622,8 +692,13 @@ export const startTerminal = async (
       box.border = border;
     }
 
-    for (const item of [address, status, themeControl, ...navigation]) {
+    for (const item of [address, status, ...navigation]) {
       item.fg = colors.muted;
+    }
+
+    for (const control of [headerVisitors, headerSound, themeControl]) {
+      control.fg = colors.muted;
+      control.bg = colors.surface;
     }
 
     for (const [index, item] of navigation.entries()) {
@@ -643,7 +718,7 @@ export const startTerminal = async (
     search.backgroundColor = colors.page;
     search.focusedBackgroundColor = colors.page;
     search.focusedTextColor = colors.text;
-    themeControl.content = colors === dark ? "☾" : "☀";
+    themeControl.content = colors === dark ? " ☾ " : " ☀ ";
     matches = [];
     matchIndex = -1;
     display(displayedBlocks, displayedLayout);
@@ -658,12 +733,21 @@ export const startTerminal = async (
   pageActions.set("theme", toggleTheme);
   pageActions.set("sound", () => {
     soundEnabled = !soundEnabled;
+    headerSound.content = soundEnabled ? " ♪ " : " ♪×";
     updateRows();
   });
   pageActions.set("visitors", () => {
     status.content =
       "Visitor activity · Here now — · Joined today — · Total visitors —";
   });
+  headerVisitors.onMouseUp = () => {
+    activatePageAction("visitors");
+  };
+
+  headerSound.onMouseUp = () => {
+    activatePageAction("sound");
+  };
+
   pageActions.set("site-search", () => {
     startInput(
       {
@@ -910,7 +994,7 @@ export const startTerminal = async (
     return true;
   };
 
-  pageActions.set("filter-query", () => {
+  pageActions.set("filter-query", (_action, row) => {
     startInput(
       {
         submit: (value) => {
@@ -918,11 +1002,12 @@ export const startTerminal = async (
         },
       },
       "Search…",
-      filterQuery
+      filterQuery,
+      row
     );
     status.content = "Enter to apply · Escape to cancel";
   });
-  pageActions.set("filter-language", () => {
+  pageActions.set("filter-language", (_action, row) => {
     const current = new URL(currentUrl).searchParams.get("language") ?? "";
     languageIndex = Math.max(
       0,
@@ -939,7 +1024,8 @@ export const startTerminal = async (
         },
       },
       "Language",
-      languageOptions.at(languageIndex)?.label ?? ""
+      languageOptions.at(languageIndex)?.label ?? "",
+      row
     );
     status.content = "Up / Down choose language · Enter to apply";
   });
@@ -1016,7 +1102,7 @@ export const startTerminal = async (
 
     if (target?.row.visible === true) {
       if (target.action !== undefined) {
-        activatePageAction(target.action);
+        activatePageAction(target.action, target.row);
 
         return;
       }
