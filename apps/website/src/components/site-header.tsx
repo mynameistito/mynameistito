@@ -59,7 +59,7 @@ export const HomeProfile = () => (
         </p>
       </div>
     </div>
-    <div className="min-w-0 flex-1">
+    <div className="min-w-0 flex-1" data-now-playing="">
       <SpotifyNowPlaying />
     </div>
     <div className="flex shrink-0 items-center gap-1">

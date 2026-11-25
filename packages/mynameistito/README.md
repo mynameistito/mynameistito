@@ -18,7 +18,7 @@ Use Up/Down or the mouse wheel to scroll, Left/Right to switch pages, and Tab/Sh
 
 Press `m` to reveal the page menu; click a page name or use Left/Right to browse. Press `b`, Backspace, or Escape to go back; `f` goes forward. Browsed pages are cached for the session, and history restores the previous scroll position. Press `r` to reload from the website, `o` to open the current page in your browser, and `q` or Ctrl+C to exit. `?` shows additional shortcuts.
 
-External links open in your browser. The contact page includes a link to its browser-verified message form. Use the browser edition at https://mynameistito.com for project filters, visitor activity, and audio. Terminal cell sizes and supported image protocols determine visual fidelity.
+Projects and Open source have native search and filters. Select a repository's disclosure arrow to reveal its pull requests. External destinations open in your browser. Contact submission and verified visitor counts require the website's browser verification. Terminal cell sizes and supported image protocols determine visual fidelity.
 
 If the website is unavailable, the interface shows the bundled profile and links. Piped output and `--plain` always print the profile card without network access.
 
@@ -33,6 +33,7 @@ import { links, profile } from "mynameistito";
 ```bash
 bun install
 bun --filter mynameistito run dev
+bun --filter mynameistito run dev --site http://localhost:1337
 ```
 
 Run `bun run --cwd packages/mynameistito test:terminal` for native terminal checks, including inline links, back/forward history, and a narrow terminal layout.

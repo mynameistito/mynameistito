@@ -27,6 +27,7 @@ export type WebsiteLayout =
     }
   | {
       readonly kind: "group";
+      readonly disclosure?: string;
       readonly presentation: WebsitePresentation;
       readonly children: readonly WebsiteLayout[];
     };
@@ -51,7 +52,9 @@ export const readWebsitePresentation = (
     borderTop: names.has("border-t"),
     card:
       names.has("border") &&
-      (names.has("bg-surface") || names.has("rounded-control")),
+      (names.has("bg-surface") ||
+        names.has("rounded-control") ||
+        names.has("bg-card")),
     direction: row ? "row" : "column",
     fixedLead: /grid-cols-\[\d+px_/u.test(classes),
     gap:

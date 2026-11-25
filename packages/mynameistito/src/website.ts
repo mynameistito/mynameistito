@@ -1,6 +1,10 @@
 import { load } from "cheerio";
-import { Data, Effect } from "effect";
+import { Data, Effect, Option, Schema } from "effect";
 
+import { profile } from "../../../apps/website/src/domain/profile.js";
+import { NowPlayingResponseSchema } from "../../../apps/website/src/integrations/spotify/lastfm.js";
+import type { NowPlaying } from "../../../apps/website/src/integrations/spotify/lastfm.js";
+import { prepareWebsiteControls } from "./website-controls.js";
 import { readWebsitePresentation } from "./website-layout.js";
 import type { WebsiteLayout, WebsitePresentation } from "./website-layout.js";
 
@@ -9,6 +13,9 @@ export const siteOrigin = "https://mynameistito.com";
 
 /** A readable website page and its navigable links. */
 export interface WebsitePage {
+  readonly languages?: readonly { label: string; value: string }[];
+  readonly filterQuery?: string;
+  readonly openDisclosures?: readonly string[];
   readonly back?: { readonly label: string; readonly url: string };
   readonly dock: readonly { readonly label: string; readonly url: string }[];
   readonly layout: WebsiteLayout;
@@ -22,6 +29,7 @@ export interface WebsitePage {
 export interface WebsiteBlock {
   readonly compact?: boolean;
   readonly experienceDetail?: boolean;
+  readonly disclosure?: string;
   readonly tone?: "text" | "muted" | "subtle";
   // oxlint-disable-next-line sonarjs/max-union-size -- These are the distinct HTML presentation roles used by the renderer.
   readonly kind: "heading" | "subheading" | "paragraph" | "list" | "code";
@@ -29,8 +37,7 @@ export interface WebsiteBlock {
     readonly text: string;
     readonly url?: string;
     readonly strong?: boolean;
-    readonly browser?: boolean;
-    readonly action?: "experience" | "theme";
+    readonly action?: string;
     readonly tone?: "text" | "muted" | "subtle";
     readonly underline?: boolean;
   }[];
@@ -57,18 +64,23 @@ const groupPresentationFor = (
   classes: string,
   isBlock: boolean
 ) =>
-  isBlock && /^(?:div|section|article|li|ul|ol|nav|header|span|a)$/u.test(tag)
+  isBlock &&
+  /^(?:div|section|article|li|ul|ol|nav|header|span|a|summary|fieldset)$/u.test(
+    tag
+  )
     ? readWebsitePresentation(classes)
     : undefined;
 
 /** Translate server-rendered portfolio HTML, excluding scripts and hidden UI.
  * @param html - The website response body.
  * @param url - The current page URL, used to resolve relative links.
+ * @param nowPlaying - The current track from the website's public endpoint.
  * @returns Readable page content, or null when no main content exists.
  */
 export const parseWebsitePage = (
   html: string,
-  url: string
+  url: string,
+  nowPlaying?: NowPlaying | null
 ): WebsitePage | null => {
   const $ = load(html);
 
@@ -99,7 +111,7 @@ export const parseWebsitePage = (
     return null;
   }
 
-  const header = main.find("header.fixed").first();
+  const header = $("header.fixed").first();
   const backLink = header.find("a[href]").first();
   const backHref = backLink.attr("href");
 
@@ -111,14 +123,35 @@ export const parseWebsitePage = (
   header.remove();
 
   const experience = main.find('section[aria-labelledby="experience-title"]');
+
+  if (experience.find("[data-experience-highlights]").length === 0) {
+    experience.find("li").each((_index, element) => {
+      const row = $(element);
+
+      const role = profile.experience.find(
+        (item) => item.href === row.find("a[href]").first().attr("href")
+      );
+
+      const summary = row.find("h3").first().parent().parent();
+
+      if (role === undefined || summary.length === 0) {
+        return;
+      }
+
+      const list = $("<ul data-experience-highlights></ul>");
+
+      for (const highlight of role.highlights) {
+        list.append($("<li></li>").text(highlight));
+      }
+
+      summary.append(list);
+    });
+  }
+
   const highlights = experience.find("[data-experience-highlights]");
   experience
     .find("button[aria-expanded]")
-    .replaceWith(
-      highlights.length > 0
-        ? '<span data-terminal-action="experience">See more</span>'
-        : '<span data-browser-action="true">See more in browser</span>'
-    );
+    .replaceWith('<span data-terminal-action="experience">See more</span>');
   highlights.each((_index, element) => {
     const list = $(element);
     const summary = list.parent();
@@ -135,19 +168,40 @@ export const parseWebsitePage = (
     summary.after(details);
   });
 
-  main
-    .find("label[for=project-search]")
-    .parent()
-    .replaceWith(
-      '<p data-browser-action="true">Filter projects in browser</p>'
+  const { filterQuery, languages, openDisclosures } = prepareWebsiteControls(
+    $,
+    url
+  );
+
+  main.append($("body > footer").first());
+
+  if (nowPlaying) {
+    const track = $('<a class="flex gap-2"></a>');
+    track.attr("href", nowPlaying.spotifyUrl);
+    track.append($("<span>Now playing</span>"));
+    track.append(
+      $("<span></span>").text(
+        `${nowPlaying.title} · ${nowPlaying.artists.join(", ")}`
+      )
     );
+    main.find("[data-now-playing]").append(track);
+  }
+
   const theme = main.find('button[aria-label="Toggle color theme"]');
+  theme.parent().addClass("gap-2");
+  theme.parent().parent().addClass("gap-2");
   theme
     .parents(".flex")
     .filter((_index, element) => $(element).find('img[width="46"]').length > 0)
     .first()
     .addClass("justify-between");
   theme.replaceWith('<span data-terminal-action="theme">☾</span>');
+  main
+    .find('button[aria-controls="visitor-activity-details"]')
+    .replaceWith('<span data-terminal-action="visitors">Visitors</span>');
+  main
+    .find('button[aria-label^="Turn click sounds"]')
+    .replaceWith('<span data-terminal-action="sound">Sound off</span>');
   main
     .find("svg.lucide-arrow-up-right")
     .replaceWith('<span class="text-muted">↗</span>');
@@ -157,11 +211,6 @@ export const parseWebsitePage = (
     )
     .remove();
   main.find('[class*="portfolio-scene"]').remove();
-  main
-    .find("form")
-    .replaceWith(
-      '<p data-browser-action="true">Open the contact form in your browser to send a message.</p>'
-    );
   const links = new Map<string, { label: string; url: string }>();
   main.find("a[href]").each((_index, element) => {
     const anchor = $(element);
@@ -190,6 +239,7 @@ export const parseWebsitePage = (
 
   interface LayoutGroup {
     readonly kind: "group";
+    readonly disclosure?: string;
     readonly presentation: WebsitePresentation;
     readonly children: WebsiteLayout[];
   }
@@ -213,11 +263,12 @@ export const parseWebsitePage = (
 
   let kind: WebsiteBlock["kind"] = "paragraph";
   let compact = false;
+  let disclosure: string | undefined;
   let tone: WebsiteBlock["tone"] = "muted";
 
   const addBlock = (block: WebsiteBlock) => {
     container.children.push({ index: blocks.length, kind: "block" });
-    blocks.push(block);
+    blocks.push({ ...block, disclosure });
   };
 
   const flush = () => {
@@ -288,7 +339,7 @@ export const parseWebsitePage = (
   const specialElement = (node: ContentNode, tag: string): boolean => {
     const action = $(node).attr("data-terminal-action");
 
-    if (action === "experience" || action === "theme") {
+    if (action !== undefined) {
       flush();
       const target = new URL(url);
       target.hash = `terminal-${action}`;
@@ -349,16 +400,6 @@ export const parseWebsitePage = (
       return true;
     }
 
-    if ($(node).attr("data-browser-action") !== undefined) {
-      flush();
-      addBlock({
-        kind: "paragraph",
-        spans: [{ browser: true, text: $(node).text(), url }],
-      });
-
-      return true;
-    }
-
     return false;
   };
 
@@ -380,6 +421,12 @@ export const parseWebsitePage = (
       kind = "list";
     } else if (tag === "pre") {
       kind = "code";
+    }
+  };
+
+  const flushRow = (presentation: WebsitePresentation | undefined) => {
+    if (presentation?.direction === "row") {
+      flush();
     }
   };
 
@@ -407,7 +454,7 @@ export const parseWebsitePage = (
     }
 
     const isBlock =
-      /^(?:h[1-6]|p|li|ul|ol|pre|div|section|article|tr|blockquote|nav|header)$/u.test(
+      /^(?:h[1-6]|p|li|ul|ol|pre|div|section|article|tr|blockquote|nav|header|summary|output)$/u.test(
         tag
       ) ||
       /(?:^|\s)(?:grid|flex|block)(?:\s|$)/u.test($(node).attr("class") ?? "");
@@ -420,13 +467,18 @@ export const parseWebsitePage = (
     const previousContainer = container;
     const previousCompact = compact;
     const previousTone = tone;
+    const previousDisclosure = disclosure;
     const classes = $(node).attr("class") ?? "";
 
     const groupPresentation = groupPresentationFor(tag, classes, isBlock);
 
     if (groupPresentation !== undefined) {
+      const id = $(node).attr("data-terminal-disclosure");
+      disclosure = id ?? disclosure;
+
       const group: LayoutGroup = {
         children: [],
+        disclosure: id,
         kind: "group",
         presentation: groupPresentation,
       };
@@ -452,12 +504,7 @@ export const parseWebsitePage = (
         underlined || classes.split(/\s+/u).includes("underline")
       );
 
-      if (
-        container !== previousContainer &&
-        container.presentation.direction === "row"
-      ) {
-        flush();
-      }
+      flushRow(groupPresentation);
     }
 
     if (isBlock) {
@@ -468,6 +515,7 @@ export const parseWebsitePage = (
     container = previousContainer;
     compact = previousCompact;
     tone = previousTone;
+    disclosure = previousDisclosure;
   };
 
   for (const node of nodes) {
@@ -495,19 +543,49 @@ export const parseWebsitePage = (
     back,
     blocks,
     dock,
+    filterQuery,
+    languages,
     layout,
     links: [...links.values()],
+    openDisclosures,
     text: cleanText(main.text()),
     title: cleanText($("title").text()) || "Tito",
   };
 };
 
+const loadNowPlaying = async (
+  origin: string,
+  signal: AbortSignal
+): Promise<NowPlaying | null> => {
+  try {
+    const response = await fetch(new URL("/api/spotify/now-playing", origin), {
+      headers: { accept: "application/json" },
+      redirect: "error",
+      signal: AbortSignal.any([signal, AbortSignal.timeout(1500)]),
+    });
+
+    if (response.ok) {
+      const payload: unknown = await response.json();
+
+      return Option.getOrNull(
+        Schema.decodeUnknownOption(NowPlayingResponseSchema)(payload)
+      );
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+};
+
 /** Fetch a published portfolio page with a bounded request lifetime.
  * @param url - An absolute URL on the portfolio origin.
+ * @param signal - Cancels the request when navigation changes.
+ * @param origin - The approved local or published portfolio origin.
  * @returns An Effect containing the translated page or a typed availability error.
  */
 export const fetchWebsitePage = Effect.fn("Portfolio.fetchPage")(
-  (url: string, signal?: AbortSignal) =>
+  (url: string, signal?: AbortSignal, origin = siteOrigin) =>
     Effect.tryPromise({
       catch: () =>
         new WebsiteUnavailable({
@@ -516,23 +594,34 @@ export const fetchWebsitePage = Effect.fn("Portfolio.fetchPage")(
       try: async () => {
         const target = new URL(url);
 
-        if (target.origin !== siteOrigin) {
+        if (target.origin !== origin) {
           return null;
         }
+
+        const timeout = AbortSignal.timeout(10_000);
+
+        const requestSignal =
+          signal === undefined ? timeout : AbortSignal.any([signal, timeout]);
 
         const response = await fetch(target, {
           headers: { accept: "text/html" },
-          signal:
-            signal === undefined
-              ? AbortSignal.timeout(10_000)
-              : AbortSignal.any([signal, AbortSignal.timeout(10_000)]),
+          signal: requestSignal,
         });
 
-        if (!response.ok || new URL(response.url).origin !== siteOrigin) {
+        if (
+          (!response.ok && response.status !== 404) ||
+          new URL(response.url).origin !== origin
+        ) {
           return null;
         }
 
-        return parseWebsitePage(await response.text(), response.url);
+        const html = await response.text();
+
+        const nowPlaying = html.includes("data-now-playing")
+          ? await loadNowPlaying(target.origin, requestSignal)
+          : undefined;
+
+        return parseWebsitePage(html, response.url, nowPlaying);
       },
     }).pipe(
       Effect.flatMap((page) =>

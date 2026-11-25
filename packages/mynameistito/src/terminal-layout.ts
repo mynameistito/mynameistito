@@ -2,9 +2,10 @@ import { BoxRenderable, ImageRenderable, TextRenderable } from "@opentui/core";
 import type { CliRenderer, Renderable } from "@opentui/core";
 
 import type { WebsiteLayout, WebsitePresentation } from "./website-layout.js";
-import { siteOrigin } from "./website.js";
 
 interface Palette {
+  readonly openDisclosures: ReadonlySet<string>;
+  readonly origin: string;
   readonly surface: string;
   readonly light: boolean;
   readonly line: string;
@@ -78,6 +79,7 @@ export const mountWebsiteLayout = (
 ): (() => void) => {
   const groups: {
     box: BoxRenderable;
+    disclosure?: string;
     presentation: WebsitePresentation;
     children: { renderable: Renderable; grow: boolean }[];
   }[] = [];
@@ -137,7 +139,7 @@ export const mountWebsiteLayout = (
 
       const rasterize = async () => {
         try {
-          if (source.origin !== siteOrigin) {
+          if (source.origin !== palette.origin) {
             throw new Error("The SVG is outside the portfolio.");
           }
 
@@ -217,7 +219,12 @@ export const mountWebsiteLayout = (
           ];
     });
 
-    groups.push({ box, children, presentation: p });
+    groups.push({
+      box,
+      children,
+      disclosure: node.disclosure,
+      presentation: p,
+    });
 
     return box;
   };
@@ -225,8 +232,10 @@ export const mountWebsiteLayout = (
   mount(layout, parent);
 
   const reflow = () => {
-    for (const { box, children, presentation } of groups) {
+    for (const { box, children, disclosure, presentation } of groups) {
       const direction = directionFor(presentation, renderer.width);
+      box.visible =
+        disclosure === undefined || palette.openDisclosures.has(disclosure);
       box.flexDirection = direction;
       box.alignItems = direction === "row" ? "center" : "stretch";
       box.rowGap = direction === "row" ? 0 : presentation.gap;

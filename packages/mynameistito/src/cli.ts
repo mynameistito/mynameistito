@@ -31,12 +31,19 @@ const supportedRuntime =
 
 if (process.argv.includes("--help")) {
   process.stdout.write(
-    "mynameistito — the portfolio in your terminal\n\nUse bunx --bun mynameistito for the interactive website.\n--plain  Print the profile card\n--help   Show this help\n"
+    "mynameistito — the portfolio in your terminal\n\nUse bunx --bun mynameistito for the interactive website.\n--site <url>  Use an alternate website origin\n--plain       Print the profile card\n--help        Show this help\n"
   );
 } else if (interactive && supportedRuntime) {
   try {
     const { startTerminal } = await import("./terminal.js");
-    await startTerminal();
+    const siteOption = process.argv.indexOf("--site", 2);
+    const site = siteOption === -1 ? undefined : process.argv[siteOption + 1];
+
+    if (siteOption !== -1 && (site === undefined || !URL.canParse(site))) {
+      throw new Error("--site requires an absolute HTTP or HTTPS URL.");
+    }
+
+    await startTerminal({ site });
   } catch (error) {
     if (
       error instanceof Error &&

@@ -108,6 +108,9 @@ const ProjectPage = () => {
                 <li className="border-b border-line" key={item.name}>
                   <Link
                     className="flex min-h-14 items-center justify-between gap-4 text-sm text-text transition-colors hover:text-accent"
+                    data-project-source={
+                      item.hasDetailPage === true ? undefined : item.source
+                    }
                     params={{ slug: projectSlug(item.name) }}
                     to="/projects/$slug"
                   >

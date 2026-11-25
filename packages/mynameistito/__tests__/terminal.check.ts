@@ -3,10 +3,70 @@ import assert from "node:assert/strict";
 import { test as nativeTest } from "node:test";
 
 import { createTestRenderer } from "@opentui/core/testing";
-import { Effect } from "effect";
+import { Deferred, Effect } from "effect";
 
 import { startTerminal } from "../src/terminal.js";
 import { parseWebsitePage, WebsiteUnavailable } from "../src/website.js";
+
+await nativeTest(
+  "filters keep literal queries and ignore controls during navigation",
+  async () => {
+    const terminal = await createTestRenderer({ height: 28, width: 100 });
+    const requested: URL[] = [];
+
+    const about = parseWebsitePage(
+      "<main><h1>About Tito</h1></main>",
+      "https://mynameistito.com/about"
+    );
+
+    assert.ok(about);
+    const pending = Effect.runSync(Deferred.make<typeof about>());
+
+    const filters =
+      '<main><h1>Projects</h1><label for="project-search">Search projects<input id="project-search"></label></main>';
+
+    try {
+      await startTerminal({
+        loadPage: (url) => {
+          const target = new URL(url);
+          requested.push(target);
+
+          if (target.pathname === "/about") {
+            return Deferred.await(pending);
+          }
+
+          const page = parseWebsitePage(filters, url);
+          assert.ok(page);
+
+          return Effect.succeed(page);
+        },
+        renderer: terminal.renderer,
+      });
+      terminal.mockInput.pressTab();
+      terminal.mockInput.pressEnter();
+      await terminal.mockInput.typeText("[1]");
+      terminal.mockInput.pressEnter();
+      await terminal.flush();
+      assert.equal(requested.at(-1)?.searchParams.get("q"), '"[1]"');
+
+      terminal.mockInput.pressKey("l", { ctrl: true });
+      await terminal.mockInput.typeText("/about");
+      terminal.mockInput.pressEnter();
+      await terminal.flush();
+      assert.equal(requested.at(-1)?.pathname, "/about");
+      terminal.mockInput.pressTab();
+      terminal.mockInput.pressEnter();
+      await terminal.flush();
+      assert.doesNotMatch(terminal.captureCharFrame(), /Enter to apply/u);
+      assert.equal(requested.length, 3);
+      await Effect.runPromise(Deferred.succeed(pending, about));
+      await terminal.waitForFrame((text) => text.includes("About Tito"));
+    } finally {
+      await Effect.runPromise(Deferred.succeed(pending, about));
+      await terminal.dispose();
+    }
+  }
+);
 
 await nativeTest(
   "home project rows wrap and experience details toggle in place",
@@ -59,7 +119,8 @@ await nativeTest(
       const lines = terminal.captureCharFrame().split("\n");
       const y = lines.findIndex((line) => line.includes("See more"));
       const x = lines.at(y)?.indexOf("See more") ?? -1;
-      assert.ok(y !== -1 && x >= 0);
+      assert.ok(y !== -1);
+      assert.ok(x >= 0);
       await terminal.mockMouse.click(x + 1, y);
       await terminal.waitForFrame((text) => text.includes("See less"));
       assert.match(terminal.captureCharFrame(), /systems around them/u);
@@ -80,7 +141,7 @@ await nativeTest(
 );
 
 await nativeTest(
-  "terminal navigation, layout, themes and browser handoff",
+  "terminal navigation, layout, themes and native filtering",
   async () => {
     const terminal = await createTestRenderer({ height: 28, width: 100 });
 
@@ -95,6 +156,7 @@ await nativeTest(
       await startTerminal({
         loadPage: (url) => {
           let html = pageHtml;
+          const target = new URL(url);
 
           if (url.endsWith("/blog/hello")) {
             html = postHtml;
@@ -105,12 +167,18 @@ await nativeTest(
           }
 
           if (url.endsWith("/contact")) {
-            html = "<main><h1>Contact Tito</h1><form>Send</form></main>";
+            html =
+              '<main><h1>Contact Tito</h1><form><label for="name">Name<input id="name"></label><label for="message">Message<textarea id="message"></textarea></label><button type="submit" disabled>Send</button><p role="status">Unavailable</p></form></main>';
           }
 
-          if (url.endsWith("/projects")) {
+          if (target.pathname === "/projects") {
             html =
-              '<main><h1>Projects</h1><div><label for="project-search">Search projects<input id="project-search"></label><label>Language<select></select></label></div></main>';
+              '<main><h1>Projects</h1><div><label for="project-search">Search projects<input id="project-search"></label><label>Language<select id="project-language"><option value="">All languages</option><option value="TypeScript">TypeScript</option></select></label></div></main>';
+          }
+
+          if (target.pathname === "/open-source") {
+            html =
+              '<main><h1>Open source</h1><details><summary class="flex">Example repository</summary><p>Pull request title</p></details></main>';
           }
 
           if (url.endsWith("/packages")) {
@@ -175,8 +243,11 @@ await nativeTest(
       await terminal.waitForFrame((text) => text.includes("Contact Tito"));
       terminal.mockInput.pressTab();
       terminal.mockInput.pressEnter();
+      await terminal.mockInput.typeText("Tito");
+      terminal.mockInput.pressEnter();
       await terminal.flush();
-      assert.deepEqual(opened, ["https://mynameistito.com/contact"]);
+      assert.match(terminal.captureCharFrame(), /Name: Tito/u);
+      assert.deepEqual(opened, []);
       terminal.resize(100, 28);
       terminal.mockInput.pressKey("l", { ctrl: true });
       await terminal.mockInput.typeText("/packages");
@@ -199,7 +270,7 @@ await nativeTest(
       terminal.mockInput.pressTab({ shift: true });
       terminal.mockInput.pressEnter();
       await terminal.flush();
-      assert.equal(opened.at(-1), "https://github.com/mynameistito");
+      assert.deepEqual(opened, ["https://github.com/mynameistito"]);
       terminal.mockInput.pressKey("t");
       await terminal.flush();
       assert.match(terminal.captureCharFrame(), /☀/u);
@@ -214,12 +285,34 @@ await nativeTest(
       terminal.mockInput.pressKey("l", { ctrl: true });
       await terminal.mockInput.typeText("/projects");
       terminal.mockInput.pressEnter();
-      await terminal.waitForFrame((text) =>
-        text.includes("Filter projects in browser")
-      );
+      await terminal.waitForFrame((text) => text.includes("Search projects"));
       terminal.mockInput.pressTab();
       terminal.mockInput.pressEnter();
-      assert.equal(opened.at(-1), "https://mynameistito.com/projects");
+      await terminal.mockInput.typeText("test");
+      terminal.mockInput.pressEnter();
+      await terminal.waitForFrame((text) =>
+        text.includes("Search projects: test")
+      );
+      terminal.mockInput.pressTab();
+      terminal.mockInput.pressTab();
+      terminal.mockInput.pressEnter();
+      terminal.mockInput.pressArrow("down");
+      terminal.mockInput.pressEnter();
+      await terminal.waitForFrame((text) =>
+        text.includes("Language: TypeScript")
+      );
+      terminal.mockInput.pressKey("l", { ctrl: true });
+      await terminal.mockInput.typeText("/open-source");
+      terminal.mockInput.pressEnter();
+      await terminal.waitForFrame((text) =>
+        text.includes("Example repository")
+      );
+      assert.doesNotMatch(terminal.captureCharFrame(), /Pull request title/u);
+      terminal.mockInput.pressTab();
+      terminal.mockInput.pressEnter();
+      await terminal.waitForFrame((text) =>
+        text.includes("Pull request title")
+      );
       console.log(
         "Terminal checks passed: links, search, history, browser actions, website rows, responsive layout, social dock, theme, and page menu."
       );

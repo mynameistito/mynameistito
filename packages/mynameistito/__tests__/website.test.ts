@@ -3,6 +3,21 @@ import { describe, expect, it } from "vitest";
 import { parseWebsitePage } from "../src/website.js";
 
 describe("terminal website translation", () => {
+  it("keeps native Experience expansion on older published pages", () => {
+    const page = parseWebsitePage(
+      '<main><section aria-labelledby="experience-title"><h2 id="experience-title">Experience</h2><button aria-expanded="false">See more</button><ul><li><div><div><h3><a href="https://kzg.gg">KZG</a></h3></div></div></li></ul></section></main>',
+      "https://mynameistito.com/"
+    );
+
+    expect(page?.blocks.flatMap((block) => block.spans)).toContainEqual(
+      expect.objectContaining({ action: "experience", text: "See more" })
+    );
+    expect(
+      page?.blocks.find((block) => block.experienceDetail === true)?.spans[0]
+        ?.text
+    ).toContain("game servers");
+  });
+
   it("preserves indentation at both code block boundaries", () => {
     const page = parseWebsitePage(
       "<main><pre>  first\n    last  </pre></main>",
@@ -62,9 +77,9 @@ describe("terminal website translation", () => {
     ]);
   });
 
-  it("retains social navigation, profile headers, and a working browser action for forms", () => {
+  it("retains social navigation, profile headers, and terminal form fields", () => {
     const page = parseWebsitePage(
-      '<main><header><h1>Tito</h1></header><nav aria-label="Social links"><a href="https://discord.com/users/1">Discord</a><a href="/blog">Writing</a></nav><form><label>Email<input></label></form></main>',
+      '<main><header><h1>Tito</h1></header><nav aria-label="Social links"><a href="https://discord.com/users/1">Discord</a><a href="/blog">Writing</a></nav><form><label for="email">Email<input></label><label for="message">Message<textarea id="message"></textarea></label></form></main>',
       "https://mynameistito.com/contact"
     );
 
@@ -76,8 +91,8 @@ describe("terminal website translation", () => {
     expect(
       page?.blocks
         .flatMap((block) => block.spans)
-        .find((span) => span.browser === true)
-    ).toMatchObject({ browser: true, url: "https://mynameistito.com/contact" });
+        .find((span) => span.action === "contact-email")
+    ).toMatchObject({ text: "Email" });
   });
 
   it("preserves line breaks and code indentation", () => {

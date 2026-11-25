@@ -63,17 +63,36 @@ const light = {
 const blockBackground = (kind: WebsiteBlock["kind"], codeColor: string) =>
   kind === "code" ? codeColor : "transparent";
 
+const encodeSearchQuery = (query: string) => {
+  // TanStack Router parses JSON-shaped query values before validation.
+  try {
+    JSON.parse(query);
+  } catch {
+    return query;
+  }
+
+  return JSON.stringify(query);
+};
+
 /** Start the terminal portfolio with semantic page content and browser navigation.
  * @param options - Optional renderer and page loader for embedded terminals and deterministic checks.
  * @returns A promise resolved when the first page has loaded.
  */
 export const startTerminal = async (
   options: {
+    readonly site?: string;
     readonly renderer?: CliRenderer;
     readonly loadPage?: typeof fetchWebsitePage;
     readonly openExternal?: (url: string) => void;
   } = {}
 ): Promise<void> => {
+  const site = new URL(options.site ?? siteOrigin);
+
+  if (!["http:", "https:"].includes(site.protocol)) {
+    throw new Error("The portfolio URL must use HTTP or HTTPS.");
+  }
+
+  const { origin } = site;
   let closed = false;
   let colors = dark;
   let revision = 0;
@@ -120,7 +139,7 @@ export const startTerminal = async (
 
   shell.add(chrome);
 
-  let backUrl = `${siteOrigin}/`;
+  let backUrl = `${origin}/`;
 
   const address = new TextRenderable(renderer, {
     content: "",
@@ -175,7 +194,7 @@ export const startTerminal = async (
       height: 1,
       onMouseUp: () => {
         // oxlint-disable-next-line no-use-before-define -- Mouse callbacks run after navigation initialization.
-        follow(new URL(path, siteOrigin).href);
+        follow(new URL(path, origin).href);
       },
       width: name.length,
     });
@@ -254,7 +273,7 @@ export const startTerminal = async (
   footer.add(status);
   shell.add(footer);
 
-  let currentUrl = `${siteOrigin}/`;
+  let currentUrl = `${origin}/`;
   const history = [{ scroll: 0, url: currentUrl }];
   let historyIndex = 0;
 
@@ -265,14 +284,35 @@ export const startTerminal = async (
 
   let linkTargets: {
     url: string;
-    action?: "experience" | "theme";
-    browser?: boolean;
+    action?: string;
     row: TextRenderable;
   }[] = [];
 
   let rows: { block: WebsiteBlock; row: TextRenderable }[] = [];
   let experienceExpanded = false;
-  const pageActions = new Map<string, () => void>();
+  let loadingPage = false;
+  const contactFields = new Map<string, string>();
+  let soundEnabled = false;
+  const openDisclosures = new Set<string>();
+  const pageActions = new Map<string, (action: string) => void>();
+
+  const activatePageAction = (action: string) => {
+    if (loadingPage) {
+      return;
+    }
+
+    if (soundEnabled && options.renderer === undefined) {
+      process.stderr.write("\u0007");
+    }
+
+    const key = action.startsWith("disclosure-") ? "disclosure" : action;
+    pageActions.get(key)?.(action);
+  };
+
+  const blockIsVisible = (block: WebsiteBlock) =>
+    (block.experienceDetail !== true || experienceExpanded) &&
+    (block.disclosure === undefined || openDisclosures.has(block.disclosure));
+
   let dockRows: { label: string; row: TextRenderable; url: string }[] = [];
   let reflowPage: (() => void) | undefined;
   let displayedBlocks: readonly WebsiteBlock[] = [];
@@ -281,7 +321,16 @@ export const startTerminal = async (
   renderer.on("resize", () => {
     reflowPage?.();
   });
-  let inputMode: "find" | "address" | null = null;
+
+  let inputSession: {
+    readonly change?: (value: string) => void;
+    readonly submit?: (value: string) => void;
+    readonly onKey?: (key: KeyEvent) => boolean;
+  } | null = null;
+
+  let languageOptions: NonNullable<WebsitePage["languages"]> = [];
+  let filterQuery = "";
+  let languageIndex = 0;
   let matches: TextRenderable[] = [];
   let matchIndex = -1;
   let findQuery = "";
@@ -317,22 +366,23 @@ export const startTerminal = async (
   };
 
   search.on("input", () => {
-    if (inputMode === "find") {
-      find(search.value.trim().toLocaleLowerCase());
-    }
+    inputSession?.change?.(search.value);
   });
 
-  const startInput = (mode: "find" | "address") => {
-    inputMode = mode;
+  const startInput = (
+    session: NonNullable<typeof inputSession>,
+    placeholder: string,
+    value = ""
+  ) => {
+    inputSession = session;
     search.visible = true;
-    search.placeholder =
-      mode === "find" ? "Find on page…" : "Enter a page path, e.g. /blog";
-    search.value = "";
+    search.placeholder = placeholder;
+    search.value = value;
     search.focus();
   };
 
   const closeInput = () => {
-    inputMode = null;
+    inputSession = null;
     search.visible = false;
     scroll.focus();
   };
@@ -376,9 +426,34 @@ export const startTerminal = async (
     child.unref();
   };
 
+  const spanLabel = ({ action, text }: WebsiteBlock["spans"][number]) => {
+    if (action === undefined) {
+      return text;
+    }
+
+    if (action === "experience" && experienceExpanded) {
+      return "See less";
+    }
+
+    if (action === "theme" && colors.light) {
+      return "☀";
+    }
+
+    if (openDisclosures.has(action)) {
+      return "▾";
+    }
+
+    if (action === "sound" && soundEnabled) {
+      return "Sound on";
+    }
+
+    const value = contactFields.get(action);
+
+    return value === undefined || value === "" ? text : `${text}: ${value}`;
+  };
+
   const updateRows = () => {
     const palette = colors;
-    const expanded = experienceExpanded;
 
     const selected =
       selectedLink < 0 ? undefined : linkTargets.at(selectedLink);
@@ -389,15 +464,7 @@ export const startTerminal = async (
       row.content = new StyledText(
         block.spans.map((span) => {
           const tone = span.tone ?? block.tone ?? "muted";
-          let label = span.text;
-
-          if (span.action === "experience" && expanded) {
-            label = "See less";
-          } else if (span.action === "theme" && palette.light) {
-            label = "☀";
-          }
-
-          let chunk = fg(palette[tone])(label);
+          let chunk = fg(palette[tone])(spanLabel(span));
 
           if (
             block.kind === "heading" ||
@@ -473,13 +540,7 @@ export const startTerminal = async (
             const span = block.spans.find((item) => item.url === target);
 
             if (span?.action !== undefined) {
-              pageActions.get(span.action)?.();
-
-              return;
-            }
-
-            if (span?.browser === true) {
-              openBrowser(target);
+              activatePageAction(span.action);
 
               return;
             }
@@ -489,7 +550,7 @@ export const startTerminal = async (
           }
         },
         selectable: block.spans.every((span) => span.action === undefined),
-        visible: block.experienceDetail !== true || experienceExpanded,
+        visible: blockIsVisible(block),
         width: "100%",
         wrapMode: "word",
       });
@@ -509,7 +570,6 @@ export const startTerminal = async (
         ) {
           linkTargets.push({
             action: span.action,
-            browser: span.browser,
             row,
             url: span.url,
           });
@@ -527,7 +587,7 @@ export const startTerminal = async (
             article,
             layout,
             new Map(rows.map(({ row }, index) => [index, row])),
-            colors
+            { ...colors, openDisclosures, origin }
           );
 
     updateRows();
@@ -589,20 +649,74 @@ export const startTerminal = async (
   };
 
   pageActions.set("theme", toggleTheme);
-  pageActions.set("experience", () => {
-    experienceExpanded = !experienceExpanded;
+  pageActions.set("sound", () => {
+    soundEnabled = !soundEnabled;
+    updateRows();
+  });
+  pageActions.set("visitors", () => {
+    status.content =
+      "Visitor activity · Here now — · Joined today — · Total visitors —";
+  });
+  pageActions.set("site-search", () => {
+    startInput(
+      {
+        submit: (value) => {
+          if (value !== "") {
+            const query = new URLSearchParams({
+              q: value,
+              sitesearch: new URL(siteOrigin).hostname,
+            });
 
+            openBrowser(`https://www.google.com/search?${query.toString()}`);
+          }
+        },
+      },
+      "Search this site"
+    );
+  });
+
+  for (const [action, label] of [
+    ["contact-name", "Name"],
+    ["contact-email", "Email"],
+    ["contact-message", "Message"],
+  ] as const) {
+    pageActions.set(action, () => {
+      startInput(
+        {
+          submit: (value) => {
+            contactFields.set(action, value);
+            updateRows();
+          },
+        },
+        label,
+        contactFields.get(action)
+      );
+    });
+  }
+
+  const refreshVisibility = () => {
     for (const { block, row } of rows) {
-      if (block.experienceDetail === true) {
-        row.visible = experienceExpanded;
-      }
+      row.visible = blockIsVisible(block);
     }
 
+    reflowPage?.();
     updateRows();
 
     if (findQuery !== "") {
       find(findQuery);
     }
+  };
+
+  pageActions.set("experience", () => {
+    experienceExpanded = !experienceExpanded;
+    refreshVisibility();
+  });
+  pageActions.set("disclosure", (action) => {
+    if (!openDisclosures.delete(action)) {
+      openDisclosures.add(action);
+    }
+
+    refreshVisibility();
   });
 
   const clearDock = () => {
@@ -615,12 +729,22 @@ export const startTerminal = async (
   };
 
   const updateBackLink = (back: WebsitePage["back"], home: boolean) => {
-    backUrl = back?.url ?? `${siteOrigin}/`;
+    backUrl = back?.url ?? `${origin}/`;
     address.content = `← ${back?.label ?? "Home"}`;
     toolbar.visible = back !== undefined || !home;
   };
 
+  const restoreControls = (page: WebsitePage) => {
+    filterQuery = page.filterQuery ?? "";
+    languageOptions = page.languages ?? [];
+
+    for (const action of page.openDisclosures ?? []) {
+      openDisclosures.add(action);
+    }
+  };
+
   const navigate = async (url: string, refresh = false) => {
+    loadingPage = true;
     requestController.abort();
     requestController = new AbortController();
     closeInput();
@@ -632,7 +756,9 @@ export const startTerminal = async (
     const request = revision;
     const path = new URL(url).pathname;
     experienceExpanded = false;
-    updateBackLink(undefined, path === "/");
+    openDisclosures.clear();
+    const profilePage = path === "/" || path === "/links";
+    updateBackLink(undefined, profilePage);
 
     const routeIndex = routes.findIndex(
       ([, route]) =>
@@ -659,7 +785,7 @@ export const startTerminal = async (
     const result = await Effect.runPromise(
       Effect.result(
         cached === undefined
-          ? loadPage(url, requestController.signal)
+          ? loadPage(url, requestController.signal, origin)
           : Effect.succeed(cached)
       )
     );
@@ -668,6 +794,7 @@ export const startTerminal = async (
       return;
     }
 
+    loadingPage = false;
     displayedEntry = history.at(historyIndex);
     clearDock();
 
@@ -686,8 +813,9 @@ export const startTerminal = async (
       ]);
     } else {
       pageCache.set(url, result.success);
+      restoreControls(result.success);
 
-      updateBackLink(result.success.back, path === "/");
+      updateBackLink(result.success.back, profilePage);
 
       for (const item of result.success.dock) {
         const label = item.label === "Tokscale" ? "AI" : item.label;
@@ -715,7 +843,7 @@ export const startTerminal = async (
   };
 
   const follow = (url: string) => {
-    if (new URL(url).origin !== siteOrigin) {
+    if (new URL(url).origin !== origin) {
       openBrowser(url);
 
       return;
@@ -735,6 +863,70 @@ export const startTerminal = async (
 
     void navigate(url);
   };
+
+  const applyFilter = (param: string, value: string) => {
+    const target = new URL(currentUrl);
+    target.searchParams.delete(param);
+
+    if (value !== "") {
+      target.searchParams.set(
+        param,
+        param === "q" ? encodeSearchQuery(value) : value
+      );
+    }
+
+    follow(target.href);
+  };
+
+  const cycleLanguage = (key: KeyEvent) => {
+    if (key.name !== "up" && key.name !== "down") {
+      return false;
+    }
+
+    const count = languageOptions.length;
+
+    if (count > 0) {
+      languageIndex =
+        (languageIndex + (key.name === "down" ? 1 : count - 1)) % count;
+      search.value = languageOptions.at(languageIndex)?.label ?? "";
+    }
+
+    return true;
+  };
+
+  pageActions.set("filter-query", () => {
+    startInput(
+      {
+        submit: (value) => {
+          applyFilter("q", value);
+        },
+      },
+      "Search…",
+      filterQuery
+    );
+    status.content = "Enter to apply · Escape to cancel";
+  });
+  pageActions.set("filter-language", () => {
+    const current = new URL(currentUrl).searchParams.get("language") ?? "";
+    languageIndex = Math.max(
+      0,
+      languageOptions.findIndex((option) => option.value === current)
+    );
+    startInput(
+      {
+        onKey: cycleLanguage,
+        submit: () => {
+          applyFilter(
+            "language",
+            languageOptions.at(languageIndex)?.value ?? ""
+          );
+        },
+      },
+      "Language",
+      languageOptions.at(languageIndex)?.label ?? ""
+    );
+    status.content = "Up / Down choose language · Enter to apply";
+  });
 
   const restoreHistory = async (entry: { url: string; scroll: number }) => {
     await navigate(entry.url);
@@ -767,19 +959,24 @@ export const startTerminal = async (
     const route = routes.at(index);
 
     if (route !== undefined) {
-      follow(new URL(route[1], siteOrigin).href);
+      follow(new URL(route[1], origin).href);
     }
   };
 
   const focusLink = (direction: number) => {
-    if (linkTargets.length === 0) {
+    const visible = linkTargets.flatMap((target, index) =>
+      target.row.visible ? [index] : []
+    );
+
+    if (visible.length === 0) {
       return;
     }
 
     const initial = direction < 0 ? 0 : -1;
-    const previous = selectedLink < 0 ? initial : selectedLink;
+    const current = visible.indexOf(selectedLink);
+    const previous = current === -1 ? initial : current;
     selectedLink =
-      (previous + direction + linkTargets.length) % linkTargets.length;
+      visible[(previous + direction + visible.length) % visible.length] ?? -1;
     const target = linkTargets.at(selectedLink);
     updateRows();
 
@@ -791,7 +988,7 @@ export const startTerminal = async (
       status.content =
         target.action === undefined
           ? `${target.url}    Enter to open`
-          : `${target.row.plainText}    Enter to toggle`;
+          : `${target.row.plainText}    Enter to activate`;
     }
 
     scroll.focus();
@@ -804,15 +1001,9 @@ export const startTerminal = async (
 
     const target = linkTargets.at(selectedLink);
 
-    if (target !== undefined) {
+    if (target?.row.visible === true) {
       if (target.action !== undefined) {
-        pageActions.get(target.action)?.();
-
-        return;
-      }
-
-      if (target.browser === true) {
-        openBrowser(target.url);
+        activatePageAction(target.action);
 
         return;
       }
@@ -832,7 +1023,14 @@ export const startTerminal = async (
     [
       "/",
       () => {
-        startInput("find");
+        startInput(
+          {
+            change: (query) => {
+              find(query.trim().toLocaleLowerCase());
+            },
+          },
+          "Find on page…"
+        );
       },
     ],
     [
@@ -900,6 +1098,12 @@ export const startTerminal = async (
   ]);
 
   const handleInput = (key: KeyEvent) => {
+    if (inputSession?.onKey?.(key) === true) {
+      key.preventDefault();
+
+      return;
+    }
+
     if (key.name === "escape") {
       key.preventDefault();
       closeInput();
@@ -909,26 +1113,25 @@ export const startTerminal = async (
 
     if (key.name === "return") {
       key.preventDefault();
-      const mode = inputMode;
+      const submit = inputSession?.submit;
       const value = search.value.trim();
       closeInput();
+      submit?.(value);
+    }
+  };
 
-      if (
-        mode === "address" &&
-        value !== "" &&
-        URL.canParse(value, siteOrigin)
-      ) {
-        const target = new URL(value, siteOrigin);
+  const submitAddress = (value: string) => {
+    if (value !== "" && URL.canParse(value, origin)) {
+      const target = new URL(value, origin);
 
-        if (["http:", "https:"].includes(target.protocol)) {
-          follow(target.href);
-        }
+      if (["http:", "https:"].includes(target.protocol)) {
+        follow(target.href);
       }
     }
   };
 
   renderer.keyInput.on("keypress", (key) => {
-    if (inputMode !== null) {
+    if (inputSession !== null) {
       handleInput(key);
 
       return;
@@ -936,7 +1139,7 @@ export const startTerminal = async (
 
     if (key.ctrl && key.name === "l") {
       key.preventDefault();
-      startInput("address");
+      startInput({ submit: submitAddress }, "Enter a page path, e.g. /blog");
 
       return;
     }

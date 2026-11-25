@@ -1,13 +1,32 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Option, Schema } from "effect";
 import { useState } from "react";
 
 import { ProjectDirectory } from "@/features/projects/components/project-directory";
 import { socialMeta } from "@/features/social/meta";
 import { getProjects } from "@/server/functions/projects";
 
+interface ProjectSearch {
+  readonly q?: string;
+  readonly language?: string;
+}
+
+const decodeSearch = Schema.decodeUnknownOption(
+  Schema.Struct({
+    language: Schema.optional(Schema.String),
+    q: Schema.optional(
+      Schema.Union([Schema.String, Schema.Number, Schema.Boolean])
+    ),
+  })
+);
+
 const ProjectsPage = () => {
-  const [query, setQuery] = useState("");
-  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const search = Route.useSearch();
+  const [query, setQuery] = useState(search.q ?? "");
+
+  const [selectedLanguage, setSelectedLanguage] = useState(
+    search.language ?? ""
+  );
 
   return (
     <ProjectDirectory
@@ -25,6 +44,16 @@ const ProjectsPage = () => {
 };
 
 export const Route = createFileRoute("/projects/")({
+  validateSearch: (search): ProjectSearch => {
+    const decoded = Option.getOrUndefined(decodeSearch(search));
+
+    const q = decoded?.q;
+
+    return {
+      q: q === undefined ? undefined : String(q),
+      language: decoded?.language,
+    };
+  },
   loader: async () => await getProjects(),
   component: ProjectsPage,
   head: () => ({

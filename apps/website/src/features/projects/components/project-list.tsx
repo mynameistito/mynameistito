@@ -31,6 +31,9 @@ export const ProjectList = ({
       >
         <Link
           className={`group relative grid min-h-[72px] items-center gap-3 py-3 transition-colors hover:bg-surface-hover ${showImages ? "grid-cols-[42px_minmax(0,1fr)_auto]" : "grid-cols-[minmax(0,1fr)_auto]"}`}
+          data-project-source={
+            project.hasDetailPage === true ? undefined : project.source
+          }
           params={{ slug: projectSlug(project.name) }}
           to="/projects/$slug"
         >
