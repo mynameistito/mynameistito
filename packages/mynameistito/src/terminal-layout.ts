@@ -257,7 +257,8 @@ export const mountWebsiteLayout = (
       box.visible =
         disclosure === undefined || palette.openDisclosures.has(disclosure);
       box.flexDirection = direction;
-      box.alignItems = direction === "row" ? "center" : "stretch";
+      box.alignItems =
+        direction === "row" || presentation.center ? "center" : "stretch";
       box.rowGap = direction === "row" ? 0 : presentation.gap;
 
       for (const [index, child] of children.entries()) {
@@ -279,6 +280,11 @@ export const mountWebsiteLayout = (
           trailing,
           (!presentation.fixedLead || index > 0) && flexible
         );
+
+        if (presentation.center && direction === "column") {
+          child.renderable.width = "auto";
+          child.renderable.maxWidth = "100%";
+        }
       }
     }
 

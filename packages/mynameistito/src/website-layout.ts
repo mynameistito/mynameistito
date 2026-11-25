@@ -8,6 +8,7 @@ export interface WebsitePresentation {
   readonly borderTop: boolean;
   readonly borderBottom: boolean;
   readonly card: boolean;
+  readonly center: boolean;
   readonly hover: boolean;
   readonly justifyBetween: boolean;
   readonly responsive: boolean;
@@ -57,6 +58,7 @@ export const readWebsitePresentation = (
       (names.has("bg-surface") ||
         names.has("rounded-control") ||
         names.has("bg-card")),
+    center: names.has("text-center"),
     direction: row ? "row" : "column",
     fixedLead: /grid-cols-\[\d+px_/u.test(classes),
     gap:

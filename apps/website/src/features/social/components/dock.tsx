@@ -277,6 +277,23 @@ const renderSocialPreview = (
   return <TokscaleHoverCard data={data?.tokscale ?? null} />;
 };
 
+/** Render the same public cards for the terminal's native social dock.
+ * @returns The public profile card markup.
+ */
+export const SocialDockPreviews = ({
+  data,
+}: {
+  readonly data: SocialProfileData;
+}) => (
+  <>
+    {socialItems.map((item) => (
+      <section data-social-preview={item.label} key={item.label}>
+        {renderSocialPreview(item, data)}
+      </section>
+    ))}
+  </>
+);
+
 /** Renders the compact footer links on every route except the link hub.
  * @returns The social navigation, or nothing on the link hub.
  */
@@ -411,6 +428,7 @@ export const SocialDock = () => {
     <nav
       aria-label="Portfolio links"
       className="social-dock fixed inset-x-0 bottom-4 z-30 mx-auto flex w-fit items-center gap-1 rounded-full border border-line bg-page/95 p-1.5 shadow-lg backdrop-blur"
+      data-portfolio-previews="/api/portfolio-footer"
       ref={dockRef}
     >
       {socialItems.map((item) => (

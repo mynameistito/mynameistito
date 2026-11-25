@@ -18,6 +18,7 @@ import { Effect } from "effect";
 
 import { links, profile } from "./data.js";
 import { mountWebsiteLayout } from "./terminal-layout.js";
+import { fetchDockPreviews } from "./website-footer.js";
 import type { WebsiteLayout } from "./website-layout.js";
 import { fetchWebsitePage, siteOrigin } from "./website.js";
 import type { WebsiteBlock, WebsitePage } from "./website.js";
@@ -47,6 +48,13 @@ const dark = {
   surfaceHover: "#141617",
   text: "#f1f2f2",
 };
+
+const dockMarks = new Map([
+  ["GitHub", "◉"],
+  ["X", "𝕏"],
+  ["Tokscale", "▥"],
+  ["Links", "↗"],
+]);
 
 const light = {
   accent: "#3f6798",
@@ -293,6 +301,7 @@ export const startTerminal = async (
     marginBottom: 1,
     paddingLeft: 2,
     paddingRight: 2,
+    visible: false,
   });
 
   footer.add(dock);
@@ -306,6 +315,25 @@ export const startTerminal = async (
 
   footer.add(status);
   shell.add(footer);
+
+  const preview = new BoxRenderable(renderer, {
+    backgroundColor: colors.surface,
+    border: true,
+    borderColor: colors.line,
+    borderStyle: "rounded",
+    bottom: 5,
+    maxWidth: "100%",
+    paddingLeft: 1,
+    paddingRight: 1,
+    position: "absolute",
+    visible: false,
+    width: 60,
+    zIndex: 2,
+  });
+
+  const previewText = new TextRenderable(renderer, { fg: colors.text });
+  preview.add(previewText);
+  footer.add(preview);
 
   let currentUrl = `${origin}/`;
   const history = [{ scroll: 0, url: currentUrl }];
@@ -360,13 +388,96 @@ export const startTerminal = async (
     (block.experienceDetail !== true || experienceExpanded) &&
     (block.disclosure === undefined || openDisclosures.has(block.disclosure));
 
-  let dockRows: { label: string; row: TextRenderable; url: string }[] = [];
+  let dockRows: {
+    label: string;
+    mark: string;
+    row: TextRenderable;
+    url: string;
+  }[] = [];
+
+  let previewSource: string | undefined;
+  let previewCache: Promise<ReadonlyMap<string, string> | null> | null = null;
+  let activePreview: (typeof dockRows)[number] | null = null;
+  let previewContent = "";
+  let closePreviewTimeout: ReturnType<typeof setTimeout> | undefined;
+  const previewController = new AbortController();
+
+  const cancelPreviewClose = () => {
+    clearTimeout(closePreviewTimeout);
+  };
+
+  const closePreview = () => {
+    cancelPreviewClose();
+    activePreview = null;
+    preview.visible = false;
+  };
+
+  const schedulePreviewClose = () => {
+    cancelPreviewClose();
+    closePreviewTimeout = setTimeout(closePreview, 140);
+  };
+
+  const drawPreview = () => {
+    const width = Math.max(1, Math.min(56, renderer.width - 8));
+    previewText.content = previewContent
+      .split("\n")
+      .map((line) => (/^[·░▒▓█ ]+$/u.test(line) ? line.slice(-width) : line))
+      .join("\n");
+  };
+
+  const showPreview = async (item: (typeof dockRows)[number] | undefined) => {
+    closePreview();
+
+    if (
+      loadingPage ||
+      item === undefined ||
+      item.label === "Links" ||
+      previewSource === undefined
+    ) {
+      return;
+    }
+
+    activePreview = item;
+    previewContent = `${item.label}\nLoading…`;
+    drawPreview();
+    preview.visible = true;
+    previewCache ??= Effect.runPromise(fetchDockPreviews(previewSource), {
+      signal: previewController.signal,
+    });
+
+    const pending = previewCache;
+
+    try {
+      const cards = await pending;
+
+      if (cards === null && previewCache === pending) {
+        previewCache = null;
+      }
+
+      if (activePreview === item) {
+        previewContent = `${item.label}\n${cards?.get(item.label) ?? "Preview unavailable."}`;
+        drawPreview();
+      }
+    } catch {
+      if (activePreview === item) {
+        closePreview();
+      }
+    }
+  };
+
+  preview.onMouseOver = cancelPreviewClose;
+  preview.onMouseOut = schedulePreviewClose;
+  renderer.once("destroy", () => {
+    closePreview();
+    previewController.abort();
+  });
   let reflowPage: (() => void) | undefined;
   let displayedBlocks: readonly WebsiteBlock[] = [];
   let displayedLayout: WebsiteLayout | undefined;
 
   renderer.on("resize", () => {
     reflowPage?.();
+    drawPreview();
   });
 
   let inputSession: {
@@ -569,11 +680,11 @@ export const startTerminal = async (
       );
     }
 
-    for (const { label, row } of dockRows) {
+    for (const { mark, row } of dockRows) {
       row.content =
         selected?.row === row
-          ? new StyledText([underline(bold(fg(colors.text)(label)))])
-          : label;
+          ? new StyledText([bold(fg(colors.text)(mark))])
+          : mark;
     }
   };
 
@@ -672,6 +783,7 @@ export const startTerminal = async (
 
   const toggleTheme = () => {
     closeInput();
+    closePreview();
     const position = scroll.scrollTop;
     colors = colors === dark ? light : dark;
     renderer.setBackgroundColor(colors.page);
@@ -714,6 +826,10 @@ export const startTerminal = async (
         child.fg = colors.muted;
       }
     }
+
+    preview.backgroundColor = colors.surface;
+    preview.borderColor = colors.line;
+    previewText.fg = colors.text;
 
     search.backgroundColor = colors.page;
     search.focusedBackgroundColor = colors.page;
@@ -845,6 +961,7 @@ export const startTerminal = async (
 
   const navigate = async (url: string, refresh = false) => {
     loadingPage = true;
+    closePreview();
     requestController.abort();
     requestController = new AbortController();
     closeInput();
@@ -917,21 +1034,35 @@ export const startTerminal = async (
 
       updateBackLink(result.success.back, profilePage);
 
+      if (previewSource !== result.success.dockPreviews || refresh) {
+        previewCache = null;
+      }
+
+      previewSource = result.success.dockPreviews;
+
       for (const item of result.success.dock) {
-        const label = item.label === "Tokscale" ? "AI" : item.label;
+        const mark = dockMarks.get(item.label) ?? item.label;
 
         const row = new TextRenderable(renderer, {
-          content: item.label === "Tokscale" ? "AI" : item.label,
+          content: mark,
           fg: colors.muted,
           height: 1,
-          onMouseUp: () => {
-            // oxlint-disable-next-line no-use-before-define -- Callbacks run after initialization.
-            follow(item.url);
-          },
         });
 
+        const entry = { ...item, mark, row };
+        row.onMouseOver = () => {
+          void showPreview(entry);
+        };
+
+        row.onMouseOut = schedulePreviewClose;
+        row.onMouseUp = () => {
+          closePreview();
+          // oxlint-disable-next-line no-use-before-define -- Callbacks run after initialization.
+          follow(item.url);
+        };
+
         dock.add(row);
-        dockRows.push({ label, row, url: item.url });
+        dockRows.push(entry);
       }
 
       dock.visible = result.success.dock.length > 0;
@@ -1083,11 +1214,18 @@ export const startTerminal = async (
     updateRows();
 
     if (target !== undefined) {
-      if (!dockRows.some(({ row }) => row === target.row)) {
+      const dockItem = dockRows.find(({ row }) => row === target.row);
+      void showPreview(dockItem);
+
+      if (dockItem === undefined) {
         scroll.scrollChildIntoView(target.row, { inset: 1 });
       }
 
       showTargetStatus(target);
+
+      if (dockItem !== undefined) {
+        status.content = `${dockItem.label} · ${status.plainText}`;
+      }
     }
 
     scroll.focus();
@@ -1172,7 +1310,11 @@ export const startTerminal = async (
     [
       "escape",
       () => {
-        moveHistory(-1);
+        if (activePreview === null) {
+          moveHistory(-1);
+        } else {
+          closePreview();
+        }
       },
     ],
     [
@@ -1195,6 +1337,15 @@ export const startTerminal = async (
     ],
     ["return", openSelected],
   ]);
+
+  preview.onMouseUp = () => {
+    const item = activePreview;
+
+    if (item !== null) {
+      closePreview();
+      follow(item.url);
+    }
+  };
 
   const handleInput = (key: KeyEvent) => {
     if (inputSession?.onKey?.(key) === true) {

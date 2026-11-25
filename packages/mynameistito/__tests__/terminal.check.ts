@@ -1,12 +1,81 @@
 import assert from "node:assert/strict";
+import { once } from "node:events";
+import { createServer } from "node:http";
 // oxlint-disable-next-line vitest/no-import-node-test -- OpenTUI requires Bun's native runtime; this suite runs with bun test.
 import { test as nativeTest } from "node:test";
 
 import { createTestRenderer } from "@opentui/core/testing";
-import { Deferred, Effect } from "effect";
+import { Deferred, Effect, Schema } from "effect";
 
 import { startTerminal } from "../src/terminal.js";
 import { parseWebsitePage, WebsiteUnavailable } from "../src/website.js";
+
+await nativeTest(
+  "footer previews open with the mouse and keyboard",
+  async () => {
+    const site = createServer((request, response) => {
+      response.setHeader("content-type", "text/html");
+
+      if (request.url === "/api/portfolio-footer") {
+        response.end(
+          '<section data-social-preview="GitHub"><strong>Example profile</strong><figure><span class="social-hover-card-contribution-week"><span data-level="4"></span></span></figure></section>'
+        );
+
+        return;
+      }
+
+      response.end(
+        `<main><h1>Tito</h1></main>
+        <footer class="text-center"><a href="/privacy">Privacy</a></footer>
+        <nav aria-label="Portfolio links" data-portfolio-previews="/api/portfolio-footer">
+          <a aria-label="GitHub" href="https://github.com/example"></a>
+          <a aria-label="Links" href="/links"></a>
+        </nav>`
+      );
+    });
+
+    const terminal = await createTestRenderer({ height: 28, width: 80 });
+
+    try {
+      site.listen(0, "127.0.0.1");
+      await once(site, "listening");
+
+      const address = Schema.decodeUnknownSync(
+        Schema.Struct({ port: Schema.Number })
+      )(site.address());
+
+      await startTerminal({
+        renderer: terminal.renderer,
+        site: `http://127.0.0.1:${address.port}`,
+      });
+      await terminal.flush();
+      const lines = terminal.captureCharFrame().split("\n");
+      assert.match(
+        lines.find((line) => line.includes("Privacy")) ?? "",
+        /^ {34,38}Privacy/u
+      );
+      const y = lines.findIndex((line) => line.includes("◉"));
+      const x = lines.at(y)?.indexOf("◉") ?? -1;
+      assert.ok(y !== -1);
+      assert.ok(x >= 0);
+      await terminal.mockMouse.moveTo(x, y);
+      await terminal.waitForFrame((frame) => frame.includes("Example profile"));
+      terminal.mockInput.pressTab({ shift: true });
+      await terminal.waitForFrame(
+        (frame) => !frame.includes("Example profile")
+      );
+      terminal.mockInput.pressTab({ shift: true });
+      await terminal.waitForFrame((frame) => frame.includes("Example profile"));
+      terminal.mockInput.pressTab();
+      await terminal.flush();
+      assert.doesNotMatch(terminal.captureCharFrame(), /Example profile/u);
+    } finally {
+      await terminal.dispose();
+      site.close();
+      site.closeAllConnections();
+    }
+  }
+);
 
 await nativeTest(
   "filters keep literal queries and ignore controls during navigation",
@@ -260,7 +329,7 @@ await nativeTest(
           /A useful package\..*123 weekly downloads/u.test(line)
         )
       );
-      assert.match(terminal.captureCharFrame(), /GitHub\s+Links/u);
+      assert.match(terminal.captureCharFrame(), /◉\s+↗/u);
       terminal.mockInput.pressTab({ shift: true });
       await terminal.flush();
       assert.match(

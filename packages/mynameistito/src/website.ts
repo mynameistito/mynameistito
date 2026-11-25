@@ -18,6 +18,7 @@ export interface WebsitePage {
   readonly openDisclosures?: readonly string[];
   readonly back?: { readonly label: string; readonly url: string };
   readonly dock: readonly { readonly label: string; readonly url: string }[];
+  readonly dockPreviews?: string;
   readonly layout: WebsiteLayout;
   readonly blocks: readonly WebsiteBlock[];
   readonly title: string;
@@ -48,7 +49,11 @@ export class WebsiteUnavailable extends Data.TaggedError("WebsiteUnavailable")<{
   readonly message: string;
 }> {}
 
-const cleanText = (text: string) =>
+/** Normalize remote text before displaying it in the terminal.
+ * @param text - The text extracted from a website response.
+ * @returns Text with control codes removed and spacing normalized.
+ */
+export const cleanText = (text: string) =>
   text
     // oxlint-disable-next-line no-control-regex -- Strip terminal escape and control sequences from remote content.
     .replaceAll(/[\u0000-\u0008\u000B-\u001F\u007F-\u009F]/gu, "")
@@ -84,7 +89,16 @@ export const parseWebsitePage = (
 ): WebsitePage | null => {
   const $ = load(html);
 
-  const dock = $('nav[aria-label="Portfolio links"] > a[aria-label]')
+  const dockNav = $('nav[aria-label="Portfolio links"]');
+  const previewPath = dockNav.attr("data-portfolio-previews");
+
+  const previewUrl =
+    previewPath !== undefined && URL.canParse(previewPath, url)
+      ? new URL(previewPath, url)
+      : undefined;
+
+  const dock = dockNav
+    .children("a[aria-label]")
     .toArray()
     .flatMap((node) => {
       const label = $(node).attr("aria-label");
@@ -550,6 +564,12 @@ export const parseWebsitePage = (
     back,
     blocks,
     dock,
+    dockPreviews:
+      previewUrl?.origin === new URL(url).origin &&
+      [previewUrl.username, previewUrl.password].every((part) => part === "") &&
+      ["http:", "https:"].includes(previewUrl.protocol)
+        ? previewUrl.href
+        : undefined,
     filterQuery,
     languages,
     layout,
