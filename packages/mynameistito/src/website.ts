@@ -65,7 +65,7 @@ const groupPresentationFor = (
   isBlock: boolean
 ) =>
   isBlock &&
-  /^(?:div|section|article|li|ul|ol|nav|header|span|a|summary|fieldset)$/u.test(
+  /^(?:div|section|article|li|ul|ol|nav|header|footer|span|a|summary|fieldset)$/u.test(
     tag
   )
     ? readWebsitePresentation(classes)
@@ -424,8 +424,15 @@ export const parseWebsitePage = (
     }
   };
 
-  const flushRow = (presentation: WebsitePresentation | undefined) => {
-    if (presentation?.direction === "row") {
+  const flushLayoutItem = (
+    presentation: WebsitePresentation | undefined,
+    classes: string
+  ) => {
+    if (
+      presentation !== undefined &&
+      (presentation.direction === "row" ||
+        /(?:^|\s)grid(?:\s|$)/u.test(classes))
+    ) {
       flush();
     }
   };
@@ -454,7 +461,7 @@ export const parseWebsitePage = (
     }
 
     const isBlock =
-      /^(?:h[1-6]|p|li|ul|ol|pre|div|section|article|tr|blockquote|nav|header|summary|output)$/u.test(
+      /^(?:h[1-6]|p|li|ul|ol|pre|div|section|article|tr|blockquote|nav|header|footer|summary|output)$/u.test(
         tag
       ) ||
       /(?:^|\s)(?:grid|flex|block)(?:\s|$)/u.test($(node).attr("class") ?? "");
@@ -504,7 +511,7 @@ export const parseWebsitePage = (
         underlined || classes.split(/\s+/u).includes("underline")
       );
 
-      flushRow(groupPresentation);
+      flushLayoutItem(groupPresentation, classes);
     }
 
     if (isBlock) {

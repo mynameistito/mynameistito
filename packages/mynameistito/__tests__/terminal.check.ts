@@ -178,7 +178,7 @@ await nativeTest(
 
           if (target.pathname === "/open-source") {
             html =
-              '<main><h1>Open source</h1><details><summary class="flex">Example repository</summary><p>Pull request title</p></details></main>';
+              '<main><h1>Open source</h1><details><summary class="flex"><span class="grid flex-1"><span>Example repository</span><span>owner/example</span></span></summary><p>Pull request title</p></details></main>';
           }
 
           if (url.endsWith("/packages")) {
@@ -307,6 +307,14 @@ await nativeTest(
       await terminal.waitForFrame((text) =>
         text.includes("Example repository")
       );
+      const repositoryRows = terminal.captureCharFrame().split("\n");
+
+      const slugRow = repositoryRows.find((line) =>
+        line.includes("owner/example")
+      );
+
+      assert.ok(slugRow !== undefined);
+      assert.doesNotMatch(slugRow, /Example repository/u);
       assert.doesNotMatch(terminal.captureCharFrame(), /Pull request title/u);
       terminal.mockInput.pressTab();
       terminal.mockInput.pressEnter();

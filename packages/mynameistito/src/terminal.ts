@@ -288,6 +288,13 @@ export const startTerminal = async (
     row: TextRenderable;
   }[] = [];
 
+  const showTargetStatus = (target: (typeof linkTargets)[number]) => {
+    status.content =
+      target.action === undefined
+        ? `${target.url}    Enter to open`
+        : `${target.row.plainText}    Enter to activate`;
+  };
+
   let rows: { block: WebsiteBlock; row: TextRenderable }[] = [];
   let experienceExpanded = false;
   let loadingPage = false;
@@ -704,6 +711,15 @@ export const startTerminal = async (
 
     if (findQuery !== "") {
       find(findQuery);
+
+      return;
+    }
+
+    const selected =
+      selectedLink < 0 ? undefined : linkTargets.at(selectedLink);
+
+    if (selected?.action !== undefined) {
+      showTargetStatus(selected);
     }
   };
 
@@ -985,10 +1001,7 @@ export const startTerminal = async (
         scroll.scrollChildIntoView(target.row, { inset: 1 });
       }
 
-      status.content =
-        target.action === undefined
-          ? `${target.url}    Enter to open`
-          : `${target.row.plainText}    Enter to activate`;
+      showTargetStatus(target);
     }
 
     scroll.focus();
