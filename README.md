@@ -26,9 +26,9 @@
 
 🔷 **[opencode-plugins](https://github.com/mynameistito/opencode-plugins)** ⭐3 — My Personal OpenCode v2 Plugins
 
-🔷 **[fxinstagram](https://github.com/mynameistito/fxinstagram)** ⭐3 — Effect and Alchemy service for fixing Instagram embeds in Discord
+🔷 **[fxinstagram](https://github.com/mynameistito/fxinstagram)** ⭐2 — Effect and Alchemy service for fixing Instagram embeds in Discord
 
-🔷 **[hamilton-bin-day](https://github.com/mynameistito/hamilton-bin-day)** ⭐2 — TypeScript client for Hamilton City Council Fight the Landfill bin-day lookup API.
+🔷 **[volume-master](https://github.com/mynameistito/volume-master)** ⭐2 — Per-tab volume control with up to 600% boost. Cross-browser (Chrome + Firefox).
 
 🔷 **[codex-usage](https://github.com/mynameistito/codex-usage)** ⭐1 — CLI for inspecting Codex usage windows and reset credits
 <!-- AUTO-PROJECTS:END -->
