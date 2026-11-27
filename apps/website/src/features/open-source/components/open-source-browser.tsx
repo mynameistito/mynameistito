@@ -13,6 +13,7 @@ import type {
 } from "@/features/open-source/contributions";
 
 interface OpenSourceBrowserProps {
+  readonly initialFilters: { readonly q?: string; readonly state?: string };
   readonly repositories: readonly ContributionRepository[];
 }
 
@@ -149,11 +150,16 @@ const RepositoryList = ({
  * @param repositories - GitHub contribution repositories to display.
  * @returns The interactive contribution browser.
  */
-export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
-  const [query, setQuery] = useState("");
+export const OpenSourceBrowser = ({
+  initialFilters,
+  repositories,
+}: OpenSourceBrowserProps) => {
+  const [query, setQuery] = useState(initialFilters.q ?? "");
 
-  const [stateFilter, setStateFilter] =
-    useState<(typeof pullRequestStates)[number]>("All");
+  const [stateFilter, setStateFilter] = useState(
+    () =>
+      pullRequestStates.find((state) => state === initialFilters.state) ?? "All"
+  );
 
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -255,6 +261,7 @@ export const OpenSourceBrowser = ({ repositories }: OpenSourceBrowserProps) => {
             {pullRequestStates.map((state) => (
               <button
                 aria-pressed={stateFilter === state}
+                data-contribution-state={state}
                 className={`flex min-w-0 items-center gap-1 border border-line px-1.5 text-micro transition-colors last:rounded-r-control first-of-type:rounded-l-control ${stateFilter === state ? "bg-surface-raised text-text" : "bg-surface text-muted hover:text-text"}`}
                 key={state}
                 onClick={() => {

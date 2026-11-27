@@ -31,6 +31,7 @@ import { Route as DotwellKnownWebfingerRouteImport } from './routes/[.]well-know
 import { Route as DotwellKnownWebfingerDotjsonRouteImport } from './routes/[.]well-known.webfinger[.]json'
 import { Route as ApiBlogViewsRouteImport } from './routes/api.blog-views'
 import { Route as ApiContactRouteImport } from './routes/api.contact'
+import { Route as ApiPortfolioFooterRouteImport } from './routes/api.portfolio-footer'
 import { Route as ApiVisitorsRouteImport } from './routes/api.visitors'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
@@ -152,6 +153,11 @@ const ApiContactRoute = ApiContactRouteImport.update({
   path: '/api/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPortfolioFooterRoute = ApiPortfolioFooterRouteImport.update({
+  id: '/api/portfolio-footer',
+  path: '/api/portfolio-footer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiVisitorsRoute = ApiVisitorsRouteImport.update({
   id: '/api/visitors',
   path: '/api/visitors',
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/webfinger.json': typeof DotwellKnownWebfingerDotjsonRoute
   '/api/blog-views': typeof ApiBlogViewsRoute
   '/api/contact': typeof ApiContactRoute
+  '/api/portfolio-footer': typeof ApiPortfolioFooterRoute
   '/api/visitors': typeof ApiVisitorsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/projects/$slug': typeof ProjectsSlugRoute
@@ -241,6 +248,7 @@ export interface FileRoutesByTo {
   '/.well-known/webfinger.json': typeof DotwellKnownWebfingerDotjsonRoute
   '/api/blog-views': typeof ApiBlogViewsRoute
   '/api/contact': typeof ApiContactRoute
+  '/api/portfolio-footer': typeof ApiPortfolioFooterRoute
   '/api/visitors': typeof ApiVisitorsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/projects/$slug': typeof ProjectsSlugRoute
@@ -273,6 +281,7 @@ export interface FileRoutesById {
   '/.well-known/webfinger.json': typeof DotwellKnownWebfingerDotjsonRoute
   '/api/blog-views': typeof ApiBlogViewsRoute
   '/api/contact': typeof ApiContactRoute
+  '/api/portfolio-footer': typeof ApiPortfolioFooterRoute
   '/api/visitors': typeof ApiVisitorsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/projects/$slug': typeof ProjectsSlugRoute
@@ -306,6 +315,7 @@ export interface FileRouteTypes {
     | '/.well-known/webfinger.json'
     | '/api/blog-views'
     | '/api/contact'
+    | '/api/portfolio-footer'
     | '/api/visitors'
     | '/blog/$slug'
     | '/projects/$slug'
@@ -336,6 +346,7 @@ export interface FileRouteTypes {
     | '/.well-known/webfinger.json'
     | '/api/blog-views'
     | '/api/contact'
+    | '/api/portfolio-footer'
     | '/api/visitors'
     | '/blog/$slug'
     | '/projects/$slug'
@@ -367,6 +378,7 @@ export interface FileRouteTypes {
     | '/.well-known/webfinger.json'
     | '/api/blog-views'
     | '/api/contact'
+    | '/api/portfolio-footer'
     | '/api/visitors'
     | '/blog/$slug'
     | '/projects/$slug'
@@ -399,6 +411,7 @@ export interface RootRouteChildren {
   DotwellKnownWebfingerDotjsonRoute: typeof DotwellKnownWebfingerDotjsonRoute
   ApiBlogViewsRoute: typeof ApiBlogViewsRoute
   ApiContactRoute: typeof ApiContactRoute
+  ApiPortfolioFooterRoute: typeof ApiPortfolioFooterRoute
   ApiVisitorsRoute: typeof ApiVisitorsRoute
   BlogSlugRoute: typeof BlogSlugRoute
   RRefRoute: typeof RRefRoute
@@ -562,6 +575,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/portfolio-footer': {
+      id: '/api/portfolio-footer'
+      path: '/api/portfolio-footer'
+      fullPath: '/api/portfolio-footer'
+      preLoaderRoute: typeof ApiPortfolioFooterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/visitors': {
       id: '/api/visitors'
       path: '/api/visitors'
@@ -651,6 +671,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotwellKnownWebfingerDotjsonRoute: DotwellKnownWebfingerDotjsonRoute,
   ApiBlogViewsRoute: ApiBlogViewsRoute,
   ApiContactRoute: ApiContactRoute,
+  ApiPortfolioFooterRoute: ApiPortfolioFooterRoute,
   ApiVisitorsRoute: ApiVisitorsRoute,
   BlogSlugRoute: BlogSlugRoute,
   RRefRoute: RRefRoute,

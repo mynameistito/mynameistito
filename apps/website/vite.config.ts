@@ -80,7 +80,9 @@ const config = defineConfig({
     devtools(),
     tailwindcss(),
     standaloneTakumiWasmPlugin,
-    tanstackStart(),
+    tanstackStart({
+      router: { routeFileIgnorePattern: "^__tests__$" },
+    }),
     viteReact(),
     cloudflareWorkersRuntimePlugin,
   ],

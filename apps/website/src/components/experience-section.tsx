@@ -89,13 +89,15 @@ export const ExperienceSection = () => {
               <p className="m-0 text-right text-xs leading-row text-muted">
                 {role.period}
               </p>
-              {expanded && (
-                <ul className="col-span-2 mt-2 grid gap-2 pl-4 text-xs leading-meta text-muted marker:text-subtle">
-                  {role.highlights.map((highlight) => (
-                    <li key={highlight}>{highlight}</li>
-                  ))}
-                </ul>
-              )}
+              <ul
+                className={`col-span-2 mt-2 gap-2 pl-4 text-xs leading-meta text-muted marker:text-subtle ${expanded ? "grid" : "hidden"}`}
+                data-experience-highlights=""
+                hidden={!expanded}
+              >
+                {role.highlights.map((highlight) => (
+                  <li key={highlight}>{highlight}</li>
+                ))}
+              </ul>
             </div>
           </li>
         ))}

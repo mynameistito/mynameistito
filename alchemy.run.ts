@@ -7,16 +7,29 @@ import {
   Website,
   Workflow,
 } from "@alchemy.run/cloudflare";
-import { Stack } from "alchemy";
+import { AlchemyContext, inMemoryState, Stack } from "alchemy";
 import {
   Redacted as ConfigRedacted,
   String as ConfigString,
 } from "effect/Config";
 import { gen } from "effect/Effect";
+import { unwrap } from "effect/Layer";
+
+// A dev server's URL belongs to the process that opened its port.
+const devWebsiteState = inMemoryState();
+
+const websiteState = unwrap(
+  gen(function* selectWebsiteState() {
+    const { dev } = yield* AlchemyContext;
+
+    return dev ? devWebsiteState : state();
+  })
+);
 
 const WebsiteResource = gen(function* deployWebsiteResource() {
   const stack = yield* Stack;
-  const isProduction = stack.stage === "prod";
+  const { dev } = yield* AlchemyContext;
+  const isProduction = !dev && stack.stage === "prod";
 
   const openSourceKV = yield* KV.Namespace("OpenSourceContributions", {
     title: `mynameistito-${stack.stage}-open-source-contributions`,
@@ -26,10 +39,20 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
     ? ["mynameistito.com"]
     : ["localhost", "127.0.0.1", "mynameistito.mynameistito.workers.dev"];
 
-  const contactTurnstile = yield* Turnstile.Widget("ContactTurnstile", {
-    domains: turnstileDomains,
-    mode: "invisible",
-  });
+  const contactTurnstile = dev
+    ? undefined
+    : yield* Turnstile.Widget("ContactTurnstile", {
+        domains: turnstileDomains,
+        mode: "invisible",
+      });
+
+  const turnstileBindings =
+    contactTurnstile === undefined
+      ? {}
+      : {
+          TURNSTILE_SECRET: contactTurnstile.secret,
+          TURNSTILE_SITEKEY: contactTurnstile.sitekey,
+        };
 
   return yield* Website.Vite("Website", {
     compatibility: {
@@ -60,8 +83,7 @@ const WebsiteResource = gen(function* deployWebsiteResource() {
       TOKSCALE_REFRESH: Workflow("TokscaleRefresh", {
         className: "TokscaleRefreshWorkflow",
       }),
-      TURNSTILE_SECRET: contactTurnstile.secret,
-      TURNSTILE_SITEKEY: contactTurnstile.sitekey,
+      ...turnstileBindings,
       VISITOR_COUNTER: DurableObjectResource("VisitorCounter", {
         className: "VisitorCounter",
         transferredFrom: "VisitorService",
@@ -96,7 +118,7 @@ export default Stack(
   "mynameistito",
   {
     providers: providers(),
-    state: state(),
+    state: websiteState,
   },
   gen(function* deployWebsite() {
     const website = yield* WebsiteResource;
