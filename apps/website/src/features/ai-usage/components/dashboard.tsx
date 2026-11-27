@@ -47,9 +47,6 @@ const subscriptionDateOptions = {
   year: "numeric",
   month: "short",
   day: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-  timeZoneName: "short",
 } as const;
 
 const subscriptionUtcDate = new Intl.DateTimeFormat("en-NZ", {

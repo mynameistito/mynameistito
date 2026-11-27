@@ -12,7 +12,7 @@ describe("AI usage dashboard", () => {
 
     expect(markup).toMatch(/Current subscriptions.*Usage data is updating/u);
     expect(markup).toContain(
-      '$140.51 USD per month total · Last updated <time dateTime="2026-11-27T05:41:06Z">27 Nov 2026, 5:41 am UTC</time>'
+      '$140.51 USD per month total · Last updated <time dateTime="2026-11-27T05:41:06Z">27 Nov 2026</time>'
     );
     expect(markup).toContain("Google AI");
     expect(markup).toMatch(
