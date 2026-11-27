@@ -44,8 +44,12 @@ const subscriptionsUpdatedAt = "2026-11-27T05:41:06Z";
 const subscriptionsUpdatedDate = new Date(subscriptionsUpdatedAt);
 
 const subscriptionDateOptions = {
-  dateStyle: "medium",
-  timeStyle: "short",
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  timeZoneName: "short",
 } as const;
 
 const subscriptionUtcDate = new Intl.DateTimeFormat("en-NZ", {
@@ -337,7 +341,7 @@ const SubscriptionUpdatedTime = () => {
 
   return (
     <time dateTime={subscriptionsUpdatedAt}>
-      {hydrated ? subscriptionLocalDate : `${subscriptionUtcDate} UTC`}
+      {hydrated ? subscriptionLocalDate : subscriptionUtcDate}
     </time>
   );
 };
