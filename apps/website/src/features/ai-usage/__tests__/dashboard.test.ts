@@ -11,9 +11,12 @@ describe("AI usage dashboard", () => {
     );
 
     expect(markup).toMatch(/Current subscriptions.*Usage data is updating/u);
-    expect(markup).toContain("Approx. $140.51 USD per month total");
-    expect(markup).toContain("PRO100 · $87.82 USD/month");
-    expect(markup).toContain("PRO · $19.76 USD/month");
-    expect(markup).toContain("Premium · $32.93 USD/month");
+    expect(markup).toContain(
+      '$140.51 USD per month total · Last updated <time dateTime="'
+    );
+    expect(markup).toContain("Google AI");
+    expect(markup).toMatch(
+      /PRO100 · \$87\.82 USD\/month.*PRO · \$19\.76 USD\/month.*Premium · \$32\.93 USD\/month/u
+    );
   });
 });

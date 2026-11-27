@@ -1,3 +1,4 @@
+import { useHydrated } from "@tanstack/react-router";
 import {
   ArrowUpRight,
   ChartColumnIncreasing,
@@ -39,9 +40,27 @@ const currencyFormat = new Intl.NumberFormat("en-US", {
   style: "currency",
 });
 
+const subscriptionsUpdatedAt = "2026-11-27T05:41:06Z";
+const subscriptionsUpdatedDate = new Date(subscriptionsUpdatedAt);
+
+const subscriptionDateOptions = {
+  dateStyle: "medium",
+  timeStyle: "short",
+} as const;
+
+const subscriptionUtcDate = new Intl.DateTimeFormat("en-NZ", {
+  ...subscriptionDateOptions,
+  timeZone: "UTC",
+}).format(subscriptionsUpdatedDate);
+
+const subscriptionLocalDate = new Intl.DateTimeFormat(
+  undefined,
+  subscriptionDateOptions
+).format(subscriptionsUpdatedDate);
+
 const subscriptions = [
   { name: "ChatGPT", plan: "PRO100", monthlyNzd: 160 },
-  { name: "AntiGravity", plan: "PRO", monthlyNzd: 36 },
+  { name: "Google AI", plan: "PRO", monthlyNzd: 36 },
   { name: "Grok", plan: "Premium", monthlyNzd: 60 },
 ] as const;
 
@@ -313,13 +332,23 @@ const UsageRanking = ({
   );
 };
 
+const SubscriptionUpdatedTime = () => {
+  const hydrated = useHydrated();
+
+  return (
+    <time dateTime={subscriptionsUpdatedAt}>
+      {hydrated ? subscriptionLocalDate : `${subscriptionUtcDate} UTC`}
+    </time>
+  );
+};
+
 const CurrentSubscriptions = () => (
   <Card>
     <CardHeader>
       <CardTitle>Current subscriptions</CardTitle>
       <CardDescription>
-        Approx. {currencyFormat.format(totalMonthlyNzd * usdPerNzd)} USD per
-        month total (converted at the 20 November 2026 rate)
+        {currencyFormat.format(totalMonthlyNzd * usdPerNzd)} USD per month total
+        · Last updated <SubscriptionUpdatedTime />
       </CardDescription>
     </CardHeader>
     <CardContent>
